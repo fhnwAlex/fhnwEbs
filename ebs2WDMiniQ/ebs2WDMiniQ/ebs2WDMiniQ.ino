@@ -1,7 +1,8 @@
 /*
  Name:		ebs2WDMiniQ.ino
  Created:	9/29/2017 5:16:53 PM
- Author:	Alex, Bruno 
+ Author:	Alex, Bruno
+ Class:		7Sbb, Systemtechnik
  Version:	V1.000.0
 */
 
