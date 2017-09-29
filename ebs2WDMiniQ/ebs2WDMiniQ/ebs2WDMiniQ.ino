@@ -1,7 +1,8 @@
 /*
  Name:		ebs2WDMiniQ.ino
  Created:	9/29/2017 5:16:53 PM
- Author:	Alex, Bruno
+ Author:	Alex, Bruno 
+ Version:	V1.000.0
 */
 
 // the setup function runs once when you press reset or power the board
