@@ -78,8 +78,6 @@ typedef void *__builtin_va_list;
 #define pgm_read_float(address_short) float()
 #define pgm_read_ptr(address_short)   short()
 
-#include "ebs2WDMiniQ.ino"
-#include "HMC5883L_Test.ino"
-#include "Testing.ino"
+#include "ebs2WDMiniQTesting.ino"
 #endif
 #endif

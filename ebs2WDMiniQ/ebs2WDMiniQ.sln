@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ebs2WDMiniQ", "ebs2WDMiniQ\ebs2WDMiniQ.vcxproj", "{C5F80730-F44F-4478-BDAE-6634EFC2CA88}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ebs2WDMiniQTesting", "ebs2WDMiniQTesting\ebs2WDMiniQTesting.vcxproj", "{B5F3777C-4CF9-4A0F-AD1A-F865C5EBE3E0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +17,15 @@ Global
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Debug|x86.Build.0 = Debug|Win32
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.ActiveCfg = Release|Win32
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.Build.0 = Release|Win32
+		{B5F3777C-4CF9-4A0F-AD1A-F865C5EBE3E0}.Debug|x86.ActiveCfg = Debug|Win32
+		{B5F3777C-4CF9-4A0F-AD1A-F865C5EBE3E0}.Debug|x86.Build.0 = Debug|Win32
+		{B5F3777C-4CF9-4A0F-AD1A-F865C5EBE3E0}.Release|x86.ActiveCfg = Release|Win32
+		{B5F3777C-4CF9-4A0F-AD1A-F865C5EBE3E0}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {261726AA-7FFA-4E3B-87C5-DF92FE2F674F}
 	EndGlobalSection
 EndGlobal
