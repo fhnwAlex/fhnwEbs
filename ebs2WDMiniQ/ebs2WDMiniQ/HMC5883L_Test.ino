@@ -153,7 +153,7 @@ void loop() {
       tone(TONEPIN,100);
     }else
     {
-      setTurn(-1, 40);
+      setTurn(-1, 100);
       noTone(TONEPIN);
     }
         
