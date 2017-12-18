@@ -4,9 +4,10 @@
  Author:	Alex
 */
 
+#include "test.h"
 #include "Wire.h"
 #include "I2Cdev.h"
-#include "HMC5883L.h"
+//#include "HMC5883L.h"
 #include <LiquidCrystal_I2C.h>
 #include <Adafruit_NeoPixel.h>
 
@@ -30,10 +31,11 @@
 // Define für Geschwindigkeit
 #define SPEEDMAX 255
 
-HMC5883L mag;
+//HMC5883L mag;
 LiquidCrystal_I2C lcd(LCDADDR, LCDCOLS, LCDROWS);
 Adafruit_NeoPixel led = Adafruit_NeoPixel(1, LEDPIN, NEO_GRB + NEO_KHZ800);
-int16_t mx, my, mz;
+
+//int16_t mx, my, mz;
 
 void setup() {
 	// join I2C bus (I2Cdev library doesn't do this automatically)
@@ -49,14 +51,16 @@ void setup() {
 	// it's really up to you depending on your project)
 	Serial.begin(38400);
 
-	// initialize device
+	/*
+		// initialize device
 	Serial.println("Initializing I2C devices...");
 	mag.initialize();
 
 	// verify connection
 	Serial.println("Testing device connections...");
 	Serial.println(mag.testConnection() ? "HMC5883L connection successful" : "HMC5883L connection failed");
-
+	*/
+	initCompass();
 
 	pinMode(5, OUTPUT);//init the motor driver pins
 	pinMode(6, OUTPUT);
@@ -65,12 +69,43 @@ void setup() {
 }
 
 void loop() {
+	/*
+	float heading = 0.0;
+	float declinationAngle = (2.0 + (16.0 / 60.0)) / (180 / M_PI);
+
+	for (int i = 0; i <= 10; i++) {
+		// read raw heading measurements from device
+		mag.getHeading(&mx, &my, &mz);
+
+		//mx = mx - (-326); //Offset Brugg Projektraum
+		//my = my - 288; //Offset Brugg Proejktraum
+		mx = mx - 291; //Offset Birmi
+		my = my - 321; //Offset Birmi
+
+					   /*
+					   // display tab-separated gyro x/y/z values
+					   Serial.print("mag:\t");
+					   Serial.print(mx); Serial.print("\t");
+					   Serial.print(my); Serial.print("\t");
+					   Serial.print(mz); Serial.print("\t");
+					   
+
+					   // To calculate heading in degrees. 0 degree indicates North
+		heading += (atan2(my, mx) + declinationAngle);
+	}
+	heading= heading/10;
+
+	if (heading < 0) { heading += 2 * M_PI; }
+	heading = round(heading * 180 / M_PI);
+	*/
+
+	/*
 	// read raw heading measurements from device
 	mag.getHeading(&mx, &my, &mz);
-	//mx = mx - (-326); //Brugg Projektraum
-	//my = my - 288; //Brugg Proejktraum
-	mx = mx - 291; //Brugg Projektraum
-	my = my - 321; //Brugg Proejktraum
+	//mx = mx - (-326); //Offset Brugg Projektraum
+	//my = my - 288; //Offset Brugg Proejktraum
+	mx = mx - 291; //Offset Birmi
+	my = my - 321; //Offset Birmi
 
 				   // display tab-separated gyro x/y/z values
 	Serial.print("mag:\t");
@@ -87,9 +122,13 @@ void loop() {
 	// Formula: (deg + (min / 60.0)) / (180 / M_PI);
 	float declinationAngle = (2.0 + (16.0 / 60.0)) / (180 / M_PI);
 	heading += declinationAngle;
-
+	
 	if (heading < 0) { heading += 2 * M_PI; }
 	heading = heading * 180 / M_PI;
+	*/
+
+	float heading = getMeasurement();
+
 	Serial.print("heading:\t");
 	Serial.println(heading);
 	lcd.clear();
@@ -114,14 +153,14 @@ void loop() {
 	}*/
 
 	//Make tones & light effects
-	if (heading > 355 || heading < 5)
+	if (heading > 350 || heading < 10)
 	{
 		setTurn(0, 0);
 		//tone(TONEPIN, 100);
 	}
 	else
 	{
-		setTurn(-1, 45);
+		setTurn(-1, 40);
 		//noTone(TONEPIN);
 	}
 	//delay(100);
@@ -143,12 +182,12 @@ void setTurn(int angle, int turnspeed)
 		analogWrite(SpeedPinRight, LOW);
 		analogWrite(SpeedPinLeft, LOW);
 	}
-	//else
-	//{
-	//	// Linksdrehen
-	//	digitalWrite(DirectionRight, BACK);
-	//	analogWrite(SpeedPinRight, turnspeed);
-	//	digitalWrite(DirectionLeft, FORW);
-	//	analogWrite(SpeedPinLeft, turnspeed);
-	//}
+	else
+	{
+		// Linksdrehen
+		digitalWrite(DirectionRight, BACK);
+		analogWrite(SpeedPinRight, turnspeed);
+		digitalWrite(DirectionLeft, FORW);
+		analogWrite(SpeedPinLeft, turnspeed);
+	}
 }
