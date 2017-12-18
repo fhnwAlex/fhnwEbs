@@ -15,7 +15,7 @@
 #define __AVR_ATmega32u4__
 #define __AVR_ATmega32U4__
 #define F_CPU 16000000L
-#define ARDUINO 10802
+#define ARDUINO 10804
 #define ARDUINO_AVR_LEONARDO
 #define ARDUINO_ARCH_AVR
 #define USB_VID 0x2341
@@ -79,7 +79,5 @@ typedef void *__builtin_va_list;
 #define pgm_read_ptr(address_short)   short()
 
 #include "ebs2WDMiniQ.ino"
-#include "HMC5883L_Test.ino"
-#include "Testing.ino"
 #endif
 #endif

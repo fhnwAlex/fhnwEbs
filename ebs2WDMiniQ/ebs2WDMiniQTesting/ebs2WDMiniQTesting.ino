@@ -114,17 +114,17 @@ void loop() {
 	}*/
 
 	//Make tones & light effects
-	if (heading > 350 || heading < 10)
+	if (heading > 355 || heading < 5)
 	{
 		setTurn(0, 0);
-		tone(TONEPIN, 100);
+		//tone(TONEPIN, 100);
 	}
 	else
 	{
-		setTurn(-1, 100);
-		noTone(TONEPIN);
+		setTurn(-1, 45);
+		//noTone(TONEPIN);
 	}
-	delay(100);
+	//delay(100);
 }
 
 void setTurn(int angle, int turnspeed)
@@ -133,8 +133,9 @@ void setTurn(int angle, int turnspeed)
 	{
 		// Rechtsdrehen
 		digitalWrite(DirectionRight, FORW);
-		digitalWrite(DirectionLeft, BACK);
 		analogWrite(SpeedPinRight, turnspeed);
+		delay(2);
+		digitalWrite(DirectionLeft, BACK);
 		analogWrite(SpeedPinLeft, turnspeed);
 	}
 	if (angle == 0)
@@ -142,12 +143,12 @@ void setTurn(int angle, int turnspeed)
 		analogWrite(SpeedPinRight, LOW);
 		analogWrite(SpeedPinLeft, LOW);
 	}
-	else
-	{
-		// Linksdrehen
-		digitalWrite(DirectionRight, BACK);
-		analogWrite(SpeedPinRight, turnspeed);
-		digitalWrite(DirectionLeft, FORW);
-		analogWrite(SpeedPinLeft, turnspeed);
-	}
+	//else
+	//{
+	//	// Linksdrehen
+	//	digitalWrite(DirectionRight, BACK);
+	//	analogWrite(SpeedPinRight, turnspeed);
+	//	digitalWrite(DirectionLeft, FORW);
+	//	analogWrite(SpeedPinLeft, turnspeed);
+	//}
 }
