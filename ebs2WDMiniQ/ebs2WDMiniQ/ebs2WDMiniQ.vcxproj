@@ -86,7 +86,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="functions.h" />
     <ClInclude Include="__vm\.ebs2WDMiniQ.vsarduino.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="functions.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
