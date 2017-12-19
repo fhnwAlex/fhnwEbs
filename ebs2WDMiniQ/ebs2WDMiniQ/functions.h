@@ -10,8 +10,30 @@ FHNW - EMBEDDED SYSTEMS
 **********************************************************************************************************************/
 
 #ifndef FUNCTIONS_H
+#define FUNCTIONS_H
 
+#if defined(ARDUINO) && ARDUINO >= 100
+#include "arduino.h"
+#else
+#include "WProgram.h"
+#endif
 
+void finitUp(void);
+void fMoveProcedure(int direction, unsigned int speed);
+void fsetTone(void);
+int fcompassCalibrate(void);
+unsigned short fgetKeyValue(void);
+
+/*----------------------------------------------------------------
+Key enumerator
+----------------------------------------------------------------*/
+typedef enum tenKey
+{
+	enKey_undef = 0,
+	enKey_1,
+	enKey_2,
+	enKey_3,
+}tenKey;
 
 /*----------------------------------------------------------------
 Motor control structure
@@ -45,8 +67,8 @@ User interface structure
 ----------------------------------------------------------------*/
 typedef struct tstUI
 {
-	tstLcd		stLcd;
-	tstKeys		stKeys;
+	//tstLcd		stLcd;
+	tenKey		enKeyState;
 
 }tstUI;
 
@@ -55,18 +77,9 @@ LCD-Display structure
 ----------------------------------------------------------------*/
 typedef struct tstLcd
 {
-
+	unsigned short		uchDummy;
 
 }tstLcd;
-
-/*----------------------------------------------------------------
-Keys structure
-----------------------------------------------------------------*/
-typedef struct tstKeys
-{
-
-
-}tstKeys;
 
 /*----------------------------------------------------------------
 Compass structure
@@ -87,7 +100,6 @@ typedef struct tstPrvMain
 	tstRgbLed		stRgbLed;
 	tstUI			stUI;
 	tstLcd			stLcd;
-	tstKeys			stKeys;
 	tstCompass		stCompass;
 }tstPrvMain;
 

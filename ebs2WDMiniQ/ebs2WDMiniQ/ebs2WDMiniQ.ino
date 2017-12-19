@@ -1,19 +1,24 @@
-/*
- Name:		ebs2WDMiniQ.ino
- Created:	9/29/2017 5:16:53 PM
- Author:	Alex, Bruno
- Class:		7Sbb, Systemtechnik
- Version:	V1.000.0
-*/
+/**********************************************************************************************************************
+FHNW - EMBEDDED SYSTEMS 
+**********************************************************************************************************************
+/*  Program :: ebs2WDMiniQ.ino	*/
+/*	Revision:: 1.0	*/
+/*	Author:: A. Gessler / B. Hürzeler	*/
+/*	Date:: 2017-10-05	*/
+/**********************************************************************************************************************/
+/* Main program
+***********************************************************************************************************************/
 
-
+#include "functions.h"
 
 // the setup function runs once when you press reset or power the board
-void setup() {
-
+void setup() 
+{
+	finitUp();
 }
 
 // the loop function runs over and over again until power down or reset
-void loop() {
-
+void loop() 
+{
+	fgetKeyValue();
 }

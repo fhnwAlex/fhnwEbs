@@ -8,7 +8,8 @@ FHNW - EMBEDDED SYSTEMS
 /**********************************************************************************************************************/
 /* Includes
 **********************************************************************************************************************/
-#include <functions.h>
+//#include <functions.h>
+#include "functions.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "Wire.h"
@@ -40,15 +41,6 @@ HMC5883L mag;
 LiquidCrystal_I2C lcd(LCDADDR, LCDCOLS, LCDROWS);
 Adafruit_NeoPixel led = Adafruit_NeoPixel(1, LEDPIN, NEO_GRB + NEO_KHZ800);
 
-/**********************************************************************************************************************/
-/* Functions
-**********************************************************************************************************************/
-void fsetMotorSpeed(void);
-
-int fcompassCalibrate(void);
-
-
-
 
 /*****************************************************************/
 void finitUp(void)
@@ -59,8 +51,13 @@ Initialize after Power up
 {
 	tstPrvMain *pstPrivate, stPrivate;
 	pstPrivate = &stPrivate;
-
+	
 	memset(&stPrivate, 0, sizeof(stPrivate));		// Set whole privat memory 0
+
+	lcd.begin();
+	lcd.backlight();
+	lcd.home();
+
 };
 
 /*****************************************************************/
@@ -70,19 +67,89 @@ Compass calibration
 Run for every new location
 *****************************************************************/
 {
+	
+};
+
+/*****************************************************************/
+void fMoveProcedure(int direction, unsigned int speed)
+/****************************************************************
+Move procedure of a motor with arguments of direction and speed
+
+*****************************************************************/
+{
+	tstMotor *pstMotor, stMotor;
+	pstMotor = &stMotor;
+
+	pstMotor->uiDirection = 0;
+	pstMotor->uiSpeed = 0;
+
+};
+
+void fsetTone(void)
+/****************************************************************
+Generate and set a tone on the buzzer
+
+*****************************************************************/
+{
+	tstBuzzer *pstBuzzer, stBuzzer;
+	pstBuzzer = &stBuzzer;
+
 
 };
 
 /*****************************************************************/
-void fsetMotorSpeed(void)
+unsigned short fgetKeyValue(void)
 /****************************************************************
-Set motor speed
+Determined which Key was pressed
 
 *****************************************************************/
 {
+	tstUI	*pstUI, stUI;
+	pstUI = &stUI;
 
+	unsigned short		usRet = (analogRead(6) * 5) / 1023;
+	static int keys[4] = { 0,0,0,0 };
+
+	if (usRet > 4)
+	{
+		lcd.setCursor(12, 0);
+		lcd.print("key0");//tests only
+		if (++keys[0] >= 1)
+		{
+			if (keys[1] > 700) usRet = 4;
+			else if (keys[1] > 10) usRet = 1;
+			else if (keys[2] > 10) usRet = 2;
+			else if (keys[3] > 10) usRet = 3;
+			else usRet = 0;
+			if (usRet) keys[0] = keys[1] = keys[2] = keys[3] = 0;
+		}
+		else usRet = 0;
+	}
+	else
+	{
+		if (usRet >= 0 && usRet < 1)
+		{
+			if (keys[1]<32000) ++keys[1];
+			lcd.setCursor(12, 0);
+			lcd.print("key1");	//tests only
+		}
+		else if (usRet >= 1 && usRet < 3)
+		{
+			++keys[2];
+			lcd.setCursor(12, 0);
+			lcd.print("key2");//tests only
+		}
+		else if (usRet >= 3 && usRet < 4)
+		{
+			++keys[3];
+			lcd.setCursor(12, 0);
+			lcd.print("key3");//tests only
+		}
+		usRet = 0;
+	}
+	return usRet;
+	lcd.print(usRet);
 };
-
 
 
 
