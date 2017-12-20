@@ -8,7 +8,7 @@ FHNW - EMBEDDED SYSTEMS
 /**********************************************************************************************************************/
 /* Includes
 **********************************************************************************************************************/
-//#include <functions.h>
+#include <math.h>
 #include "functions.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -32,6 +32,7 @@ FHNW - EMBEDDED SYSTEMS
 #define LCDCOLS			16			// Number of coloums on LCD
 #define TONEPIN			16			// Pin of buzzer
 #define SPEEDMAX		255			// Maximum speed of motors
+#define TONEFREQ		200			// Tone frequency buzzer
 #define LCDADDR			0x20		// Adress for LCD display
 
 /**********************************************************************************************************************/
@@ -41,7 +42,6 @@ HMC5883L mag;
 LiquidCrystal_I2C lcd(LCDADDR, LCDCOLS, LCDROWS);
 Adafruit_NeoPixel led = Adafruit_NeoPixel(1, LEDPIN, NEO_GRB + NEO_KHZ800);
 
-
 /*****************************************************************/
 void finitUp(tstPrvMain *pstPrivate)
 /****************************************************************
@@ -50,21 +50,30 @@ Initialize after Power up
 *****************************************************************/
 {
 	pstPrivate->stMotor.pflActAngle = &pstPrivate->stCompass.flAngle;
+	pstPrivate->stUI.pflActAngle = &pstPrivate->stCompass.flAngle;
 	
 	// Initialize LCD-Display
 	lcd.begin();
 	lcd.backlight();
 	lcd.home();
 
+
 	// Initialize compass
 	mag.initialize();
-	if (!mag.testConnection())
-	{
-		lcd.setCursor(0, 0);
-		lcd.print("Connection to");
-		lcd.setCursor(0, 1);
-		lcd.print("compass failed!");
-	};
+	if (!mag.testConnection())	lcd.println("Connection to compass failed!");
+
+	// Initialize Motors
+	pinMode(SpeedPinLeft, OUTPUT);
+	pinMode(SpeedPinRight, OUTPUT);
+	pinMode(DirectionRight, OUTPUT);
+	pinMode(DirectionLeft, OUTPUT);
+
+	// Initialize RGB-LED
+	led.begin();
+	led.show();
+
+	// Initialize Buzzer
+	pinMode(TONEPIN, OUTPUT);
 
 };
 
@@ -129,7 +138,8 @@ Generate and set a tone on the buzzer
 
 *****************************************************************/
 {
-
+	//pstBuzzer->ulToneDurration = ;
+	tone(TONEPIN, TONEFREQ, pstBuzzer->ulToneDurration);
 
 
 };
@@ -146,9 +156,6 @@ Set key state
 
 	if (usRet > 4)
 	{
-		lcd.setCursor(12, 0);//tests only
-		lcd.print("key0");//tests only
-
 		pstUI->enKeyState = enKey_undef;
 		if (++keys[0] >= 1)
 		{
@@ -166,25 +173,24 @@ Set key state
 		if (usRet >= 0 && usRet < 1)
 		{
 			if (keys[1]<32000) ++keys[1];
-			lcd.setCursor(12, 0);
-			lcd.print("key1");	//tests only
+			pstUI->enKeyState = enKey_1;
+			usRet = pstUI->enKeyState;
 		}
 		else if (usRet >= 1 && usRet < 3)
 		{
 			++keys[2];
-			lcd.setCursor(12, 0);
-			lcd.print("key2");//tests only
+			pstUI->enKeyState = enKey_2;
+			usRet = pstUI->enKeyState;
 		}
 		else if (usRet >= 3 && usRet < 4)
 		{
 			++keys[3];
-			lcd.setCursor(12, 0);
-			lcd.print("key3");//tests only
+			pstUI->enKeyState = enKey_3;
+			usRet = pstUI->enKeyState;
 		}
-		usRet = 0;
+		usRet = pstUI->enKeyState;
 	}
 	return usRet;
-	lcd.print(usRet);
 };
 
 void fUIProcedure(tstUI *pstUI)
@@ -199,20 +205,34 @@ Complete User Interface procedure
 	switch (usKeyState)
 	{
 	case enKey_1:
+		pstUI->enUIState = enUIState_Calibration;
+		//fcompassCalibrate();
 		break;
 
 	case enKey_2:
+		pstUI->enUIState = enUIState_ManualMode;
 		break;
 
 	case enKey_3:
+		if (pstUI->enUIState == enUIState_AutomaticMode)
+		{
+			pstUI->stMotor.bRun = false;
+		}
+		else
+		{
+			pstUI->enUIState = enUIState_AutomaticMode;
+			pstUI->stMotor.bRun = true;
+		}
 		break;
 
+	case enKey_undef:
+		pstUI->enUIState = enUIState_undef;
+		break;
 
 
 	default:
 		break;
 	}
-
 
 };
 

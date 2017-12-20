@@ -18,15 +18,6 @@ FHNW - EMBEDDED SYSTEMS
 #include "WProgram.h"
 #endif
 
-void finitUp(tstPrvMain *pstPrivate);
-void fcompassCalibrate(tstCompass *pstCompass);
-void fgetAngle(tstCompass *pstCompass);
-void fMoveProcedure(tstMotor *pstMotor);
-void fsetTone(tstBuzzer *pstBuzzer);
-unsigned short fgetKeyValue(tstUI *pstUI);
-void fUIProcedure(tstUI *pstUI);
-
-
 /*----------------------------------------------------------------
 Key enumerator
 ----------------------------------------------------------------*/
@@ -37,6 +28,17 @@ typedef enum tenKey
 	enKey_2,
 	enKey_3,
 }tenKey;
+
+/*----------------------------------------------------------------
+User Interface enumerator
+----------------------------------------------------------------*/
+typedef enum tenUIState
+{
+	enUIState_undef = 0,
+	enUIState_Calibration,
+	enUIState_ManualMode,
+	enUIState_AutomaticMode,
+}tenUIState;
 
 /*----------------------------------------------------------------
 Motor control structure
@@ -54,7 +56,7 @@ Buzzer structure
 ----------------------------------------------------------------*/
 typedef struct tstBuzzer
 {
-	
+	unsigned long		ulToneDurration;
 
 }tstBuzzer;
 
@@ -72,8 +74,12 @@ User interface structure
 ----------------------------------------------------------------*/
 typedef struct tstUI
 {
-	tstLcd		stLcd;
+	//tstLcd		stLcd;
 	tenKey		enKeyState;
+	tenUIState	enUIState;
+	tstBuzzer	stBuzzer;
+	tstMotor	stMotor;
+	float		*pflActAngle;
 
 }tstUI;
 

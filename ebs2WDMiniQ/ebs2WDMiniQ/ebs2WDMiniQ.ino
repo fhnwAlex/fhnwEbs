@@ -9,7 +9,21 @@ FHNW - EMBEDDED SYSTEMS
 /* Main program
 ***********************************************************************************************************************/
 
+/****************************************************************
+INCLUDES
+*****************************************************************/
 #include "functions.h"
+
+/****************************************************************
+FUNCTIONS
+*****************************************************************/
+void finitUp(tstPrvMain *pstPrivate);
+void fcompassCalibrate(tstCompass *pstCompass);
+void fgetAngle(tstCompass *pstCompass);
+void fMoveProcedure(tstMotor *pstMotor);
+void fsetTone(tstBuzzer *pstBuzzer);
+unsigned short fgetKeyValue(tstUI *pstUI);
+void fUIProcedure(tstUI *pstUI);
 
 tstPrvMain stPrivate;	//Allocate private memory
 
@@ -24,8 +38,8 @@ void setup()
 // the loop function runs over and over again until power down or reset
 void loop() 
 {
-	
-	fMoveProcedure();
+	tstUI *pstUI = &stPrivate.stUI;
 
-	fgetAngle();
+	fUIProcedure(pstUI);
+	
 }
