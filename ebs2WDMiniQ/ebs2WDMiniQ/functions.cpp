@@ -53,10 +53,12 @@ Initialize after Power up
 	pstPrivate->stUI.pflActAngle = &pstPrivate->stCompass.flAngle;
 	
 	// Initialize LCD-Display
+	uint8_t				uiLcdSquare[] = { 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F };
 	lcd.begin();
 	lcd.backlight();
 	lcd.home();
 
+	lcd.createChar(0, uiLcdSquare);
 
 	// Initialize compass
 	mag.initialize();
@@ -207,6 +209,19 @@ Complete User Interface procedure
 	case enKey_1:
 		pstUI->enUIState = enUIState_Calibration;
 		//fcompassCalibrate();
+		lcd.clear();
+		lcd.setCursor(0, 0);
+		lcd.println("Compass calibr..");
+		for (unsigned int i = 0; i < LCDCOLS; i++)
+		{
+			lcd.setCursor(i, 1);
+			lcd.write(0);
+			delay(300);
+		}
+		lcd.setCursor(0, 0);
+		lcd.println("                ");
+		lcd.setCursor(4, 0);
+		lcd.println("Complete!");
 		break;
 
 	case enKey_2:
@@ -227,6 +242,7 @@ Complete User Interface procedure
 
 	case enKey_undef:
 		pstUI->enUIState = enUIState_undef;
+		//lcd.println("1.Calib 2.ManMod 3.AutoMod");
 		break;
 
 
