@@ -11,14 +11,21 @@ FHNW - EMBEDDED SYSTEMS
 
 #include "functions.h"
 
+tstPrvMain stPrivate;	//Allocate private memory
+
 // the setup function runs once when you press reset or power the board
 void setup() 
 {
-	finitUp();
+	tstPrvMain *pstPrivate = &stPrivate;
+	memset(&stPrivate, 0, sizeof(stPrivate));		// Set whole privat memory 0
+	finitUp(pstPrivate);
 }
 
 // the loop function runs over and over again until power down or reset
 void loop() 
 {
-	fgetKeyValue();
+	
+	fMoveProcedure();
+
+	fgetAngle();
 }

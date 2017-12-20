@@ -18,11 +18,14 @@ FHNW - EMBEDDED SYSTEMS
 #include "WProgram.h"
 #endif
 
-void finitUp(void);
-void fMoveProcedure(int direction, unsigned int speed);
-void fsetTone(void);
-int fcompassCalibrate(void);
-unsigned short fgetKeyValue(void);
+void finitUp(tstPrvMain *pstPrivate);
+void fcompassCalibrate(tstCompass *pstCompass);
+void fgetAngle(tstCompass *pstCompass);
+void fMoveProcedure(tstMotor *pstMotor);
+void fsetTone(tstBuzzer *pstBuzzer);
+unsigned short fgetKeyValue(tstUI *pstUI);
+void fUIProcedure(tstUI *pstUI);
+
 
 /*----------------------------------------------------------------
 Key enumerator
@@ -41,7 +44,9 @@ Motor control structure
 typedef struct tstMotor
 {
 	unsigned int 	uiSpeed;        //
-	unsigned int	uiDirection;	//
+	float			flAngelNorth;	//
+	float			*pflActAngle;
+	bool			bRun;
 }tstMotor;
 
 /*----------------------------------------------------------------
@@ -49,7 +54,7 @@ Buzzer structure
 ----------------------------------------------------------------*/
 typedef struct tstBuzzer
 {
-
+	
 
 }tstBuzzer;
 
@@ -58,7 +63,7 @@ RGB-LED structure
 ----------------------------------------------------------------*/
 typedef struct tstRgbLed
 {
-
+	
 
 }tstRgbLed;
 
@@ -67,7 +72,7 @@ User interface structure
 ----------------------------------------------------------------*/
 typedef struct tstUI
 {
-	//tstLcd		stLcd;
+	tstLcd		stLcd;
 	tenKey		enKeyState;
 
 }tstUI;
@@ -77,7 +82,7 @@ LCD-Display structure
 ----------------------------------------------------------------*/
 typedef struct tstLcd
 {
-	unsigned short		uchDummy;
+	
 
 }tstLcd;
 
@@ -86,8 +91,13 @@ Compass structure
 ----------------------------------------------------------------*/
 typedef struct tstCompass
 {
-
-
+	float			flAngle;
+	float			declinationAngle;
+	unsigned int	uiSamples;
+	signed int		iMagnet_x;
+	signed int		iMagnet_y;
+	signed int		iMagnet_z;
+	bool			bRun;
 }tstCompass;
 
 /*----------------------------------------------------------------

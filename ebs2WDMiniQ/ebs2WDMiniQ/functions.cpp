@@ -43,25 +43,33 @@ Adafruit_NeoPixel led = Adafruit_NeoPixel(1, LEDPIN, NEO_GRB + NEO_KHZ800);
 
 
 /*****************************************************************/
-void finitUp(void)
+void finitUp(tstPrvMain *pstPrivate)
 /****************************************************************
 Initialize after Power up
 
 *****************************************************************/
 {
-	tstPrvMain *pstPrivate, stPrivate;
-	pstPrivate = &stPrivate;
+	pstPrivate->stMotor.pflActAngle = &pstPrivate->stCompass.flAngle;
 	
-	memset(&stPrivate, 0, sizeof(stPrivate));		// Set whole privat memory 0
-
+	// Initialize LCD-Display
 	lcd.begin();
 	lcd.backlight();
 	lcd.home();
 
+	// Initialize compass
+	mag.initialize();
+	if (!mag.testConnection())
+	{
+		lcd.setCursor(0, 0);
+		lcd.print("Connection to");
+		lcd.setCursor(0, 1);
+		lcd.print("compass failed!");
+	};
+
 };
 
 /*****************************************************************/
-int fcompassCalibrate(void)
+void fcompassCalibrate(tstCompass *pstCompass)
 /****************************************************************
 Compass calibration
 Run for every new location
@@ -70,50 +78,78 @@ Run for every new location
 	
 };
 
+void fgetAngle(tstCompass *pstCompass)
+/****************************************************************
+Get actual angle from compass
+
+*****************************************************************/
+{
+	pstCompass->flAngle = 0.0;
+	pstCompass->uiSamples = 10;
+
+	// Set declination angle on your location and fix heading
+	// You can find your declination on: http://magnetic-declination.com/
+	// (+) Positive or (-) for negative
+	// Formula: (deg + (min / 60.0)) / (180 / M_PI);
+	pstCompass->declinationAngle = (2.0 + (16.0 / 60.0)) / (180.0 / M_PI);
+
+	for (int i = 1; i <= pstCompass->uiSamples; i++) {
+		// read raw heading measurements from device
+		mag.getHeading(&pstCompass->iMagnet_x, &pstCompass->iMagnet_y, &pstCompass->iMagnet_z);
+
+		//mx = mx - (-326); //Offset Brugg Projektraum
+		//my = my - 288; //Offset Brugg Proejktraum
+		pstCompass->iMagnet_x = pstCompass->iMagnet_x - 291; //Offset Birmi
+		pstCompass->iMagnet_y = pstCompass->iMagnet_y - 321; //Offset Birmi
+
+	   // To calculate heading in degrees. 0 degree indicates North
+		pstCompass->flAngle += (atan2(pstCompass->iMagnet_y, pstCompass->iMagnet_x) + pstCompass->declinationAngle);
+	}
+	pstCompass->flAngle = pstCompass->flAngle / pstCompass->uiSamples;
+
+	if (pstCompass->flAngle < 0) { pstCompass->flAngle += 2 * M_PI; }
+	pstCompass->flAngle = round(pstCompass->flAngle * 180 / M_PI);
+};
+
 /*****************************************************************/
-void fMoveProcedure(int direction, unsigned int speed)
+void fMoveProcedure(tstMotor *pstMotor)
 /****************************************************************
 Move procedure of a motor with arguments of direction and speed
 
 *****************************************************************/
 {
-	tstMotor *pstMotor, stMotor;
-	pstMotor = &stMotor;
+	
 
-	pstMotor->uiDirection = 0;
-	pstMotor->uiSpeed = 0;
 
 };
 
-void fsetTone(void)
+void fsetTone(tstBuzzer *pstBuzzer)
 /****************************************************************
 Generate and set a tone on the buzzer
 
 *****************************************************************/
 {
-	tstBuzzer *pstBuzzer, stBuzzer;
-	pstBuzzer = &stBuzzer;
+
 
 
 };
 
 /*****************************************************************/
-unsigned short fgetKeyValue(void)
+unsigned short fgetKeyValue(tstUI *pstUI)
 /****************************************************************
 Determined which Key was pressed
-
+Set key state
 *****************************************************************/
 {
-	tstUI	*pstUI, stUI;
-	pstUI = &stUI;
-
 	unsigned short		usRet = (analogRead(6) * 5) / 1023;
 	static int keys[4] = { 0,0,0,0 };
 
 	if (usRet > 4)
 	{
-		lcd.setCursor(12, 0);
+		lcd.setCursor(12, 0);//tests only
 		lcd.print("key0");//tests only
+
+		pstUI->enKeyState = enKey_undef;
 		if (++keys[0] >= 1)
 		{
 			if (keys[1] > 700) usRet = 4;
@@ -123,7 +159,7 @@ Determined which Key was pressed
 			else usRet = 0;
 			if (usRet) keys[0] = keys[1] = keys[2] = keys[3] = 0;
 		}
-		else usRet = 0;
+		else usRet = pstUI->enKeyState;
 	}
 	else
 	{
@@ -151,5 +187,32 @@ Determined which Key was pressed
 	lcd.print(usRet);
 };
 
+void fUIProcedure(tstUI *pstUI)
+/****************************************************************
+Complete User Interface procedure
 
+*****************************************************************/
+{
+	unsigned short		usKeyState;
+	usKeyState = fgetKeyValue(pstUI);
+
+	switch (usKeyState)
+	{
+	case enKey_1:
+		break;
+
+	case enKey_2:
+		break;
+
+	case enKey_3:
+		break;
+
+
+
+	default:
+		break;
+	}
+
+
+};
 
