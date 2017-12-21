@@ -25,6 +25,9 @@ void fsetTone(tstBuzzer *pstBuzzer);
 unsigned short fgetKeyValue(tstUI *pstUI);
 void fUIProcedure(tstUI *pstUI);
 
+//testfunctions
+void fRandomAngleTest(tstCompass *pstRandomAngle);
+
 tstPrvMain stPrivate;	//Allocate private memory
 
 // the setup function runs once when you press reset or power the board
@@ -39,7 +42,9 @@ void setup()
 void loop() 
 {
 	tstUI *pstUI = &stPrivate.stUI;
+	tstCompass *pstRandomAngle = &stPrivate.stCompass;
+
 
 	fUIProcedure(pstUI);
-	
+	fRandomAngleTest(pstRandomAngle);
 }

@@ -42,6 +42,7 @@ HMC5883L mag;
 LiquidCrystal_I2C lcd(LCDADDR, LCDCOLS, LCDROWS);
 Adafruit_NeoPixel led = Adafruit_NeoPixel(1, LEDPIN, NEO_GRB + NEO_KHZ800);
 
+void fsetUIMenu(tstUI *pstUIMenu);
 /*****************************************************************/
 void finitUp(tstPrvMain *pstPrivate)
 /****************************************************************
@@ -49,16 +50,21 @@ Initialize after Power up
 
 *****************************************************************/
 {
+	tstUI *pstInitUI = &pstPrivate->stUI;
+
+	// Pointer access to interface
 	pstPrivate->stMotor.pflActAngle = &pstPrivate->stCompass.flAngle;
 	pstPrivate->stUI.pflActAngle = &pstPrivate->stCompass.flAngle;
-	
+	pstPrivate->stUI.pbCompassReady = &pstPrivate->stCompass.bCalibrationDone;
+
 	// Initialize LCD-Display
-	uint8_t				uiLcdSquare[] = { 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F };
+	uint8_t	uiLcdSquare[] = { 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F };
+	uint8_t uiLcdDegrees[] = { 0x0C, 0x12, 0x12, 0x0C, 0x00, 0x00, 0x00, 0x00 };
 	lcd.begin();
 	lcd.backlight();
 	lcd.home();
-
 	lcd.createChar(0, uiLcdSquare);
+	lcd.createChar(1, uiLcdDegrees);
 
 	// Initialize compass
 	mag.initialize();
@@ -77,6 +83,9 @@ Initialize after Power up
 	// Initialize Buzzer
 	pinMode(TONEPIN, OUTPUT);
 
+	pstPrivate->stUI.enUIState = enUIState_undef;
+	fsetUIMenu(pstInitUI);
+	pstPrivate->stUI.bInitUpDone = true;
 };
 
 /*****************************************************************/
@@ -86,6 +95,8 @@ Compass calibration
 Run for every new location
 *****************************************************************/
 {
+	//for tests only!!
+	pstCompass->bCalibrationDone = true;
 	
 };
 
@@ -140,7 +151,7 @@ Generate and set a tone on the buzzer
 
 *****************************************************************/
 {
-	//pstBuzzer->ulToneDurration = ;
+	
 	tone(TONEPIN, TONEFREQ, pstBuzzer->ulToneDurration);
 
 
@@ -207,11 +218,62 @@ Complete User Interface procedure
 	switch (usKeyState)
 	{
 	case enKey_1:
-		pstUI->enUIState = enUIState_Calibration;
-		//fcompassCalibrate();
+
+		if (!pstUI->bCompassReady)
+		{
+			//fcompassCalibrate();
+			pstUI->bCompassReady = true; //for test only!! simulation -> after set within function above
+			pstUI->enUIState = enUIState_Calibration;
+			fsetUIMenu(pstUI);
+		}
+		else
+		{
+			pstUI->enUIState = enUIState_ManualMode;
+			fsetUIMenu(pstUI);
+		}
+		break;
+
+	case enKey_2:
+		if (pstUI->bCompassReady)
+		{
+			pstUI->enUIState = enUIState_AutomaticMode;
+			fsetUIMenu(pstUI);
+		}
+		break;
+
+	case enKey_3:
+
+		if(pstUI->bCompassReady)
+		{
+			pstUI->enUIState = enUIState_Abort;
+			fsetUIMenu(pstUI);
+		}
+		break;
+
+	case enKey_undef:
+		pstUI->enUIState = enUIState_undef;
+		
+		if (!pstUI->bMenuSet)
+		{
+			fsetUIMenu(pstUI);
+		}
+		break;
+	default:
+		break;
+	}
+};
+
+void fsetUIMenu(tstUI *pstUIMenu)
+/****************************************************************
+Indicate different User Interface menus
+
+*****************************************************************/
+{
+	if (pstUIMenu->enUIState == enUIState_Calibration)
+	{
 		lcd.clear();
 		lcd.setCursor(0, 0);
-		lcd.println("Compass calibr..");
+		if (pstUIMenu->bCompassReady)		lcd.println("Compass calibr..");	//for test only!! boolean change to pointer
 		for (unsigned int i = 0; i < LCDCOLS; i++)
 		{
 			lcd.setCursor(i, 1);
@@ -219,36 +281,67 @@ Complete User Interface procedure
 			delay(300);
 		}
 		lcd.setCursor(0, 0);
-		lcd.println("                ");
+		lcd.print("                  ");
 		lcd.setCursor(4, 0);
-		lcd.println("Complete!");
-		break;
-
-	case enKey_2:
-		pstUI->enUIState = enUIState_ManualMode;
-		break;
-
-	case enKey_3:
-		if (pstUI->enUIState == enUIState_AutomaticMode)
-		{
-			pstUI->stMotor.bRun = false;
-		}
-		else
-		{
-			pstUI->enUIState = enUIState_AutomaticMode;
-			pstUI->stMotor.bRun = true;
-		}
-		break;
-
-	case enKey_undef:
-		pstUI->enUIState = enUIState_undef;
-		//lcd.println("1.Calib 2.ManMod 3.AutoMod");
-		break;
-
-
-	default:
-		break;
+		lcd.print("Complete!");
+		delay(1000);
+		pstUIMenu->bMenuSet = false;
 	}
-
+	else if (pstUIMenu->enUIState == enUIState_undef && !pstUIMenu->bCompassReady)	//for test only!!
+	{
+		lcd.clear();
+		lcd.println("PRESS Key 1 to  ");
+		lcd.setCursor(0, 1);
+		lcd.println("calib. compass! ");
+		pstUIMenu->bMenuSet = true;
+	}
+	else if(pstUIMenu->enUIState == enUIState_undef && pstUIMenu->bCompassReady)//for test only!!
+	{
+		lcd.clear();
+		lcd.println("Key 1 - ManMode ");
+		lcd.setCursor(0, 1);
+		lcd.println("Key 2 - AutoMode");
+		pstUIMenu->usPrevState = enUIState_undef;
+		pstUIMenu->bMenuSet = true;
+	}
+	else if ((pstUIMenu->enUIState == enUIState_ManualMode && pstUIMenu->bCompassReady) )//for test only!!
+	{
+		lcd.clear();
+		lcd.setCursor(0, 0);
+		lcd.print("M:Act. Ang: XY");
+		lcd.setCursor(15, 0);
+		lcd.write(1);
+		lcd.setCursor(0, 1);
+		lcd.print("Key 3 - STOP");
+		pstUIMenu->usPrevState = enUIState_ManualMode;
+	}
+	else if ((pstUIMenu->enUIState == enUIState_AutomaticMode && pstUIMenu->bCompassReady) )//for test only!!
+	{
+		lcd.clear();
+		lcd.setCursor(0, 0);
+		lcd.print("A:Act. Ang: XY");
+		lcd.setCursor(15, 0);
+		lcd.write(1);
+		lcd.setCursor(0, 1);
+		lcd.print("Key 3 - STOP");
+		pstUIMenu->usPrevState = enUIState_AutomaticMode;
+	}
+	else if ((pstUIMenu->enUIState == enUIState_Abort) && pstUIMenu->usPrevState > 0) 
+	{
+		lcd.clear();
+		lcd.setCursor(0, 0);
+		lcd.print("Mode aborted!");
+		delay(2000);
+		pstUIMenu->bMenuSet = false;
+	}
 };
 
+void fRandomAngleTest(tstCompass *pstRandomAngle)
+/****************************************************************
+TESTFUNCTION
+
+*****************************************************************/
+{
+	pstRandomAngle->flAngle = (float)random(0, 395);
+
+};

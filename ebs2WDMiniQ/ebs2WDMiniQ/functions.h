@@ -38,6 +38,7 @@ typedef enum tenUIState
 	enUIState_Calibration,
 	enUIState_ManualMode,
 	enUIState_AutomaticMode,
+	enUIState_Abort,
 }tenUIState;
 
 /*----------------------------------------------------------------
@@ -75,11 +76,17 @@ User interface structure
 typedef struct tstUI
 {
 	//tstLcd		stLcd;
-	tenKey		enKeyState;
-	tenUIState	enUIState;
-	tstBuzzer	stBuzzer;
-	tstMotor	stMotor;
-	float		*pflActAngle;
+	tenKey			enKeyState;
+	tenUIState		enUIState;
+	tstBuzzer		stBuzzer;
+	tstMotor		stMotor;
+	tstCompass		stCompass;
+	float			*pflActAngle;
+	bool			bInitUpDone;
+	bool			*pbCompassReady;
+	bool			bCompassReady;	//for test only!!
+	bool			bMenuSet; //for test only!!
+	unsigned short	usPrevState;
 
 }tstUI;
 
@@ -104,6 +111,7 @@ typedef struct tstCompass
 	signed int		iMagnet_y;
 	signed int		iMagnet_z;
 	bool			bRun;
+	bool			bCalibrationDone;
 }tstCompass;
 
 /*----------------------------------------------------------------
