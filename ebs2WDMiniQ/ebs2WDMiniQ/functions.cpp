@@ -32,7 +32,7 @@ FHNW - EMBEDDED SYSTEMS
 #define LCDCOLS			16			// Number of coloums on LCD
 #define TONEPIN			16			// Pin of buzzer
 #define SPEEDMAX		255			// Maximum speed of motors
-#define TONEFREQ		200			// Tone frequency buzzer
+#define TONEFREQ		100			// Tone frequency buzzer
 #define LCDADDR			0x20		// Adress for LCD display
 
 /**********************************************************************************************************************/
@@ -54,7 +54,7 @@ Initialize after Power up
 
 	// Pointer access to interface
 	pstPrivate->stMotor.puiActAngle = &pstPrivate->stCompass.uiAngle;
-	pstPrivate->stUI.puilActAngle = &pstPrivate->stCompass.uiAngle;
+	pstPrivate->stUI.puiActAngle = &pstPrivate->stCompass.uiAngle;
 	pstPrivate->stUI.pbCompassReady = &pstPrivate->stCompass.bCalibrationDone;
 
 	// Initialize LCD-Display
@@ -145,14 +145,17 @@ Move procedure of a motor with arguments of direction and speed
 
 };
 
-void fsetTone(tstBuzzer *pstBuzzer)
+void fsetTone(tstUI *pstBuzzer)
 /****************************************************************
 Generate and set a tone on the buzzer
 
 *****************************************************************/
 {
-	pstBuzzer->ulToneDurration = 1000;
-	tone(TONEPIN, TONEFREQ, pstBuzzer->ulToneDurration);
+	unsigned int uiAngleDiff;
+	
+	uiAngleDiff = *pstUI->puiActAngle - 180;
+	pstUI->stBuzzer.ulToneFrequency = abs(uiAngleDiff);
+	tone(TONEPIN, pstUI->stBuzzer.ulToneFrequency, pstUI->stBuzzer.ulToneDurration);
 
 
 };

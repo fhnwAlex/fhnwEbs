@@ -21,7 +21,7 @@ void finitUp(tstPrvMain *pstPrivate);
 void fcompassCalibrate(tstCompass *pstCompass);
 void fgetAngle(tstCompass *pstCompass);
 void fMoveProcedure(tstMotor *pstMotor);
-void fsetTone(tstBuzzer *pstBuzzer);
+void fsetTone(tstUI *pstBuzzer);
 unsigned short fgetKeyValue(tstUI *pstUI);
 void fUIProcedure(tstUI *pstUI);
 
@@ -37,7 +37,7 @@ MEMORY ALLOCATION
 tstPrvMain stPrivate;	//Allocate private memory
 tstUI *pstUI = &stPrivate.stUI;
 tstUI *pstRandomAngle = &stPrivate.stUI;
-tstBuzzer *pstBuzzer = &stPrivate.stBuzzer;
+tstUI *pstBuzzer = &stPrivate.stUI;
 
 // the setup function runs once when you press reset or power the board
 void setup() 

@@ -58,7 +58,7 @@ Buzzer structure
 typedef struct tstBuzzer
 {
 	unsigned long		ulToneDurration;
-
+	unsigned long		ulToneFrequency;
 }tstBuzzer;
 
 /*----------------------------------------------------------------
@@ -105,7 +105,7 @@ typedef struct tstUI
 	tstBuzzer		stBuzzer;
 	tstMotor		stMotor;
 	tstCompass		stCompass;
-	unsigned int	*puilActAngle;
+	unsigned int	*puiActAngle;
 	unsigned short	usPrevState;
 	bool			bInitUpDone;
 	bool			*pbCompassReady;
