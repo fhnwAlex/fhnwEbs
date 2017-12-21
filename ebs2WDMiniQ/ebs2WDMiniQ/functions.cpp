@@ -53,8 +53,8 @@ Initialize after Power up
 	tstUI *pstInitUI = &pstPrivate->stUI;
 
 	// Pointer access to interface
-	pstPrivate->stMotor.pflActAngle = &pstPrivate->stCompass.flAngle;
-	pstPrivate->stUI.pflActAngle = &pstPrivate->stCompass.flAngle;
+	pstPrivate->stMotor.puiActAngle = &pstPrivate->stCompass.uiAngle;
+	pstPrivate->stUI.puilActAngle = &pstPrivate->stCompass.uiAngle;
 	pstPrivate->stUI.pbCompassReady = &pstPrivate->stCompass.bCalibrationDone;
 
 	// Initialize LCD-Display
@@ -106,14 +106,14 @@ Get actual angle from compass
 
 *****************************************************************/
 {
-	pstCompass->flAngle = 0.0;
+	pstCompass->uiAngle = 0.0;
 	pstCompass->uiSamples = 10;
 
 	// Set declination angle on your location and fix heading
 	// You can find your declination on: http://magnetic-declination.com/
 	// (+) Positive or (-) for negative
 	// Formula: (deg + (min / 60.0)) / (180 / M_PI);
-	pstCompass->declinationAngle = (2.0 + (16.0 / 60.0)) / (180.0 / M_PI);
+	pstCompass->flDeclinationAngle = (2.0 + (16.0 / 60.0)) / (180.0 / M_PI);
 
 	for (int i = 1; i <= pstCompass->uiSamples; i++) {
 		// read raw heading measurements from device
@@ -125,12 +125,12 @@ Get actual angle from compass
 		pstCompass->iMagnet_y = pstCompass->iMagnet_y - 321; //Offset Birmi
 
 	   // To calculate heading in degrees. 0 degree indicates North
-		pstCompass->flAngle += (atan2(pstCompass->iMagnet_y, pstCompass->iMagnet_x) + pstCompass->declinationAngle);
+		pstCompass->uiAngle += (atan2(pstCompass->iMagnet_y, pstCompass->iMagnet_x) + pstCompass->flDeclinationAngle);
 	}
-	pstCompass->flAngle = pstCompass->flAngle / pstCompass->uiSamples;
+	pstCompass->uiAngle = pstCompass->uiAngle / pstCompass->uiSamples;
 
-	if (pstCompass->flAngle < 0) { pstCompass->flAngle += 2 * M_PI; }
-	pstCompass->flAngle = round(pstCompass->flAngle * 180 / M_PI);
+	if (pstCompass->uiAngle < 0) { pstCompass->uiAngle += 2 * M_PI; }
+	pstCompass->uiAngle = round(pstCompass->uiAngle * 180 / M_PI);
 };
 
 /*****************************************************************/
@@ -236,13 +236,20 @@ Complete User Interface procedure
 	case enKey_2:
 		if (pstUI->bCompassReady)
 		{
+			pstUI->bStartAuto = true;
 			pstUI->enUIState = enUIState_AutomaticMode;
-			fsetUIMenu(pstUI);
+			if (pstUI->bStartAuto)
+			{
+				pstUI->enUIState = enUIState_AutomaticMode;
+				fsetUIMenu(pstUI);
+				delay(100);
+			}
+			
 		}
 		break;
 
 	case enKey_3:
-
+		pstUI->bStartAuto = false;
 		if(pstUI->bCompassReady)
 		{
 			pstUI->enUIState = enUIState_Abort;
@@ -319,7 +326,11 @@ Indicate different User Interface menus
 	{
 		lcd.clear();
 		lcd.setCursor(0, 0);
-		lcd.print("A:Act. Ang: XY");
+		lcd.print("A:Act. Ang:   ");
+
+		lcd.setCursor(12, 0);
+		lcd.print(pstUIMenu->stCompass.uiAngle);
+
 		lcd.setCursor(15, 0);
 		lcd.write(1);
 		lcd.setCursor(0, 1);
@@ -336,12 +347,21 @@ Indicate different User Interface menus
 	}
 };
 
-void fRandomAngleTest(tstCompass *pstRandomAngle)
+void fRandomAngleTest(tstUI *pstRandomAngle)
 /****************************************************************
 TESTFUNCTION
 
 *****************************************************************/
 {
-	pstRandomAngle->flAngle = (float)random(0, 395);
-
+	//lcd.clear();
+	pstRandomAngle->stCompass.uiAngle = random(0, 395);
+	//lcd.setCursor(0, 0);
+	//lcd.print("A:Act. Ang:   ");
+	//lcd.setCursor(12, 0);
+	//lcd.print(pstRandomAngle->stCompass.uiAngle);
+	//lcd.setCursor(15, 0);
+	//lcd.write(1);
+	//lcd.setCursor(0, 1);
+	//lcd.print("Key 3 - STOP");
+	delay(500);
 };

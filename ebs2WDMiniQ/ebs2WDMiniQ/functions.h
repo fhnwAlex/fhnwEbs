@@ -47,8 +47,8 @@ Motor control structure
 typedef struct tstMotor
 {
 	unsigned int 	uiSpeed;        //
-	float			flAngelNorth;	//
-	float			*pflActAngle;
+	unsigned int	uiAngelNorth;	//
+	unsigned int	*puiActAngle;
 	bool			bRun;
 }tstMotor;
 
@@ -71,48 +71,51 @@ typedef struct tstRgbLed
 }tstRgbLed;
 
 /*----------------------------------------------------------------
-User interface structure
-----------------------------------------------------------------*/
-typedef struct tstUI
-{
-	//tstLcd		stLcd;
-	tenKey			enKeyState;
-	tenUIState		enUIState;
-	tstBuzzer		stBuzzer;
-	tstMotor		stMotor;
-	tstCompass		stCompass;
-	float			*pflActAngle;
-	bool			bInitUpDone;
-	bool			*pbCompassReady;
-	bool			bCompassReady;	//for test only!!
-	bool			bMenuSet; //for test only!!
-	unsigned short	usPrevState;
-
-}tstUI;
-
-/*----------------------------------------------------------------
-LCD-Display structure
-----------------------------------------------------------------*/
-typedef struct tstLcd
-{
-	
-
-}tstLcd;
-
-/*----------------------------------------------------------------
 Compass structure
 ----------------------------------------------------------------*/
 typedef struct tstCompass
 {
-	float			flAngle;
-	float			declinationAngle;
+	unsigned int	uiAngle;
 	unsigned int	uiSamples;
+	float			flDeclinationAngle;
 	signed int		iMagnet_x;
 	signed int		iMagnet_y;
 	signed int		iMagnet_z;
 	bool			bRun;
 	bool			bCalibrationDone;
 }tstCompass;
+
+/*----------------------------------------------------------------
+LCD-Display structure
+----------------------------------------------------------------*/
+typedef struct tstLcd
+{
+
+
+}tstLcd;
+
+/*----------------------------------------------------------------
+User interface structure
+----------------------------------------------------------------*/
+typedef struct tstUI
+{
+	tstLcd			stLcd;
+	tenKey			enKeyState;
+	tenUIState		enUIState;
+	tstBuzzer		stBuzzer;
+	tstMotor		stMotor;
+	tstCompass		stCompass;
+	unsigned int	*puilActAngle;
+	unsigned short	usPrevState;
+	bool			bInitUpDone;
+	bool			*pbCompassReady;
+	bool			bCompassReady;	//for test only!!
+	bool			bMenuSet; //for test only!!
+	bool			bStartAuto;
+
+
+}tstUI;
+
 
 /*----------------------------------------------------------------
 Private structure

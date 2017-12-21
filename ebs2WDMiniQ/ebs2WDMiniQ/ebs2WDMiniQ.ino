@@ -26,9 +26,11 @@ unsigned short fgetKeyValue(tstUI *pstUI);
 void fUIProcedure(tstUI *pstUI);
 
 //testfunctions
-void fRandomAngleTest(tstCompass *pstRandomAngle);
+void fRandomAngleTest(tstUI *pstRandomAngle);
 
 tstPrvMain stPrivate;	//Allocate private memory
+tstUI *pstUI = &stPrivate.stUI;
+tstUI *pstRandomAngle = &stPrivate.stUI;
 
 // the setup function runs once when you press reset or power the board
 void setup() 
@@ -41,10 +43,6 @@ void setup()
 // the loop function runs over and over again until power down or reset
 void loop() 
 {
-	tstUI *pstUI = &stPrivate.stUI;
-	tstCompass *pstRandomAngle = &stPrivate.stCompass;
-
-
 	fUIProcedure(pstUI);
 	fRandomAngleTest(pstRandomAngle);
 }
