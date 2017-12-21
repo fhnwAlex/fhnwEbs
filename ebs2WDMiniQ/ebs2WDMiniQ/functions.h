@@ -112,6 +112,8 @@ typedef struct tstUI
 	bool			bCompassReady;	//for test only!!
 	bool			bMenuSet; //for test only!!
 	bool			bStartAuto;
+	bool			bStartManual;
+	bool			bStartCalibrate;
 
 
 }tstUI;

@@ -25,12 +25,19 @@ void fsetTone(tstBuzzer *pstBuzzer);
 unsigned short fgetKeyValue(tstUI *pstUI);
 void fUIProcedure(tstUI *pstUI);
 
+//###################################################################
 //testfunctions
+//###################################################################
 void fRandomAngleTest(tstUI *pstRandomAngle);
 
+
+/****************************************************************
+MEMORY ALLOCATION
+*****************************************************************/
 tstPrvMain stPrivate;	//Allocate private memory
 tstUI *pstUI = &stPrivate.stUI;
 tstUI *pstRandomAngle = &stPrivate.stUI;
+tstBuzzer *pstBuzzer = &stPrivate.stBuzzer;
 
 // the setup function runs once when you press reset or power the board
 void setup() 
@@ -44,5 +51,13 @@ void setup()
 void loop() 
 {
 	fUIProcedure(pstUI);
-	fRandomAngleTest(pstRandomAngle);
+
+	if (pstUI->bStartAuto || pstUI->bStartManual)
+	{
+		fRandomAngleTest(pstRandomAngle);
+	}
+	
+	fsetTone(pstBuzzer);
+
+
 }

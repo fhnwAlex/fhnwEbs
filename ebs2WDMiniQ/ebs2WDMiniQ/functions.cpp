@@ -151,7 +151,7 @@ Generate and set a tone on the buzzer
 
 *****************************************************************/
 {
-	
+	pstBuzzer->ulToneDurration = 1000;
 	tone(TONEPIN, TONEFREQ, pstBuzzer->ulToneDurration);
 
 
@@ -222,12 +222,14 @@ Complete User Interface procedure
 		if (!pstUI->bCompassReady)
 		{
 			//fcompassCalibrate();
+			pstUI->bStartCalibrate = true;
 			pstUI->bCompassReady = true; //for test only!! simulation -> after set within function above
 			pstUI->enUIState = enUIState_Calibration;
 			fsetUIMenu(pstUI);
 		}
 		else
 		{
+			pstUI->bStartManual = true;
 			pstUI->enUIState = enUIState_ManualMode;
 			fsetUIMenu(pstUI);
 		}
@@ -250,6 +252,8 @@ Complete User Interface procedure
 
 	case enKey_3:
 		pstUI->bStartAuto = false;
+		pstUI->bStartManual = false;
+
 		if(pstUI->bCompassReady)
 		{
 			pstUI->enUIState = enUIState_Abort;
@@ -293,6 +297,7 @@ Indicate different User Interface menus
 		lcd.print("Complete!");
 		delay(1000);
 		pstUIMenu->bMenuSet = false;
+		pstUIMenu->bStartCalibrate = false;
 	}
 	else if (pstUIMenu->enUIState == enUIState_undef && !pstUIMenu->bCompassReady)	//for test only!!
 	{
@@ -311,30 +316,18 @@ Indicate different User Interface menus
 		pstUIMenu->usPrevState = enUIState_undef;
 		pstUIMenu->bMenuSet = true;
 	}
-	else if ((pstUIMenu->enUIState == enUIState_ManualMode && pstUIMenu->bCompassReady) )//for test only!!
+	else if (pstUIMenu->enUIState == enUIState_ManualMode)	//for test only!!
 	{
 		lcd.clear();
 		lcd.setCursor(0, 0);
-		lcd.print("M:Act. Ang: XY");
-		lcd.setCursor(15, 0);
-		lcd.write(1);
-		lcd.setCursor(0, 1);
-		lcd.print("Key 3 - STOP");
+		lcd.print("M:");
 		pstUIMenu->usPrevState = enUIState_ManualMode;
 	}
-	else if ((pstUIMenu->enUIState == enUIState_AutomaticMode && pstUIMenu->bCompassReady) )//for test only!!
+	else if (pstUIMenu->enUIState == enUIState_AutomaticMode)//for test only!!
 	{
 		lcd.clear();
 		lcd.setCursor(0, 0);
-		lcd.print("A:Act. Ang:   ");
-
-		lcd.setCursor(12, 0);
-		lcd.print(pstUIMenu->stCompass.uiAngle);
-
-		lcd.setCursor(15, 0);
-		lcd.write(1);
-		lcd.setCursor(0, 1);
-		lcd.print("Key 3 - STOP");
+		lcd.print("A:");
 		pstUIMenu->usPrevState = enUIState_AutomaticMode;
 	}
 	else if ((pstUIMenu->enUIState == enUIState_Abort) && pstUIMenu->usPrevState > 0) 
@@ -348,20 +341,20 @@ Indicate different User Interface menus
 };
 
 void fRandomAngleTest(tstUI *pstRandomAngle)
-/****************************************************************
-TESTFUNCTION
-
-*****************************************************************/
+//###################################################################
+//TESTFUNCTION ->> Simulate an angle (Compass)
+//###################################################################
 {
-	//lcd.clear();
+	lcd.clear();
 	pstRandomAngle->stCompass.uiAngle = random(0, 395);
-	//lcd.setCursor(0, 0);
-	//lcd.print("A:Act. Ang:   ");
-	//lcd.setCursor(12, 0);
-	//lcd.print(pstRandomAngle->stCompass.uiAngle);
-	//lcd.setCursor(15, 0);
-	//lcd.write(1);
-	//lcd.setCursor(0, 1);
-	//lcd.print("Key 3 - STOP");
+	lcd.setCursor(0, 0);
+	if (pstRandomAngle->bStartManual)	lcd.print("M:Act. Ang:   ");
+	if (pstRandomAngle->bStartAuto)		lcd.print("A:Act. Ang:   ");
+	lcd.setCursor(12, 0);
+	lcd.print(pstRandomAngle->stCompass.uiAngle);
+	lcd.setCursor(15, 0);
+	lcd.write(1);
+	lcd.setCursor(0, 1);
+	lcd.print("Key 3 - STOP");
 	delay(500);
 };
