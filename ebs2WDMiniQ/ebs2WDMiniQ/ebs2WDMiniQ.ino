@@ -38,6 +38,8 @@ tstPrvMain stPrivate;	//Allocate private memory
 tstUI *pstUI = &stPrivate.stUI;
 tstUI *pstRandomAngle = &stPrivate.stUI; //for tests only!!
 tstUI *pstBuzzer = &stPrivate.stUI;
+tstMotor *pstMotor = &stPrivate.stMotor;
+tstCompass *pstCompass = &stPrivate.stCompass;
 
 // the setup function runs once when you press reset or power the board
 void setup() 
@@ -51,14 +53,25 @@ void setup()
 void loop() 
 {
 	fUIProcedure(pstUI);
+	fgetAngle(pstCompass);
+
+	//if (pstUI->stMotor.bRun)	
+	fMoveProcedure(pstMotor);
+
+
+
 
 
 	if (pstUI->bStartAuto || pstUI->bStartManual)
 	{
 		fRandomAngleTest(pstRandomAngle);
 	}
-	
+
+
+
+
+
+
+
 	//fsetTone(pstBuzzer);
-
-
 }
