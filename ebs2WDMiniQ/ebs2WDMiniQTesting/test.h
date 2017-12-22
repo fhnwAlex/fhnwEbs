@@ -10,7 +10,9 @@
 #endif
 
 void initCompass(void);
-float getMeasurement(void);
+int getMeasurement(void);
+int calculateSpeed(int angle);
+void fMoveProcedure(int angle);
 
 #endif
 
