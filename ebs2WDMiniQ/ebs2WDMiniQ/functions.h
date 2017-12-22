@@ -50,6 +50,7 @@ typedef struct tstMotor
 	unsigned int	uiAngelNorth;	//
 	unsigned int	*puiActAngle;
 	bool			bRun;
+	bool			bCalibRun;
 }tstMotor;
 
 /*----------------------------------------------------------------

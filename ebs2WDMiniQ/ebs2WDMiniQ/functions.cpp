@@ -29,6 +29,7 @@ FHNW - EMBEDDED SYSTEMS
 #define SpeedPinRight	6			// Pin for run the right motor 
 #define DirectionRight	7			// Pin for control right motor direction
 #define LEDPIN			10			// Pin of RGB-LED
+#define SAMPLES			10			// For filter magnitude
 #define DirectionLeft	12			// Pin for control left motor direction
 #define LCDCOLS			16			// Number of coloums on LCD
 #define TONEPIN			16			// Pin of buzzer
@@ -99,8 +100,8 @@ Compass calibration
 Run for every new location
 *****************************************************************/
 {
-	pstCompass->bRun = true;
-	fMoveProcedure();
+	/*pstCompass->bRun = true;
+	fMoveProcedure();*/
 
 
 
@@ -117,8 +118,8 @@ Get actual angle from compass
 
 *****************************************************************/
 {
-	pstCompass->uiAngle = 0.0;
-	pstCompass->uiSamples = 10;
+	pstCompass->uiMagOffset_x = 291; //tests only!!
+	pstCompass->uiMagOffset_y = 321; //tests only!!
 
 	// Set declination angle on your location and fix heading
 	// You can find your declination on: http://magnetic-declination.com/
@@ -126,7 +127,7 @@ Get actual angle from compass
 	// Formula: (deg + (min / 60.0)) / (180 / M_PI);
 	pstCompass->flDeclinationAngle = (2.0 + (16.0 / 60.0)) / (180.0 / M_PI);
 
-	for (int i = 1; i <= pstCompass->uiSamples; i++) {
+	for (int i = 1; i <= SAMPLES; i++) {
 		// read raw heading measurements from device
 		mag.getHeading(&pstCompass->iMagnet_x, &pstCompass->iMagnet_y, &pstCompass->iMagnet_z);
 
@@ -138,7 +139,7 @@ Get actual angle from compass
 	   // To calculate heading in degrees. 0 degree indicates North
 		pstCompass->uiAngle += (atan2(pstCompass->iMagnet_y, pstCompass->iMagnet_x) + pstCompass->flDeclinationAngle);
 	}
-	pstCompass->uiAngle = pstCompass->uiAngle / pstCompass->uiSamples;
+	pstCompass->uiAngle = pstCompass->uiAngle / SAMPLES;
 
 	if (pstCompass->uiAngle < 0) { pstCompass->uiAngle += 2 * M_PI; }
 	pstCompass->uiAngle = round(pstCompass->uiAngle * 180 / M_PI);
@@ -260,11 +261,11 @@ Complete User Interface procedure
 	{
 	case enKey_1:
 
-		if (!pstUI->bCompassReady)
+		if (!pstUI->bCompassReady)//for test only!! pointer instead of boolean
 		{
-			fcompassCalibrate(pstCompass);
-			//pstUI->bStartCalibrate = true;
-			//pstUI->bCompassReady = true; //for test only!! simulation -> after set within function above
+			//fcompassCalibrate(pstCompass);
+			pstUI->bStartCalibrate = true;
+			pstUI->bCompassReady = true; //for test only!! simulation -> after set within function above
 			pstUI->enUIState = enUIState_Calibration;
 			fsetUIMenu(pstUI);
 		}
@@ -281,12 +282,12 @@ Complete User Interface procedure
 		{
 			pstUI->bStartAuto = true;
 			pstUI->enUIState = enUIState_AutomaticMode;
-			//if (pstUI->bStartAuto)
-			//{
-			//	pstUI->enUIState = enUIState_AutomaticMode;
-			//	fsetUIMenu(pstUI);
-			//	delay(100);
-			//}
+			if (pstUI->bStartAuto)
+			{
+				pstUI->enUIState = enUIState_AutomaticMode;
+				fsetUIMenu(pstUI);
+				delay(100);
+			}
 			
 		}
 		break;
@@ -338,7 +339,7 @@ Indicate different User Interface menus
 		lcd.print("Complete!");
 		delay(1000);
 		pstUIMenu->bMenuSet = false;
-		//pstUIMenu->bStartCalibrate = false;
+		pstUIMenu->bStartCalibrate = false;
 	}
 	else if (pstUIMenu->enUIState == enUIState_undef && !pstUIMenu->bCompassReady)	//for test only!!
 	{
