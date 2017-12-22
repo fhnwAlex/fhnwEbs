@@ -153,36 +153,57 @@ Move procedure of a motor with arguments of direction and speed
 *****************************************************************/
 {
 	tstMotor *pstMotor = &stPrivate.stMotor;
+	
+	// Static speed mode
+	if (pstMotor->bCalibRun)
+	{
+		// Rechtsdrehen, fixe Geschwindigkeit MIN_V
+		digitalWrite(DirectionRight, FORW);
+		analogWrite(SpeedPinRight, MIN_V);
+		delay(2);
+		digitalWrite(DirectionLeft, BACK);
+		analogWrite(SpeedPinLeft, MIN_V);
+	}
+	else {
+		analogWrite(SpeedPinRight, LOW);
+		analogWrite(SpeedPinLeft, LOW);
+	}
 
-	// Dynamic speed mode
-	signed int	siDiffAngle = *pstMotor->puiActAngle - 180;
-	unsigned int uiSpeed = (MAX_V - MIN_V) / 180 * abs(siDiffAngle) + MIN_V;
+	if (pstMotor->bRun)
+	{
+		// Dynamic speed mode
+		signed int	siDiffAngle = *pstMotor->puiActAngle - 180;
+		unsigned int uiSpeed = (MAX_V - MIN_V) / 180 * abs(siDiffAngle) + MIN_V;
 
-	if (*pstMotor->puiActAngle <= ANGLE_MIN || *pstMotor->puiActAngle >= ANGLE_MAX)
+		if (*pstMotor->puiActAngle <= ANGLE_MIN || *pstMotor->puiActAngle >= ANGLE_MAX)
+		{
+			analogWrite(SpeedPinRight, LOW);
+			analogWrite(SpeedPinLeft, LOW);
+		}
+		if (*pstMotor->puiActAngle < ANGLE_MAX && *pstMotor->puiActAngle >= 180)
+		{
+			// Rechtsdrehen
+			digitalWrite(DirectionRight, FORW);
+			analogWrite(SpeedPinRight, uiSpeed);
+			delay(2);
+			digitalWrite(DirectionLeft, BACK);
+			analogWrite(SpeedPinLeft, uiSpeed);
+		}
+		else
+		{
+			// Linksdrehen
+			digitalWrite(DirectionRight, BACK);
+			analogWrite(SpeedPinRight, uiSpeed);
+			delay(2);
+			digitalWrite(DirectionLeft, FORW);
+			analogWrite(SpeedPinLeft, uiSpeed);
+		}
+	}
+	else //stop if bRun==false
 	{
 		analogWrite(SpeedPinRight, LOW);
 		analogWrite(SpeedPinLeft, LOW);
 	}
-	if (*pstMotor->puiActAngle < ANGLE_MAX && *pstMotor->puiActAngle >= 180)
-	{
-		// Rechtsdrehen
-		digitalWrite(DirectionRight, FORW);
-		analogWrite(SpeedPinRight, uiSpeed);
-		delay(2);
-		digitalWrite(DirectionLeft, BACK);
-		analogWrite(SpeedPinLeft, uiSpeed);
-	}
-	else
-	{
-		// Linksdrehen
-		digitalWrite(DirectionRight, BACK);
-		analogWrite(SpeedPinRight, uiSpeed);
-		delay(2);
-		digitalWrite(DirectionLeft, FORW);
-		analogWrite(SpeedPinLeft, uiSpeed);
-	}
-
-
 };
 
 void fsetTone(tstUI *pstBuzzer)
