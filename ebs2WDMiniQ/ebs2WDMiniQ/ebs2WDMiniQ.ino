@@ -52,12 +52,13 @@ void loop()
 {
 	fUIProcedure(pstUI);
 
+
 	if (pstUI->bStartAuto || pstUI->bStartManual)
 	{
 		fRandomAngleTest(pstRandomAngle);
 	}
 	
-	fsetTone(pstBuzzer);
+	//fsetTone(pstBuzzer);
 
 
 }

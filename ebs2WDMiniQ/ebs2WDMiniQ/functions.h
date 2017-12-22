@@ -77,6 +77,8 @@ typedef struct tstCompass
 {
 	unsigned int	uiAngle;
 	unsigned int	uiSamples;
+	unsigned int	uiMagOffset_x;
+	unsigned int	uiMagOffset_y;
 	float			flDeclinationAngle;
 	signed int		iMagnet_x;
 	signed int		iMagnet_y;

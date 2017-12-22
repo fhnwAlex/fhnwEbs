@@ -25,14 +25,18 @@ FHNW - EMBEDDED SYSTEMS
 #define BACK			1			// Motor control backward
 #define LCDROWS			2			// Number of rows on LCD
 #define SpeedPinLeft	5			// Pin for run the left motor 
+#define ANGLE_MIN		5			// Minimum angle
 #define SpeedPinRight	6			// Pin for run the right motor 
 #define DirectionRight	7			// Pin for control right motor direction
 #define LEDPIN			10			// Pin of RGB-LED
 #define DirectionLeft	12			// Pin for control left motor direction
 #define LCDCOLS			16			// Number of coloums on LCD
 #define TONEPIN			16			// Pin of buzzer
-#define SPEEDMAX		255			// Maximum speed of motors
+#define MIN_V			40			// Minimum speed of motors
+#define MAX_V			100			// Maximum speed of motors
+//#define SPEEDMAX		255			// Maximum speed of motors
 #define TONEFREQ		100			// Tone frequency buzzer
+#define ANGLE_MAX		355			// Maximum angle
 #define LCDADDR			0x20		// Adress for LCD display
 
 /**********************************************************************************************************************/
@@ -95,8 +99,15 @@ Compass calibration
 Run for every new location
 *****************************************************************/
 {
-	//for tests only!!
+	pstCompass->bRun = true;
+	fMoveProcedure();
+
+
+
+
+
 	pstCompass->bCalibrationDone = true;
+
 	
 };
 
@@ -121,8 +132,8 @@ Get actual angle from compass
 
 		//mx = mx - (-326); //Offset Brugg Projektraum
 		//my = my - 288; //Offset Brugg Proejktraum
-		pstCompass->iMagnet_x = pstCompass->iMagnet_x - 291; //Offset Birmi
-		pstCompass->iMagnet_y = pstCompass->iMagnet_y - 321; //Offset Birmi
+		pstCompass->iMagnet_x = pstCompass->iMagnet_x - pstCompass->uiMagOffset_x;//291; //Offset Birmi
+		pstCompass->iMagnet_y = pstCompass->iMagnet_y - pstCompass->uiMagOffset_y;//321; //Offset Birmi
 
 	   // To calculate heading in degrees. 0 degree indicates North
 		pstCompass->uiAngle += (atan2(pstCompass->iMagnet_y, pstCompass->iMagnet_x) + pstCompass->flDeclinationAngle);
@@ -140,7 +151,35 @@ Move procedure of a motor with arguments of direction and speed
 
 *****************************************************************/
 {
-	
+	tstMotor *pstMotor = &stPrivate.stMotor;
+
+	// Dynamic speed mode
+	signed int	siDiffAngle = *pstMotor->puiActAngle - 180;
+	unsigned int uiSpeed = (MAX_V - MIN_V) / 180 * abs(siDiffAngle) + MIN_V;
+
+	if (*pstMotor->puiActAngle <= ANGLE_MIN || *pstMotor->puiActAngle >= ANGLE_MAX)
+	{
+		analogWrite(SpeedPinRight, LOW);
+		analogWrite(SpeedPinLeft, LOW);
+	}
+	if (*pstMotor->puiActAngle < ANGLE_MAX && *pstMotor->puiActAngle >= 180)
+	{
+		// Rechtsdrehen
+		digitalWrite(DirectionRight, FORW);
+		analogWrite(SpeedPinRight, uiSpeed);
+		delay(2);
+		digitalWrite(DirectionLeft, BACK);
+		analogWrite(SpeedPinLeft, uiSpeed);
+	}
+	else
+	{
+		// Linksdrehen
+		digitalWrite(DirectionRight, BACK);
+		analogWrite(SpeedPinRight, uiSpeed);
+		delay(2);
+		digitalWrite(DirectionLeft, FORW);
+		analogWrite(SpeedPinLeft, uiSpeed);
+	}
 
 
 };
@@ -151,16 +190,16 @@ Generate and set a tone on the buzzer
 
 *****************************************************************/
 {
-	unsigned int uiAngleDiff;
-	
-	uiAngleDiff = *pstUI->puiActAngle - 180;
-	tone(TONEPIN, abs(uiAngleDiff), pstUI->stBuzzer.ulToneDurration);
+	//unsigned int uiAngleDiff;
+	//
+	//uiAngleDiff = *pstUI->puiActAngle - 180;
+	//tone(TONEPIN, abs(uiAngleDiff), pstUI->stBuzzer.ulToneDurration);
 
 
 };
 
 /*****************************************************************/
-unsigned short fgetKeyValue(tstUI *pstUI)
+unsigned short fgetKeyValue(tstUI *pstUIKey)
 /****************************************************************
 Determined which Key was pressed
 Set key state
@@ -171,7 +210,7 @@ Set key state
 
 	if (usRet > 4)
 	{
-		pstUI->enKeyState = enKey_undef;
+		pstUIKey->enKeyState = enKey_undef;
 		if (++keys[0] >= 1)
 		{
 			if (keys[1] > 700) usRet = 4;
@@ -181,29 +220,29 @@ Set key state
 			else usRet = 0;
 			if (usRet) keys[0] = keys[1] = keys[2] = keys[3] = 0;
 		}
-		else usRet = pstUI->enKeyState;
+		else usRet = pstUIKey->enKeyState;
 	}
 	else
 	{
 		if (usRet >= 0 && usRet < 1)
 		{
 			if (keys[1]<32000) ++keys[1];
-			pstUI->enKeyState = enKey_1;
-			usRet = pstUI->enKeyState;
+			pstUIKey->enKeyState = enKey_1;
+			usRet = pstUIKey->enKeyState;
 		}
 		else if (usRet >= 1 && usRet < 3)
 		{
 			++keys[2];
-			pstUI->enKeyState = enKey_2;
-			usRet = pstUI->enKeyState;
+			pstUIKey->enKeyState = enKey_2;
+			usRet = pstUIKey->enKeyState;
 		}
 		else if (usRet >= 3 && usRet < 4)
 		{
 			++keys[3];
-			pstUI->enKeyState = enKey_3;
-			usRet = pstUI->enKeyState;
+			pstUIKey->enKeyState = enKey_3;
+			usRet = pstUIKey->enKeyState;
 		}
-		usRet = pstUI->enKeyState;
+		usRet = pstUIKey->enKeyState;
 	}
 	return usRet;
 };
@@ -216,16 +255,16 @@ Complete User Interface procedure
 {
 	unsigned short		usKeyState;
 	usKeyState = fgetKeyValue(pstUI);
-
+	tstCompass *pstCompass = &stPrivate.stUI.stCompass;
 	switch (usKeyState)
 	{
 	case enKey_1:
 
 		if (!pstUI->bCompassReady)
 		{
-			//fcompassCalibrate();
-			pstUI->bStartCalibrate = true;
-			pstUI->bCompassReady = true; //for test only!! simulation -> after set within function above
+			fcompassCalibrate(pstCompass);
+			//pstUI->bStartCalibrate = true;
+			//pstUI->bCompassReady = true; //for test only!! simulation -> after set within function above
 			pstUI->enUIState = enUIState_Calibration;
 			fsetUIMenu(pstUI);
 		}
@@ -242,12 +281,12 @@ Complete User Interface procedure
 		{
 			pstUI->bStartAuto = true;
 			pstUI->enUIState = enUIState_AutomaticMode;
-			if (pstUI->bStartAuto)
-			{
-				pstUI->enUIState = enUIState_AutomaticMode;
-				fsetUIMenu(pstUI);
-				delay(100);
-			}
+			//if (pstUI->bStartAuto)
+			//{
+			//	pstUI->enUIState = enUIState_AutomaticMode;
+			//	fsetUIMenu(pstUI);
+			//	delay(100);
+			//}
 			
 		}
 		break;
@@ -299,7 +338,7 @@ Indicate different User Interface menus
 		lcd.print("Complete!");
 		delay(1000);
 		pstUIMenu->bMenuSet = false;
-		pstUIMenu->bStartCalibrate = false;
+		//pstUIMenu->bStartCalibrate = false;
 	}
 	else if (pstUIMenu->enUIState == enUIState_undef && !pstUIMenu->bCompassReady)	//for test only!!
 	{
