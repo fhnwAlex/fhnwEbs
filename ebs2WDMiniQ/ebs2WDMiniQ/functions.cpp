@@ -154,8 +154,7 @@ Generate and set a tone on the buzzer
 	unsigned int uiAngleDiff;
 	
 	uiAngleDiff = *pstUI->puiActAngle - 180;
-	pstUI->stBuzzer.ulToneFrequency = abs(uiAngleDiff);
-	tone(TONEPIN, pstUI->stBuzzer.ulToneFrequency, pstUI->stBuzzer.ulToneDurration);
+	tone(TONEPIN, abs(uiAngleDiff), pstUI->stBuzzer.ulToneDurration);
 
 
 };

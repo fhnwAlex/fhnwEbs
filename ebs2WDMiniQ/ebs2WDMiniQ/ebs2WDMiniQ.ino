@@ -36,7 +36,7 @@ MEMORY ALLOCATION
 *****************************************************************/
 tstPrvMain stPrivate;	//Allocate private memory
 tstUI *pstUI = &stPrivate.stUI;
-tstUI *pstRandomAngle = &stPrivate.stUI;
+tstUI *pstRandomAngle = &stPrivate.stUI; //for tests only!!
 tstUI *pstBuzzer = &stPrivate.stUI;
 
 // the setup function runs once when you press reset or power the board
