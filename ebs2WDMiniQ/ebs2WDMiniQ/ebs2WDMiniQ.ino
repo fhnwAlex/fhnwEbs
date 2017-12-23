@@ -32,12 +32,7 @@ MEMORY ALLOCATION
 *****************************************************************/
 tstPrvMain stPrivate;	//Allocate private memory
 
-//tstPrvMain *pstPrivate = &stPrivate;
 tstUI *pstUI = &stPrivate.stUI;
-//tstUI *pstDisplay = &stPrivate.stUI;
-//tstBuzzer *pstBuzzer = &stPrivate.stBuzzer;
-//tstMotor *pstMotor = &stPrivate.stMotor;
-//tstCompass *pstCompass = &stPrivate.stCompass;
 
 // the setup function runs once when you press reset or power the board
 void setup() 
