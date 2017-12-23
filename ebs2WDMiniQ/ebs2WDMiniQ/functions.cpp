@@ -48,7 +48,7 @@ HMC5883L mag;
 LiquidCrystal_I2C lcd(LCDADDR, LCDCOLS, LCDROWS);
 Adafruit_NeoPixel led = Adafruit_NeoPixel(1, LEDPIN, NEO_GRB + NEO_KHZ800);
 
-void fsetUIMenu(tstUI *pstUIMenu);
+void fsetUIMenu(tstPrvMain *pstUIMenu);
 /*****************************************************************/
 void finitUp(tstPrvMain *pstPrivate)
 /****************************************************************
@@ -61,9 +61,6 @@ Initialize after Power up
 	// Pointer access to interface
 	pstPrivate->stMotor.puiActAngle = &pstPrivate->stCompass.uiAngle;
 	pstPrivate->stUI.puiActAngle = &pstPrivate->stCompass.uiAngle;
-	//pstPrivate->stUI.pbCompassReady = &pstPrivate->stCompass.bCalibrationDone;
-	pstPrivate->stMotor.pbRun = &pstPrivate->stUI.bRun;
-	pstPrivate->stMotor.pbCalibRun = &pstPrivate->stUI.bCalibRun;
 
 	// Initialize LCD-Display
 	uint8_t	uiLcdSquare[] = { 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F };
@@ -92,32 +89,92 @@ Initialize after Power up
 	pinMode(TONEPIN, OUTPUT);
 
 	pstPrivate->stUI.enUIState = enUIState_undef;
-	fsetUIMenu(pstInitUI);
+	fsetUIMenu(pstPrivate);
 	pstPrivate->stUI.bInitUpDone = true;
 };
 
 /*****************************************************************/
-void fcompassCalibrate(tstCompass *pstCompass)
+void fMoveProcedure(tstMotor *pstMotor)
+/****************************************************************
+Move procedure of a motor with arguments of direction and speed
+
+*****************************************************************/
+{
+	// Static speed mode
+	
+	Serial.print("Motor comp.Cal: ");
+	Serial.println(pstMotor->bCompassCalibrated);
+
+
+	if (!pstMotor->bCompassCalibrated)
+	{
+		if (pstMotor->bCalibRun)
+		{
+			// Rechtsdrehen, fixe Geschwindigkeit MIN_V
+			digitalWrite(DirectionRight, FORW);
+			analogWrite(SpeedPinRight, MIN_V);
+			delay(2);
+			digitalWrite(DirectionLeft, BACK);
+			analogWrite(SpeedPinLeft, MIN_V);
+		}
+		else 
+		{
+			analogWrite(SpeedPinRight, LOW);
+			analogWrite(SpeedPinLeft, LOW);
+		}
+	}else if (pstMotor->bRun)
+	{
+		// Dynamic speed mode
+		signed int	siDiffAngle = *pstMotor->puiActAngle - 180;
+		unsigned int uiSpeed = (MAX_V - MIN_V) / 180 * abs(siDiffAngle) + MIN_V;
+
+		if (*pstMotor->puiActAngle <= ANGLE_MIN || *pstMotor->puiActAngle >= ANGLE_MAX)
+		{
+			analogWrite(SpeedPinRight, LOW);
+			analogWrite(SpeedPinLeft, LOW);
+		}
+		if (*pstMotor->puiActAngle < ANGLE_MAX && *pstMotor->puiActAngle >= 180)
+		{
+			// Rechtsdrehen
+			digitalWrite(DirectionRight, FORW);
+			analogWrite(SpeedPinRight, uiSpeed);
+			delay(2);
+			digitalWrite(DirectionLeft, BACK);
+			analogWrite(SpeedPinLeft, uiSpeed);
+		}
+		else
+		{
+			// Linksdrehen
+			digitalWrite(DirectionRight, BACK);
+			analogWrite(SpeedPinRight, uiSpeed);
+			delay(2);
+			digitalWrite(DirectionLeft, FORW);
+			analogWrite(SpeedPinLeft, uiSpeed);
+		}
+	}
+	else //stop if bRun==false
+	{
+		analogWrite(SpeedPinRight, LOW);
+		analogWrite(SpeedPinLeft, LOW);
+	}
+};
+
+/*****************************************************************/
+void fcompassCalibrate(tstCompass *pstCompass, tstMotor *pstMotor)
 /****************************************************************
 Compass calibration
 Run for every new location
 *****************************************************************/
 {
-	/*pstCompass->bRun = true;
-	fMoveProcedure();*/
-
-	tstMotor *pstMotor = &stPrivate.stMotor;
-
 	unsigned int minX = 0;
 	unsigned int maxX = 0;
 	unsigned int minY = 0;
 	unsigned int maxY = 0;
 	unsigned int start_time = millis();
 
-	pstCompass->bCalibRun = true;
+	pstMotor->bCalibRun = true;
 	fMoveProcedure(pstMotor);
 
-	// TODO define CALIB_TIME= 10000;
 	for (unsigned int i = 0; (millis() - start_time) < CALIB_TIME;)
 	{
 		mag.getHeading(&pstCompass->iMagnet_x, &pstCompass->iMagnet_y, &pstCompass->iMagnet_z);
@@ -133,9 +190,16 @@ Run for every new location
 		}
 
 	}
-	//pstCompass->bCalibrationDone = true;
+	//pstMotor->bCalibRun = false;
+	pstCompass->bCalibDone = true;
+	pstMotor->bCompassCalibrated = pstCompass->bCalibDone;
 
-	
+
+	Serial.print("Compass comp.Cal: ");
+	Serial.print(pstCompass->bCalibDone);
+	Serial.print("\t");
+	Serial.print(pstMotor->bCompassCalibrated);
+	fMoveProcedure(pstMotor);
 };
 
 void fgetAngle(tstCompass *pstCompass)
@@ -172,70 +236,8 @@ Get actual angle from compass
 	if (flTempAngle < 0) { flTempAngle += 2 * M_PI; }
 	flTempAngle = flTempAngle * 180 / M_PI;
 	pstCompass->uiAngle = (unsigned int)flTempAngle;
-
-	//Serial.print("Compass function: ");
-	//Serial.print(pstCompass->uiAngle); //test only
-	//Serial.print("\t");
 };
 
-/*****************************************************************/
-void fMoveProcedure(tstMotor *pstMotor)
-/****************************************************************
-Move procedure of a motor with arguments of direction and speed
-
-*****************************************************************/
-{
-	// Static speed mode
-	if (*pstMotor->pbCalibRun)
-	{
-		// Rechtsdrehen, fixe Geschwindigkeit MIN_V
-		digitalWrite(DirectionRight, FORW);
-		analogWrite(SpeedPinRight, MIN_V);
-		delay(2);
-		digitalWrite(DirectionLeft, BACK);
-		analogWrite(SpeedPinLeft, MIN_V);
-	}
-	else {
-		analogWrite(SpeedPinRight, LOW);
-		analogWrite(SpeedPinLeft, LOW);
-	}
-
-	if (*pstMotor->pbRun)
-	{
-		// Dynamic speed mode
-		signed int	siDiffAngle = *pstMotor->puiActAngle - 180;
-		unsigned int uiSpeed = (MAX_V - MIN_V) / 180 * abs(siDiffAngle) + MIN_V;
-
-		if (*pstMotor->puiActAngle <= ANGLE_MIN || *pstMotor->puiActAngle >= ANGLE_MAX)
-		{
-			analogWrite(SpeedPinRight, LOW);
-			analogWrite(SpeedPinLeft, LOW);
-		}
-		if (*pstMotor->puiActAngle < ANGLE_MAX && *pstMotor->puiActAngle >= 180)
-		{
-			// Rechtsdrehen
-			digitalWrite(DirectionRight, FORW);
-			analogWrite(SpeedPinRight, uiSpeed);
-			delay(2);
-			digitalWrite(DirectionLeft, BACK);
-			analogWrite(SpeedPinLeft, uiSpeed);
-		}
-		else
-		{
-			// Linksdrehen
-			digitalWrite(DirectionRight, BACK);
-			analogWrite(SpeedPinRight, uiSpeed);
-			delay(2);
-			digitalWrite(DirectionLeft, FORW);
-			analogWrite(SpeedPinLeft, uiSpeed);
-		}
-	}
-	else //stop if bRun==false
-	{
-		analogWrite(SpeedPinRight, LOW);
-		analogWrite(SpeedPinLeft, LOW);
-	}
-};
 
 void fsetTone(tstUI *pstBuzzer)
 /****************************************************************
@@ -300,47 +302,45 @@ Set key state
 	return usRet;
 };
 
-void fUIProcedure(tstUI *pstUI)
+void fUIProcedure(tstPrvMain *pstUI)
 /****************************************************************
 Complete User Interface procedure
 
 *****************************************************************/
 {
+	tstCompass *pstCompass = &pstUI->stCompass;
+	tstMotor *pstMotor = &pstUI->stMotor;
+	tstUI *pstUIProcedure = &pstUI->stUI;
+
 	unsigned short		usKeyState;
-	usKeyState = fgetKeyValue(pstUI);
-	//tstCompass *pstCompass = &stPrivate.stUI.stCompass;
+	usKeyState = fgetKeyValue(pstUIProcedure);
 	switch (usKeyState)
 	{
 	case enKey_1:
 
-		if (!pstUI->bCompassReady)//for test only!! pointer instead of boolean
+		if (!pstCompass->bCalibDone)
 		{
-			
-			//pstUI->bStartCalibrate = true;
-			pstUI->bCompassReady = true; //for test only!! simulation -> after set within function above
-			pstUI->enUIState = enUIState_Calibration;
+			pstUIProcedure->enUIState = enUIState_Calibration;
 			fsetUIMenu(pstUI);
 		}
 		else
 		{
-			pstUI->bStartManual = true;
-			pstUI->enUIState = enUIState_ManualMode;
+			pstUIProcedure->bStartManual = true;
+			pstUIProcedure->enUIState = enUIState_ManualMode;
 			fsetUIMenu(pstUI);
 		}
 		break;
 
 	case enKey_2:
-		if (pstUI->bCompassReady)
+		if (pstCompass->bCalibDone)
 		{
-			pstUI->bStartAuto = true;
-			// tests only!!
-			pstUI->bRun = true;
-			
+			pstUIProcedure->bStartAuto = true;
+			pstMotor->bRun = true;
 
-			pstUI->enUIState = enUIState_AutomaticMode;
-			if (pstUI->bStartAuto)
+			pstUIProcedure->enUIState = enUIState_AutomaticMode;
+			if (pstUIProcedure->bStartAuto)
 			{
-				pstUI->enUIState = enUIState_AutomaticMode;
+				pstUIProcedure->enUIState = enUIState_AutomaticMode;
 				fsetUIMenu(pstUI);
 				delay(100);
 			}
@@ -349,22 +349,22 @@ Complete User Interface procedure
 		break;
 
 	case enKey_3:
-		pstUI->bStartAuto = false;
-		pstUI->bStartManual = false;
+		pstUIProcedure->bStartAuto = false;
+		pstUIProcedure->bStartManual = false;
+		pstMotor->bRun = false;
+		//pstUI->bRun = false; // test only
 
-		pstUI->bRun = false; // test only
-
-		if(pstUI->bCompassReady)
+		if(pstCompass->bCalibDone)
 		{
-			pstUI->enUIState = enUIState_Abort;
+			pstUIProcedure->enUIState = enUIState_Abort;
 			fsetUIMenu(pstUI);
 		}
 		break;
 
 	case enKey_undef:
-		pstUI->enUIState = enUIState_undef;
+		pstUIProcedure->enUIState = enUIState_undef;
 		
-		if (!pstUI->bMenuSet)
+		if (!pstUIProcedure->bMenuSet)
 		{
 			fsetUIMenu(pstUI);
 		}
@@ -374,70 +374,66 @@ Complete User Interface procedure
 	}
 };
 
-void fsetUIMenu(tstUI *pstUIMenu)
+void fsetUIMenu(tstPrvMain *pstUIMenu)
 /****************************************************************
 Indicate different User Interface menus
 
 *****************************************************************/
 {
-	if (pstUIMenu->enUIState == enUIState_Calibration)
+	tstCompass *pstCompass = &pstUIMenu->stCompass;
+	tstMotor *pstMotor = &pstUIMenu->stMotor;
+
+	if (pstUIMenu->stUI.enUIState == enUIState_Calibration)
 	{
 		lcd.clear();
 		lcd.setCursor(0, 0);
-		if (!pstUIMenu->bCompassReady)		lcd.println("Compass calibr..");	//for test only!! boolean change to pointer
-		fcompassCalibrate(pstCompass);
-		//for (unsigned int i = 0; i < LCDCOLS; i++)
-		//{
-		//	lcd.setCursor(i, 1);
-		//	lcd.write(0);
-		//	delay(300);
-		//}
+		if (!pstCompass->bCalibDone)		lcd.println("Compass calibr..");	//for test only!! boolean change to pointer
+		fcompassCalibrate(pstCompass, pstMotor);
 		lcd.setCursor(0, 0);
 		lcd.print("                  ");
 		lcd.setCursor(4, 0);
 		lcd.print("Complete!");
-		delay(1000);
-		pstUIMenu->bMenuSet = false;
-		pstUIMenu->bStartCalibrate = false;
+		delay(2000);
+		pstUIMenu->stUI.bMenuSet = false;
 	}
-	else if (pstUIMenu->enUIState == enUIState_undef && !pstUIMenu->bCompassReady)	//for test only!!
+	else if (pstUIMenu->stUI.enUIState == enUIState_undef && !pstCompass->bCalibDone)	//for test only!!
 	{
 		lcd.clear();
 		lcd.println("PRESS Key 1 to  ");
 		lcd.setCursor(0, 1);
 		lcd.println("calib. compass! ");
-		pstUIMenu->bMenuSet = true;
+		pstUIMenu->stUI.bMenuSet = true;
 	}
-	else if(pstUIMenu->enUIState == enUIState_undef && pstUIMenu->bCompassReady)//for test only!!
+	else if(pstUIMenu->stUI.enUIState == enUIState_undef && pstCompass->bCalibDone)//for test only!!
 	{
 		lcd.clear();
 		lcd.println("Key 1 - ManMode ");
 		lcd.setCursor(0, 1);
 		lcd.println("Key 2 - AutoMode");
-		pstUIMenu->usPrevState = enUIState_undef;
-		pstUIMenu->bMenuSet = true;
+		pstUIMenu->stUI.usPrevState = enUIState_undef;
+		pstUIMenu->stUI.bMenuSet = true;
 	}
-	else if (pstUIMenu->enUIState == enUIState_ManualMode)	//for test only!!
+	else if (pstUIMenu->stUI.enUIState == enUIState_ManualMode)	//for test only!!
 	{
 		lcd.clear();
 		lcd.setCursor(0, 0);
 		lcd.print("M:");
-		pstUIMenu->usPrevState = enUIState_ManualMode;
+		pstUIMenu->stUI.usPrevState = enUIState_ManualMode;
 	}
-	else if (pstUIMenu->enUIState == enUIState_AutomaticMode)//for test only!!
+	else if (pstUIMenu->stUI.enUIState == enUIState_AutomaticMode)//for test only!!
 	{
 		lcd.clear();
 		lcd.setCursor(0, 0);
 		lcd.print("A:");
-		pstUIMenu->usPrevState = enUIState_AutomaticMode;
+		pstUIMenu->stUI.usPrevState = enUIState_AutomaticMode;
 	}
-	else if ((pstUIMenu->enUIState == enUIState_Abort) && pstUIMenu->usPrevState > 0) 
+	else if ((pstUIMenu->stUI.enUIState == enUIState_Abort) && pstUIMenu->stUI.usPrevState > 0)
 	{
 		lcd.clear();
 		lcd.setCursor(0, 0);
 		lcd.print("Mode aborted!");
 		delay(2000);
-		pstUIMenu->bMenuSet = false;
+		pstUIMenu->stUI.bMenuSet = false;
 	}
 };
 

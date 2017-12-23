@@ -18,12 +18,12 @@ INCLUDES
 FUNCTIONS
 *****************************************************************/
 void finitUp(tstPrvMain *pstPrivate);
-void fcompassCalibrate(tstCompass *pstCompass);
+void fcompassCalibrate(tstCompass *pstCompass, tstMotor *pstMotor);
 void fgetAngle(tstCompass *pstCompass);
 void fMoveProcedure(tstMotor *pstMotor);
 void fsetTone(tstUI *pstBuzzer);
 unsigned short fgetKeyValue(tstUI *pstUI);
-void fUIProcedure(tstUI *pstUI);
+void fUIProcedure(tstPrvMain *pstUI);
 
 //###################################################################
 //testfunctions
@@ -35,9 +35,12 @@ void fRandomAngleTest(tstUI *pstRandomAngle);
 MEMORY ALLOCATION
 *****************************************************************/
 tstPrvMain stPrivate;	//Allocate private memory
+
+tstPrvMain *pstPrivate = &stPrivate;
+
 tstUI *pstUI = &stPrivate.stUI;
 tstUI *pstRandomAngle = &stPrivate.stUI; //for tests only!!
-tstUI *pstBuzzer = &stPrivate.stUI;
+tstBuzzer *pstBuzzer = &stPrivate.stBuzzer;
 tstMotor *pstMotor = &stPrivate.stMotor;
 tstCompass *pstCompass = &stPrivate.stCompass;
 
@@ -52,24 +55,16 @@ void setup()
 // the loop function runs over and over again until power down or reset
 void loop() 
 {
-	fUIProcedure(pstUI);
+	fUIProcedure(pstPrivate);
 	fgetAngle(pstCompass);
 
-	//if (pstUI->stMotor.bRun)	
+
 	fMoveProcedure(pstMotor);
-
-
-
-
-
+	
 	if (pstUI->bStartAuto || pstUI->bStartManual)
 	{
 		fRandomAngleTest(pstRandomAngle);
 	}
-
-
-
-
 
 
 

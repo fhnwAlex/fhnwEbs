@@ -49,8 +49,11 @@ typedef struct tstMotor
 	unsigned int 	uiSpeed;        //
 	unsigned int	uiAngelNorth;	//
 	unsigned int	*puiActAngle;
-	bool			*pbRun;
-	bool			*pbCalibRun;
+	//bool			*pbRun;
+	//bool			*pbCalibRun;
+	bool			bRun;
+	bool			bCalibRun;
+	bool			bCompassCalibrated;
 }tstMotor;
 
 /*----------------------------------------------------------------
@@ -86,6 +89,7 @@ typedef struct tstCompass
 	signed int		iMagnet_z;
 	bool			bRun;
 	bool			bCalibRun;
+	bool			bCalibDone;
 }tstCompass;
 
 /*----------------------------------------------------------------
@@ -111,8 +115,8 @@ typedef struct tstUI
 	unsigned int	*puiActAngle;
 	unsigned short	usPrevState;
 	bool			bInitUpDone;
-	bool			*pbCompassReady;
-	bool			bCompassReady;	//for test only!!
+	//bool			*pbCompassReady;
+	//bool			bCompassReady;	//for test only!!
 	bool			bMenuSet; //for test only!!
 	bool			bStartAuto;
 	bool			bStartManual;
