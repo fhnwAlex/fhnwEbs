@@ -49,8 +49,6 @@ typedef struct tstMotor
 	unsigned int 	uiSpeed;        //
 	unsigned int	uiAngelNorth;	//
 	unsigned int	*puiActAngle;
-	//bool			*pbRun;
-	//bool			*pbCalibRun;
 	bool			bRun;
 	bool			bCalibRun;
 	bool			bCompassCalibrated;
@@ -93,20 +91,10 @@ typedef struct tstCompass
 }tstCompass;
 
 /*----------------------------------------------------------------
-LCD-Display structure
-----------------------------------------------------------------*/
-typedef struct tstLcd
-{
-
-
-}tstLcd;
-
-/*----------------------------------------------------------------
 User interface structure
 ----------------------------------------------------------------*/
 typedef struct tstUI
 {
-	tstLcd			stLcd;
 	tenKey			enKeyState;
 	tenUIState		enUIState;
 	tstBuzzer		stBuzzer;
@@ -115,8 +103,6 @@ typedef struct tstUI
 	unsigned int	*puiActAngle;
 	unsigned short	usPrevState;
 	bool			bInitUpDone;
-	//bool			*pbCompassReady;
-	//bool			bCompassReady;	//for test only!!
 	bool			bMenuSet; //for test only!!
 	bool			bStartAuto;
 	bool			bStartManual;
@@ -137,7 +123,6 @@ typedef struct tstPrvMain
 	tstBuzzer		stBuzzer;
 	tstRgbLed		stRgbLed;
 	tstUI			stUI;
-	tstLcd			stLcd;
 	tstCompass		stCompass;
 }tstPrvMain;
 

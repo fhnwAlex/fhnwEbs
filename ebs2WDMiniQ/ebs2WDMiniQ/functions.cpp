@@ -35,11 +35,10 @@ FHNW - EMBEDDED SYSTEMS
 #define TONEPIN			16			// Pin of buzzer
 #define MIN_V			40			// Minimum speed of motors
 #define MAX_V			100			// Maximum speed of motors
-//#define SPEEDMAX		255			// Maximum speed of motors
 #define TONEFREQ		100			// Tone frequency buzzer
 #define ANGLE_MAX		355			// Maximum angle
 #define LCDADDR			0x20		// Adress for LCD display
-#define CALIB_TIME		10000		// Calibration time
+#define CALIB_TIME		10000		// Calibration time [ms]
 
 /**********************************************************************************************************************/
 /* Instances
@@ -56,8 +55,6 @@ Initialize after Power up
 
 *****************************************************************/
 {
-	tstUI *pstInitUI = &pstPrivate->stUI;
-
 	// Pointer access to interface
 	pstPrivate->stMotor.puiActAngle = &pstPrivate->stCompass.uiAngle;
 	pstPrivate->stUI.puiActAngle = &pstPrivate->stCompass.uiAngle;
@@ -75,7 +72,7 @@ Initialize after Power up
 	mag.initialize();
 	if (!mag.testConnection())	lcd.println("Connection to compass failed!");
 
-	// Initialize Motors
+	// Initialize Motorpins
 	pinMode(SpeedPinLeft, OUTPUT);
 	pinMode(SpeedPinRight, OUTPUT);
 	pinMode(DirectionRight, OUTPUT);
@@ -101,11 +98,6 @@ Move procedure of a motor with arguments of direction and speed
 *****************************************************************/
 {
 	// Static speed mode
-	
-	Serial.print("Motor comp.Cal: ");
-	Serial.println(pstMotor->bCompassCalibrated);
-
-
 	if (!pstMotor->bCompassCalibrated)
 	{
 		if (pstMotor->bCalibRun)
@@ -166,23 +158,23 @@ Compass calibration
 Run for every new location
 *****************************************************************/
 {
-	unsigned int minX = 0;
-	unsigned int maxX = 0;
-	unsigned int minY = 0;
-	unsigned int maxY = 0;
-	unsigned int start_time = millis();
+	unsigned int	uiMinX = 0;
+	unsigned int	uiMaxX = 0;
+	unsigned int	uiMinY = 0;
+	unsigned int	uiMaxY = 0;
+	unsigned long	ulStartTime = millis();
 
 	pstMotor->bCalibRun = true;
 	fMoveProcedure(pstMotor);
 
-	for (unsigned int i = 0; (millis() - start_time) < CALIB_TIME;)
+	for (unsigned int i = 0; (millis() - ulStartTime) < CALIB_TIME;)
 	{
 		mag.getHeading(&pstCompass->iMagnet_x, &pstCompass->iMagnet_y, &pstCompass->iMagnet_z);
-		if (pstCompass->iMagnet_x < minX) minX = pstCompass->iMagnet_x; // TODO CHECK IF OK
-		if (pstCompass->iMagnet_x > maxX) maxX = pstCompass->iMagnet_x; // TODO CHECK IF OK
-		if (pstCompass->iMagnet_y < minY) minY = pstCompass->iMagnet_y; // TODO CHECK IF OK
-		if (pstCompass->iMagnet_y > maxY) maxY = pstCompass->iMagnet_y; // TODO CHECK IF OK
-		if (i < 16 && (millis() - start_time) >= (CALIB_TIME / 16 * i))
+		if (pstCompass->iMagnet_x < uiMinX) uiMinX = pstCompass->iMagnet_x; // TODO CHECK IF OK
+		if (pstCompass->iMagnet_x > uiMaxX) uiMaxX = pstCompass->iMagnet_x; // TODO CHECK IF OK
+		if (pstCompass->iMagnet_y < uiMinY) uiMinY = pstCompass->iMagnet_y; // TODO CHECK IF OK
+		if (pstCompass->iMagnet_y > uiMaxY) uiMaxY = pstCompass->iMagnet_y; // TODO CHECK IF OK
+		if (i < 16 && (millis() - ulStartTime) >= (CALIB_TIME / 16 * i))
 		{
 			lcd.setCursor(i, 1);
 			lcd.write(0);
@@ -190,15 +182,8 @@ Run for every new location
 		}
 
 	}
-	//pstMotor->bCalibRun = false;
 	pstCompass->bCalibDone = true;
 	pstMotor->bCompassCalibrated = pstCompass->bCalibDone;
-
-
-	Serial.print("Compass comp.Cal: ");
-	Serial.print(pstCompass->bCalibDone);
-	Serial.print("\t");
-	Serial.print(pstMotor->bCompassCalibrated);
 	fMoveProcedure(pstMotor);
 };
 
@@ -311,9 +296,10 @@ Complete User Interface procedure
 	tstCompass *pstCompass = &pstUI->stCompass;
 	tstMotor *pstMotor = &pstUI->stMotor;
 	tstUI *pstUIProcedure = &pstUI->stUI;
-
 	unsigned short		usKeyState;
+
 	usKeyState = fgetKeyValue(pstUIProcedure);
+
 	switch (usKeyState)
 	{
 	case enKey_1:
@@ -336,26 +322,17 @@ Complete User Interface procedure
 		{
 			pstUIProcedure->bStartAuto = true;
 			pstMotor->bRun = true;
-
 			pstUIProcedure->enUIState = enUIState_AutomaticMode;
-			if (pstUIProcedure->bStartAuto)
-			{
-				pstUIProcedure->enUIState = enUIState_AutomaticMode;
-				fsetUIMenu(pstUI);
-				delay(100);
-			}
-			
+			fsetUIMenu(pstUI);
 		}
 		break;
 
 	case enKey_3:
-		pstUIProcedure->bStartAuto = false;
-		pstUIProcedure->bStartManual = false;
-		pstMotor->bRun = false;
-		//pstUI->bRun = false; // test only
-
 		if(pstCompass->bCalibDone)
 		{
+			pstUIProcedure->bStartAuto = false;
+			pstUIProcedure->bStartManual = false;
+			pstMotor->bRun = false;
 			pstUIProcedure->enUIState = enUIState_Abort;
 			fsetUIMenu(pstUI);
 		}
