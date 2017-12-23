@@ -46,12 +46,12 @@ Motor control structure
 ----------------------------------------------------------------*/
 typedef struct tstMotor
 {
-	unsigned int 	uiSpeed;        //
-	unsigned int	uiAngelNorth;	//
-	unsigned int	*puiActAngle;
 	bool			bRun;
 	bool			bCalibRun;
 	bool			bCompassCalibrated;
+	unsigned int 	uiSpeed;
+	unsigned int	uiAngelNorth;
+	unsigned int	*puiActAngle;
 }tstMotor;
 
 /*----------------------------------------------------------------
@@ -77,17 +77,18 @@ Compass structure
 ----------------------------------------------------------------*/
 typedef struct tstCompass
 {
-	unsigned int	uiAngle;
-	unsigned int	uiSamples;
-	unsigned int	uiMagOffset_x;
-	unsigned int	uiMagOffset_y;
+	bool			bRun;
+	bool			bCalibRun;
+	bool			bCalibDone;
 	float			flDeclinationAngle;
 	signed int		iMagnet_x;
 	signed int		iMagnet_y;
 	signed int		iMagnet_z;
-	bool			bRun;
-	bool			bCalibRun;
-	bool			bCalibDone;
+	signed int		iMagOffset_x;
+	signed int		iMagOffset_y;
+	unsigned int	uiAngle;
+	unsigned int	uiSamples;
+
 }tstCompass;
 
 /*----------------------------------------------------------------
@@ -95,13 +96,6 @@ User interface structure
 ----------------------------------------------------------------*/
 typedef struct tstUI
 {
-	tenKey			enKeyState;
-	tenUIState		enUIState;
-	tstBuzzer		stBuzzer;
-	tstMotor		stMotor;
-	tstCompass		stCompass;
-	unsigned int	*puiActAngle;
-	unsigned short	usPrevState;
 	bool			bInitUpDone;
 	bool			bMenuSet; //for test only!!
 	bool			bStartAuto;
@@ -109,8 +103,10 @@ typedef struct tstUI
 	bool			bStartCalibrate;
 	bool			bRun;
 	bool			bCalibRun;
-
-
+	tenKey			enKeyState;
+	tenUIState		enUIState;
+	unsigned int	*puiActAngle;
+	unsigned short	usPrevState;
 }tstUI;
 
 

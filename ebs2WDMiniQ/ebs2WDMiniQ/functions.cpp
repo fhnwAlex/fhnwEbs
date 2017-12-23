@@ -33,9 +33,10 @@ FHNW - EMBEDDED SYSTEMS
 #define DirectionLeft	12			// Pin for control left motor direction
 #define LCDCOLS			16			// Number of coloums on LCD
 #define TONEPIN			16			// Pin of buzzer
-#define MIN_V			40			// Minimum speed of motors
-#define MAX_V			100			// Maximum speed of motors
+#define MIN_V			30.0		// Minimum speed of motors
+#define MAX_V			60.0		// Maximum speed of motors
 #define TONEFREQ		100			// Tone frequency buzzer
+#define HALFCIRCLE		180.0		// Half circle in degrees
 #define ANGLE_MAX		355			// Maximum angle
 #define LCDADDR			0x20		// Adress for LCD display
 #define CALIB_TIME		10000		// Calibration time [ms]
@@ -102,7 +103,6 @@ Move procedure of a motor with arguments of direction and speed
 	{
 		if (pstMotor->bCalibRun)
 		{
-			// Rechtsdrehen, fixe Geschwindigkeit MIN_V
 			digitalWrite(DirectionRight, FORW);
 			analogWrite(SpeedPinRight, MIN_V);
 			delay(2);
@@ -117,8 +117,15 @@ Move procedure of a motor with arguments of direction and speed
 	}else if (pstMotor->bRun)
 	{
 		// Dynamic speed mode
-		signed int	siDiffAngle = *pstMotor->puiActAngle - 180;
-		unsigned int uiSpeed = (MAX_V - MIN_V) / 180 * abs(siDiffAngle) + MIN_V;
+		signed int	siDiffAngle = (*pstMotor->puiActAngle) - 180;
+		unsigned int uiSpeed = (unsigned int)(((MAX_V - MIN_V) * (float)abs(siDiffAngle) / HALFCIRCLE) + MIN_V);
+
+		///test only
+		//Serial.print("Diff Angle: ");
+		//Serial.print(siDiffAngle);
+		//Serial.print("\t");
+		//Serial.print("Speed: ");
+		//Serial.println(uiSpeed);
 
 		if (*pstMotor->puiActAngle <= ANGLE_MIN || *pstMotor->puiActAngle >= ANGLE_MAX)
 		{
@@ -158,10 +165,10 @@ Compass calibration
 Run for every new location
 *****************************************************************/
 {
-	unsigned int	uiMinX = 0;
-	unsigned int	uiMaxX = 0;
-	unsigned int	uiMinY = 0;
-	unsigned int	uiMaxY = 0;
+	signed int		iMinX = 0;
+	signed int		iMaxX = 0;
+	signed int		iMinY = 0;
+	signed int		iMaxY = 0;
 	unsigned long	ulStartTime = millis();
 
 	pstMotor->bCalibRun = true;
@@ -170,18 +177,33 @@ Run for every new location
 	for (unsigned int i = 0; (millis() - ulStartTime) < CALIB_TIME;)
 	{
 		mag.getHeading(&pstCompass->iMagnet_x, &pstCompass->iMagnet_y, &pstCompass->iMagnet_z);
-		if (pstCompass->iMagnet_x < uiMinX) uiMinX = pstCompass->iMagnet_x; // TODO CHECK IF OK
-		if (pstCompass->iMagnet_x > uiMaxX) uiMaxX = pstCompass->iMagnet_x; // TODO CHECK IF OK
-		if (pstCompass->iMagnet_y < uiMinY) uiMinY = pstCompass->iMagnet_y; // TODO CHECK IF OK
-		if (pstCompass->iMagnet_y > uiMaxY) uiMaxY = pstCompass->iMagnet_y; // TODO CHECK IF OK
-		if (i < 16 && (millis() - ulStartTime) >= (CALIB_TIME / 16 * i))
+		if (pstCompass->iMagnet_x < iMinX) iMinX = pstCompass->iMagnet_x; // TODO CHECK IF OK
+		if (pstCompass->iMagnet_x > iMaxX) iMaxX = pstCompass->iMagnet_x; // TODO CHECK IF OK
+		if (pstCompass->iMagnet_y < iMinY) iMinY = pstCompass->iMagnet_y; // TODO CHECK IF OK
+		if (pstCompass->iMagnet_y > iMaxY) iMaxY = pstCompass->iMagnet_y; // TODO CHECK IF OK
+		if (i < LCDCOLS && (millis() - ulStartTime) >= (CALIB_TIME / LCDCOLS * i))
 		{
 			lcd.setCursor(i, 1);
 			lcd.write(0);
 			i++;
 		}
-
+		///Test only
+		//Serial.print(pstCompass->iMagnet_x);
+		//Serial.print("\t");
+		//Serial.println(pstCompass->iMagnet_y);
 	}
+
+	// Calculate offsets
+	pstCompass->iMagOffset_x = (iMaxX + iMinX) / 2; // TODO CHECK IF OK
+	pstCompass->iMagOffset_y = (iMaxY + iMinY) / 2; // TODO CHECK IF OK
+
+	///test only
+	//Serial.print("offset X: ");
+	//Serial.print(pstCompass->iMagOffset_x);
+	//Serial.print("\t");
+	//Serial.print("offset Y: ");
+	//Serial.println(pstCompass->iMagOffset_y);
+
 	pstCompass->bCalibDone = true;
 	pstMotor->bCompassCalibrated = pstCompass->bCalibDone;
 	fMoveProcedure(pstMotor);
@@ -194,8 +216,6 @@ Get actual angle from compass
 *****************************************************************/
 {
 	float flTempAngle = 0.0;
-	pstCompass->uiMagOffset_x = 291; //tests only!!
-	pstCompass->uiMagOffset_y = 321; //tests only!!
 
 	// Set declination angle on your location and fix heading
 	// You can find your declination on: http://magnetic-declination.com/
@@ -209,11 +229,10 @@ Get actual angle from compass
 
 		//mx = mx - (-326); //Offset Brugg Projektraum
 		//my = my - 288; //Offset Brugg Proejktraum
-		pstCompass->iMagnet_x = pstCompass->iMagnet_x - pstCompass->uiMagOffset_x;//291; //Offset Birmi
-		pstCompass->iMagnet_y = pstCompass->iMagnet_y - pstCompass->uiMagOffset_y;//321; //Offset Birmi
+		pstCompass->iMagnet_x = pstCompass->iMagnet_x - pstCompass->iMagOffset_x;//291; //Offset Birmi
+		pstCompass->iMagnet_y = pstCompass->iMagnet_y - pstCompass->iMagOffset_y;//321; //Offset Birmi
 
 	   // To calculate heading in degrees. 0 degree indicates North
-		//pstCompass->uiAngle += (atan2(pstCompass->iMagnet_y, pstCompass->iMagnet_x) + pstCompass->flDeclinationAngle);
 		flTempAngle += (atan2((float)pstCompass->iMagnet_y, (float)pstCompass->iMagnet_x) + pstCompass->flDeclinationAngle);
 		
 	}
@@ -221,6 +240,12 @@ Get actual angle from compass
 	if (flTempAngle < 0) { flTempAngle += 2 * M_PI; }
 	flTempAngle = flTempAngle * 180 / M_PI;
 	pstCompass->uiAngle = (unsigned int)flTempAngle;
+
+	///test only
+	//Serial.print("Angle compass: ");
+	//Serial.print(pstCompass->uiAngle);
+	//Serial.println("\t");
+
 };
 
 
@@ -340,11 +365,7 @@ Complete User Interface procedure
 
 	case enKey_undef:
 		pstUIProcedure->enUIState = enUIState_undef;
-		
-		if (!pstUIProcedure->bMenuSet)
-		{
-			fsetUIMenu(pstUI);
-		}
+		if (!pstUIProcedure->bMenuSet)	fsetUIMenu(pstUI);
 		break;
 	default:
 		break;
@@ -364,7 +385,7 @@ Indicate different User Interface menus
 	{
 		lcd.clear();
 		lcd.setCursor(0, 0);
-		if (!pstCompass->bCalibDone)		lcd.println("Compass calibr..");	//for test only!! boolean change to pointer
+		if (!pstCompass->bCalibDone)		lcd.println("Compass calibr..");	
 		fcompassCalibrate(pstCompass, pstMotor);
 		lcd.setCursor(0, 0);
 		lcd.print("                  ");
@@ -373,7 +394,7 @@ Indicate different User Interface menus
 		delay(2000);
 		pstUIMenu->stUI.bMenuSet = false;
 	}
-	else if (pstUIMenu->stUI.enUIState == enUIState_undef && !pstCompass->bCalibDone)	//for test only!!
+	else if (pstUIMenu->stUI.enUIState == enUIState_undef && !pstCompass->bCalibDone)	
 	{
 		lcd.clear();
 		lcd.println("PRESS Key 1 to  ");
@@ -381,7 +402,7 @@ Indicate different User Interface menus
 		lcd.println("calib. compass! ");
 		pstUIMenu->stUI.bMenuSet = true;
 	}
-	else if(pstUIMenu->stUI.enUIState == enUIState_undef && pstCompass->bCalibDone)//for test only!!
+	else if(pstUIMenu->stUI.enUIState == enUIState_undef && pstCompass->bCalibDone)
 	{
 		lcd.clear();
 		lcd.println("Key 1 - ManMode ");
@@ -390,45 +411,34 @@ Indicate different User Interface menus
 		pstUIMenu->stUI.usPrevState = enUIState_undef;
 		pstUIMenu->stUI.bMenuSet = true;
 	}
-	else if (pstUIMenu->stUI.enUIState == enUIState_ManualMode)	//for test only!!
-	{
-		lcd.clear();
-		lcd.setCursor(0, 0);
-		lcd.print("M:");
-		pstUIMenu->stUI.usPrevState = enUIState_ManualMode;
-	}
-	else if (pstUIMenu->stUI.enUIState == enUIState_AutomaticMode)//for test only!!
-	{
-		lcd.clear();
-		lcd.setCursor(0, 0);
-		lcd.print("A:");
-		pstUIMenu->stUI.usPrevState = enUIState_AutomaticMode;
-	}
+	else if (pstUIMenu->stUI.enUIState == enUIState_ManualMode)		pstUIMenu->stUI.usPrevState = enUIState_ManualMode;
+	else if (pstUIMenu->stUI.enUIState == enUIState_AutomaticMode)	pstUIMenu->stUI.usPrevState = enUIState_AutomaticMode;
 	else if ((pstUIMenu->stUI.enUIState == enUIState_Abort) && pstUIMenu->stUI.usPrevState > 0)
 	{
 		lcd.clear();
 		lcd.setCursor(0, 0);
+		fMoveProcedure(pstMotor);
 		lcd.print("Mode aborted!");
 		delay(2000);
 		pstUIMenu->stUI.bMenuSet = false;
 	}
 };
 
-void fRandomAngleTest(tstUI *pstRandomAngle)
-//###################################################################
-//TESTFUNCTION ->> Simulate an angle (Compass)
-//###################################################################
+void fUpdateDisplay(tstUI *pstDisplay)
+/****************************************************************
+Update LCD Display
+
+*****************************************************************/
 {
 	lcd.clear();
-	//pstRandomAngle->stCompass.uiAngle;
 	lcd.setCursor(0, 0);
-	if (pstRandomAngle->bStartManual)	lcd.print("M:Act. Ang:   ");
-	if (pstRandomAngle->bStartAuto)		lcd.print("A:Act. Ang:   ");
+	if (pstDisplay->bStartManual)	lcd.print("M:Act. Ang:   ");
+	if (pstDisplay->bStartAuto)		lcd.print("A:Act. Ang:   ");
 	lcd.setCursor(12, 0);
-	lcd.print(*pstRandomAngle->puiActAngle);
+	lcd.print(*pstDisplay->puiActAngle);
 	lcd.setCursor(15, 0);
 	lcd.write(1);
 	lcd.setCursor(0, 1);
 	lcd.print("Key 3 - STOP");
-	delay(500);
+	delay(200);
 };
