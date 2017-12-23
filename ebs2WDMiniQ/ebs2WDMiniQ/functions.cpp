@@ -59,6 +59,7 @@ Initialize after Power up
 	// Pointer access to interface
 	pstPrivate->stMotor.puiActAngle = &pstPrivate->stCompass.uiAngle;
 	pstPrivate->stUI.puiActAngle = &pstPrivate->stCompass.uiAngle;
+	pstPrivate->stRgbLed.puiColor = &pstPrivate->stCompass.uiAngle;
 
 	// Initialize LCD-Display
 	uint8_t	uiLcdSquare[] = { 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F };
@@ -260,6 +261,22 @@ Generate and set a tone on the buzzer
 	//uiAngleDiff = *pstUI->puiActAngle - 180;
 	//tone(TONEPIN, abs(uiAngleDiff), pstUI->stBuzzer.ulToneDurration);
 
+
+};
+
+void fsetColor(tstPrvMain *pstLed)
+/****************************************************************
+Indicates color on RGB Led
+
+*****************************************************************/
+{
+	tstRgbLed *pstColor = &pstLed->stRgbLed;
+	
+	led.setBrightness(60);
+	if(*pstColor->puiColor <= 90)				led.setPixelColor(0, 255, 0, 0);
+	else if (90 < *pstColor->puiColor < 170)	led.setPixelColor(0, 255, 204, 0);
+	else if (*pstColor->puiColor > 170)			led.setPixelColor(0, 0, 200, 0);
+	led.show();
 
 };
 
