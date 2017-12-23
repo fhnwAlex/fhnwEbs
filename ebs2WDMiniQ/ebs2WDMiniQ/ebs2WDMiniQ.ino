@@ -22,6 +22,7 @@ void fcompassCalibrate(tstCompass *pstCompass, tstMotor *pstMotor);
 void fgetAngle(tstCompass *pstCompass);
 void fMoveProcedure(tstMotor *pstMotor);
 void fsetTone(tstUI *pstBuzzer);
+void fsetColor(tstPrvMain *pstLed);
 unsigned short fgetKeyValue(tstUI *pstUI);
 void fUIProcedure(tstPrvMain *pstUI);
 void fUpdateDisplay(tstUI *pstDisplay);
@@ -48,6 +49,7 @@ void loop()
 	/*CYCLIC FUNCTIONS*/
 	fUIProcedure(&stPrivate);
 	fgetAngle(&stPrivate.stCompass);
+	fsetColor(&stPrivate);
 	fMoveProcedure(&stPrivate.stMotor);
 	if (pstUI->bStartAuto || pstUI->bStartManual)	fUpdateDisplay(&stPrivate.stUI);
 }
