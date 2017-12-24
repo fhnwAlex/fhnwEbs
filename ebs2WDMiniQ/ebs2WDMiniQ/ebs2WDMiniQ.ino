@@ -18,7 +18,7 @@ INCLUDES
 FUNCTIONS
 *****************************************************************/
 void finitUp(tstPrvMain *pstPrivate);
-void fcompassCalibrate(tstCompass *pstCompass, tstMotor *pstMotor);
+void fcompassCalibrate(tstPrvMain *pstCalibrate);
 void fgetAngle(tstCompass *pstCompass);
 void fMoveProcedure(tstMotor *pstMotor);
 void fsetTone(tstUI *pstBuzzer);
@@ -39,7 +39,6 @@ tstUI *pstUI = &stPrivate.stUI;
 void setup() 
 {
 	memset(&stPrivate, 0, sizeof(stPrivate));		// Set whole privat memory 0
-	//finitUp(pstPrivate);
 	finitUp(&stPrivate);
 }
 
@@ -49,7 +48,12 @@ void loop()
 	/*CYCLIC FUNCTIONS*/
 	fUIProcedure(&stPrivate);
 	fgetAngle(&stPrivate.stCompass);
-	fsetColor(&stPrivate);
 	fMoveProcedure(&stPrivate.stMotor);
-	if (pstUI->bStartAuto || pstUI->bStartManual)	fUpdateDisplay(&stPrivate.stUI);
+
+	if (pstUI->bStartAuto || pstUI->bStartManual) 
+	{
+		fUpdateDisplay(&stPrivate.stUI);
+		fsetColor(&stPrivate);
+	}
+
 }

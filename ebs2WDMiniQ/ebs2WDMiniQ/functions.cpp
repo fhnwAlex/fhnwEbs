@@ -159,13 +159,51 @@ Move procedure of a motor with arguments of direction and speed
 	}
 };
 
+void fsetColor(tstPrvMain *pstLed)
+/****************************************************************
+Indicates color on RGB Led
+
+*****************************************************************/
+{
+	tstRgbLed *pstColor = &pstLed->stRgbLed;
+	tstUI *pstUI = &pstLed->stUI;
+	tstMotor *pstMotor = &pstLed->stMotor;
+
+	led.setBrightness(60);
+	if (pstUI->bStartAuto || pstUI->bStartManual)
+	{
+		if (*pstColor->puiColor <= 90)				led.setPixelColor(0, 255, 0, 0);
+		else if (90 < *pstColor->puiColor < 170)	led.setPixelColor(0, 255, 204, 0);
+		else if (*pstColor->puiColor > 170)			led.setPixelColor(0, 0, 200, 0);
+	}
+	else if (pstMotor->bCalibRun)
+	{
+		led.setPixelColor(0, 255, 0, 255);
+		led.show();
+		delay(200);
+		led.setPixelColor(0, 0, 0, 0);
+		led.show();
+		delay(200);
+	}
+	else
+	{
+		led.setPixelColor(0, 0, 0, 0);
+		led.show();
+	}
+
+
+};
+
 /*****************************************************************/
-void fcompassCalibrate(tstCompass *pstCompass, tstMotor *pstMotor)
+void fcompassCalibrate(tstPrvMain *pstCalibrate) ///tstCompass *pstCompass, tstMotor *pstMotor
 /****************************************************************
 Compass calibration
 Run for every new location
 *****************************************************************/
 {
+	tstCompass *pstCompass = &pstCalibrate->stCompass;
+	tstMotor *pstMotor = &pstCalibrate->stMotor;
+
 	signed int		iMinX = 0;
 	signed int		iMaxX = 0;
 	signed int		iMinY = 0;
@@ -188,6 +226,7 @@ Run for every new location
 			lcd.write(0);
 			i++;
 		}
+		fsetColor(pstCalibrate);
 		///Test only
 		//Serial.print(pstCompass->iMagnet_x);
 		//Serial.print("\t");
@@ -203,8 +242,8 @@ Run for every new location
 	//Serial.print(pstCompass->iMagOffset_x);
 	//Serial.print("\t");
 	//Serial.print("offset Y: ");
-	//Serial.println(pstCompass->iMagOffset_y);
-
+	Serial.println(pstCompass->iMagOffset_y);
+	pstMotor->bCalibRun = false;
 	pstCompass->bCalibDone = true;
 	pstMotor->bCompassCalibrated = pstCompass->bCalibDone;
 	fMoveProcedure(pstMotor);
@@ -264,21 +303,7 @@ Generate and set a tone on the buzzer
 
 };
 
-void fsetColor(tstPrvMain *pstLed)
-/****************************************************************
-Indicates color on RGB Led
 
-*****************************************************************/
-{
-	tstRgbLed *pstColor = &pstLed->stRgbLed;
-	
-	led.setBrightness(60);
-	if(*pstColor->puiColor <= 90)				led.setPixelColor(0, 255, 0, 0);
-	else if (90 < *pstColor->puiColor < 170)	led.setPixelColor(0, 255, 204, 0);
-	else if (*pstColor->puiColor > 170)			led.setPixelColor(0, 0, 200, 0);
-	led.show();
-
-};
 
 /*****************************************************************/
 unsigned short fgetKeyValue(tstUI *pstUIKey)
@@ -402,8 +427,9 @@ Indicate different User Interface menus
 	{
 		lcd.clear();
 		lcd.setCursor(0, 0);
-		if (!pstCompass->bCalibDone)		lcd.println("Compass calibr..");	
-		fcompassCalibrate(pstCompass, pstMotor);
+		if (!pstCompass->bCalibDone)		lcd.println("Compass calibr..");
+		///fcompassCalibrate(pstCompass, pstMotor);
+		fcompassCalibrate(pstUIMenu);
 		lcd.setCursor(0, 0);
 		lcd.print("                  ");
 		lcd.setCursor(4, 0);
