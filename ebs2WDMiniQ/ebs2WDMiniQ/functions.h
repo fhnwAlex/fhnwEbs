@@ -99,7 +99,6 @@ typedef struct tstUI
 	bool			bMenuSet; //for test only!!
 	bool			bStartAuto;
 	bool			bStartManual;
-	bool			bStartCalibrate;
 	bool			bRun;
 	bool			bCalibRun;
 	tenKey			enKeyState;

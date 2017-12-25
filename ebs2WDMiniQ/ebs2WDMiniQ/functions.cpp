@@ -174,7 +174,7 @@ Indicates color on RGB Led
 	{
 		if (*pstColor->puiColor <= 90)				led.setPixelColor(0, 255, 0, 0);
 		else if (90 < *pstColor->puiColor < 170)	led.setPixelColor(0, 255, 204, 0);
-		else if (*pstColor->puiColor > 170)			led.setPixelColor(0, 0, 200, 0);
+		else if (*pstColor->puiColor >= 170)		led.setPixelColor(0, 0, 200, 0);
 	}
 	else if (pstMotor->bCalibRun)
 	{
@@ -185,13 +185,8 @@ Indicates color on RGB Led
 		led.show();
 		delay(200);
 	}
-	else
-	{
-		led.setPixelColor(0, 0, 0, 0);
-		led.show();
-	}
-
-
+	else led.setPixelColor(0, 0, 0, 0);
+	led.show();
 };
 
 /*****************************************************************/
@@ -242,7 +237,7 @@ Run for every new location
 	//Serial.print(pstCompass->iMagOffset_x);
 	//Serial.print("\t");
 	//Serial.print("offset Y: ");
-	Serial.println(pstCompass->iMagOffset_y);
+	//Serial.println(pstCompass->iMagOffset_y);
 	pstMotor->bCalibRun = false;
 	pstCompass->bCalibDone = true;
 	pstMotor->bCompassCalibrated = pstCompass->bCalibDone;
@@ -428,7 +423,6 @@ Indicate different User Interface menus
 		lcd.clear();
 		lcd.setCursor(0, 0);
 		if (!pstCompass->bCalibDone)		lcd.println("Compass calibr..");
-		///fcompassCalibrate(pstCompass, pstMotor);
 		fcompassCalibrate(pstUIMenu);
 		lcd.setCursor(0, 0);
 		lcd.print("                  ");
