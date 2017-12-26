@@ -169,12 +169,16 @@ Indicates color on RGB Led
 	tstUI *pstUI = &pstLed->stUI;
 	tstMotor *pstMotor = &pstLed->stMotor;
 
+	signed int iColor = *pstColor->puiColor;
+	iColor = abs(iColor - 180);
 	led.setBrightness(60);
+
 	if (pstUI->bStartAuto || pstUI->bStartManual)
 	{
-		if (*pstColor->puiColor <= 90)				led.setPixelColor(0, 255, 0, 0);
-		else if (90 < *pstColor->puiColor < 170)	led.setPixelColor(0, 255, 204, 0);
-		else if (*pstColor->puiColor >= 170)		led.setPixelColor(0, 0, 200, 0);
+		if (iColor <= 45)								led.setPixelColor(0, 200, 0, 0);
+		else if ((iColor > 45) && (iColor < 170))		led.setPixelColor(0, 255, 204, 0);
+		else if (iColor >= 170)							led.setPixelColor(0, 0, 200, 0);
+		led.show();
 	}
 	else if (pstMotor->bCalibRun)
 	{
