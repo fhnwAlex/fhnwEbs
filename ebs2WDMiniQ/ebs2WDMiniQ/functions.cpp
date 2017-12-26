@@ -25,7 +25,7 @@ FHNW - EMBEDDED SYSTEMS
 #define BACK			1			// Motor control backward
 #define LCDROWS			2			// Number of rows on LCD
 #define SpeedPinLeft	5			// Pin for run the left motor 
-#define ANGLE_MIN		5			// Minimum angle
+#define ANGLE_MIN		10.0		// Minimum angle
 #define SpeedPinRight	6			// Pin for run the right motor 
 #define DirectionRight	7			// Pin for control right motor direction
 #define LEDPIN			10			// Pin of RGB-LED
@@ -118,22 +118,17 @@ Move procedure of a motor with arguments of direction and speed
 	}else if (pstMotor->bRun)
 	{
 		// Dynamic speed mode
-		signed int	siDiffAngle = (*pstMotor->puiActAngle) - 180;
-		unsigned int uiSpeed = (unsigned int)(((MAX_V - MIN_V) * (float)abs(siDiffAngle) / HALFCIRCLE) + MIN_V);
+		signed int	iDiffAngle = *pstMotor->puiActAngle;
+		iDiffAngle = abs(iDiffAngle - 180);
+		Serial.println(iDiffAngle);
+		unsigned int uiSpeed = (unsigned int)(((MAX_V - MIN_V) * (float)iDiffAngle / HALFCIRCLE) + MIN_V);
 
-		///test only
-		//Serial.print("Diff Angle: ");
-		//Serial.print(siDiffAngle);
-		//Serial.print("\t");
-		//Serial.print("Speed: ");
-		//Serial.println(uiSpeed);
-
-		if (*pstMotor->puiActAngle <= ANGLE_MIN || *pstMotor->puiActAngle >= ANGLE_MAX)
+		if (iDiffAngle >= (HALFCIRCLE - ANGLE_MIN))
 		{
 			analogWrite(SpeedPinRight, LOW);
 			analogWrite(SpeedPinLeft, LOW);
 		}
-		if (*pstMotor->puiActAngle < ANGLE_MAX && *pstMotor->puiActAngle >= 180)
+		if (*pstMotor->puiActAngle < ANGLE_MAX )
 		{
 			// Rechtsdrehen
 			digitalWrite(DirectionRight, FORW);
