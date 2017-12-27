@@ -23,23 +23,23 @@ FHNW - EMBEDDED SYSTEMS
 **********************************************************************************************************************/
 #define FORW			0			// Motor control forward
 #define BACK			1			// Motor control backward
+#define LCDADDR			0x20		// Adress for LCD display
 #define LCDROWS			2			// Number of rows on LCD
+#define LCDCOLS			16			// Number of coloums on LCD
 #define SpeedPinLeft	5			// Pin for run the left motor 
-#define ANGLE_MIN		10.0		// Minimum angle
 #define SpeedPinRight	6			// Pin for run the right motor 
 #define DirectionRight	7			// Pin for control right motor direction
-#define LEDPIN			10			// Pin of RGB-LED
-#define SAMPLES			10			// For filter magnitude
 #define DirectionLeft	12			// Pin for control left motor direction
-#define LCDCOLS			16			// Number of coloums on LCD
-#define TONEPIN			16			// Pin of buzzer
 #define MIN_V			30.0		// Minimum speed of motors
 #define MAX_V			60.0		// Maximum speed of motors
-#define TONEFREQ		100			// Tone frequency buzzer
-#define HALFCIRCLE		180.0		// Half circle in degrees
+#define ANGLE_MIN		10.0		// Minimum angle
 #define ANGLE_MAX		355			// Maximum angle
-#define LCDADDR			0x20		// Adress for LCD display
+#define HALFCIRCLE		180.0		// Half circle in degrees
+#define LEDPIN			10			// Pin of RGB-LED
+#define SAMPLES			10			// For filter magnitude
 #define CALIB_TIME		10000		// Calibration time [ms]
+#define TONEPIN			16			// Pin of buzzer
+#define TONEFREQ		100			// Tone frequency buzzer
 
 /**********************************************************************************************************************/
 /* Instances
@@ -47,9 +47,13 @@ FHNW - EMBEDDED SYSTEMS
 HMC5883L mag;
 LiquidCrystal_I2C lcd(LCDADDR, LCDCOLS, LCDROWS);
 Adafruit_NeoPixel led = Adafruit_NeoPixel(1, LEDPIN, NEO_GRB + NEO_KHZ800);
-
+/**********************************************************************************************************************/
+/* Functions
+**********************************************************************************************************************/
 void fsetUIMenu(tstPrvMain *pstUIMenu);
-/*****************************************************************/
+/**********************************************************************************************************************/
+
+
 void finitUp(tstPrvMain *pstPrivate)
 /****************************************************************
 Initialize after Power up
@@ -92,7 +96,6 @@ Initialize after Power up
 	pstPrivate->stUI.bInitUpDone = true;
 };
 
-/*****************************************************************/
 void fMoveProcedure(tstMotor *pstMotor)
 /****************************************************************
 Move procedure of a motor with arguments of direction and speed
@@ -120,7 +123,6 @@ Move procedure of a motor with arguments of direction and speed
 		// Dynamic speed mode
 		signed int	iDiffAngle = *pstMotor->puiActAngle;
 		iDiffAngle = abs(iDiffAngle - 180);
-		Serial.println(iDiffAngle);
 		unsigned int uiSpeed = (unsigned int)(((MAX_V - MIN_V) * (float)iDiffAngle / HALFCIRCLE) + MIN_V);
 
 		if (iDiffAngle >= (HALFCIRCLE - ANGLE_MIN))
@@ -188,8 +190,7 @@ Indicates color on RGB Led
 	led.show();
 };
 
-/*****************************************************************/
-void fcompassCalibrate(tstPrvMain *pstCalibrate) ///tstCompass *pstCompass, tstMotor *pstMotor
+void fcompassCalibrate(tstPrvMain *pstCalibrate) 
 /****************************************************************
 Compass calibration
 Run for every new location
@@ -282,7 +283,6 @@ Get actual angle from compass
 
 };
 
-
 void fsetTone(tstUI *pstBuzzer)
 /****************************************************************
 Generate and set a tone on the buzzer
@@ -297,9 +297,6 @@ Generate and set a tone on the buzzer
 
 };
 
-
-
-/*****************************************************************/
 unsigned short fgetKeyValue(tstUI *pstUIKey)
 /****************************************************************
 Determined which Key was pressed

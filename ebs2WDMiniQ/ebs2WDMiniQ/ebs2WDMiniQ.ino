@@ -49,7 +49,7 @@ void loop()
 	fUIProcedure(&stPrivate);
 	fgetAngle(&stPrivate.stCompass);
 	fMoveProcedure(&stPrivate.stMotor);
-	fsetColor(&stPrivate);
+	//fsetColor(&stPrivate); -> Problem maker!!
 
 	if (pstUI->bStartAuto || pstUI->bStartManual) 		fUpdateDisplay(&stPrivate.stUI);
 	
