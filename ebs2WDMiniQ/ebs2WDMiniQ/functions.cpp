@@ -113,7 +113,7 @@ Move procedure of a motor with arguments of direction and speed
 			digitalWrite(DirectionLeft, BACK);
 			analogWrite(SpeedPinLeft, MIN_V);
 		}
-		if (pstMotor->bCalibRunL)
+		else if (pstMotor->bCalibRunL)
 		{
 			digitalWrite(DirectionRight, BACK);
 			analogWrite(SpeedPinRight, MIN_V);
@@ -146,22 +146,22 @@ Move procedure of a motor with arguments of direction and speed
 			delay(2);
 			analogWrite(SpeedPinLeft, LOW);
 		}
-		if ((*pstMotor->puiActAngle < ANGLE_MAX) && (*pstMotor->puiActAngle > HALFCIRCLE)) // *pstMotor->puiActAngle < ANGLE_MAX 
-		{
-			// Rechtsdrehen
-			digitalWrite(DirectionRight, FORW);
-			analogWrite(SpeedPinRight, uiSpeed);
-			delay(2);
-			digitalWrite(DirectionLeft, BACK);
-			analogWrite(SpeedPinLeft, uiSpeed);
-		}
-		else
+		else if ((*pstMotor->puiActAngle < ANGLE_MAX) && (*pstMotor->puiActAngle > HALFCIRCLE)) // *pstMotor->puiActAngle < ANGLE_MAX 
 		{
 			// Linksdrehen
 			digitalWrite(DirectionRight, BACK);
 			analogWrite(SpeedPinRight, uiSpeed);
 			delay(2);
 			digitalWrite(DirectionLeft, FORW);
+			analogWrite(SpeedPinLeft, uiSpeed);
+		}
+		else
+		{
+			// Rechtsdrehen
+			digitalWrite(DirectionRight, FORW);
+			analogWrite(SpeedPinRight, uiSpeed);
+			delay(2);
+			digitalWrite(DirectionLeft, BACK);
 			analogWrite(SpeedPinLeft, uiSpeed);
 		}
 	}
@@ -194,7 +194,7 @@ Indicates color on RGB Led
 		else if (iColor >= 170)							led.setPixelColor(0, 0, 200, 0);
 		led.show();
 	}
-	else if (pstMotor->bCalibRun)
+	else if (pstMotor->bCalibRun || pstMotor->bCalibRunL)
 	{
 		led.setPixelColor(0, 255, 0, 255);
 		led.show();
@@ -221,16 +221,18 @@ Run for every new location
 	signed int		iMinY = 0;
 	signed int		iMaxY = 0;
 	unsigned long	ulStartTime = millis();
-
+	bool bStarted = false;
+	
 	pstMotor->bCalibRun = true;
 	fMoveProcedure(pstMotor);
 
 	for (unsigned int i = 0; (millis() - ulStartTime) < CALIB_TIME;)
 	{
-		if ((millis() - ulStartTime) > (CALIB_TIME / 2))
+		if ((millis() - ulStartTime) > (CALIB_TIME / 2) && !bStarted)
 		{
 			pstMotor->bCalibRunL = true;
 			pstMotor->bCalibRun = false;
+			bStarted = true;
 			fMoveProcedure(pstMotor);
 		}
 		mag.getHeading(&pstCompass->iMagnet_x, &pstCompass->iMagnet_y, &pstCompass->iMagnet_z);
