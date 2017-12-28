@@ -9,7 +9,7 @@ FHNW - EMBEDDED SYSTEMS
 /* Includes
 **********************************************************************************************************************/
 #include <math.h>
-#include "functions.h"
+#include "functions_test.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "Wire.h"
@@ -123,12 +123,13 @@ Move procedure of a motor with arguments of direction and speed
 			//digitalWrite(DirectionLeft, FORW);
 			//analogWrite(SpeedPinLeft, MIN_V);
 		}
-		else 
+		else
 		{
 			analogWrite(SpeedPinRight, LOW);
 			analogWrite(SpeedPinLeft, LOW);
 		}
-	}else if (pstMotor->bRun)
+	}
+	else if (pstMotor->bRun)
 	{
 		// Dynamic speed mode
 		signed int	iDiffAngle = *pstMotor->puiActAngle;
@@ -140,7 +141,7 @@ Move procedure of a motor with arguments of direction and speed
 			analogWrite(SpeedPinRight, LOW);
 			analogWrite(SpeedPinLeft, LOW);
 		}
-		else if ((*pstMotor->puiActAngle < ANGLE_MAX) && (*pstMotor->puiActAngle > HALFCIRCLE)) 
+		else if ((*pstMotor->puiActAngle < ANGLE_MAX) && (*pstMotor->puiActAngle > HALFCIRCLE))
 		{
 			// Left turn
 			digitalWrite(DirectionRight, BACK);
@@ -161,7 +162,7 @@ Move procedure of a motor with arguments of direction and speed
 			analogWrite(SpeedPinLeft, uiSpeed);
 		}
 	}
-	else 
+	else
 	{
 		analogWrite(SpeedPinRight, LOW);
 		analogWrite(SpeedPinLeft, LOW);
@@ -207,7 +208,7 @@ Indicates color on RGB Led
 	led.show();
 };
 
-void fcompassCalibrate(tstPrvMain *pstCalibrate) 
+void fcompassCalibrate(tstPrvMain *pstCalibrate)
 /****************************************************************
 Compass calibration
 Run for every new location
@@ -223,7 +224,7 @@ Run for every new location
 	signed int		iMaxY = 0;
 	unsigned long	ulStartTime = millis();
 
-	
+
 	pstMotor->bCalibRun = true;
 	fMoveProcedure(pstMotor);
 
@@ -237,10 +238,10 @@ Run for every new location
 			fMoveProcedure(pstMotor);
 		}
 		mag.getHeading(&pstCompass->iMagnet_x, &pstCompass->iMagnet_y, &pstCompass->iMagnet_z);
-		if (pstCompass->iMagnet_x < iMinX) iMinX = pstCompass->iMagnet_x; 
-		if (pstCompass->iMagnet_x > iMaxX) iMaxX = pstCompass->iMagnet_x; 
-		if (pstCompass->iMagnet_y < iMinY) iMinY = pstCompass->iMagnet_y; 
-		if (pstCompass->iMagnet_y > iMaxY) iMaxY = pstCompass->iMagnet_y; 
+		if (pstCompass->iMagnet_x < iMinX) iMinX = pstCompass->iMagnet_x;
+		if (pstCompass->iMagnet_x > iMaxX) iMaxX = pstCompass->iMagnet_x;
+		if (pstCompass->iMagnet_y < iMinY) iMinY = pstCompass->iMagnet_y;
+		if (pstCompass->iMagnet_y > iMaxY) iMaxY = pstCompass->iMagnet_y;
 		if (i < LCDCOLS && (millis() - ulStartTime) >= (CALIB_TIME / LCDCOLS * i))
 		{
 			lcd.setCursor(i, 1);
@@ -251,8 +252,13 @@ Run for every new location
 	}
 
 	// Calculate offsets
-	pstCompass->iMagOffset_x = (iMaxX + iMinX) / 2; 
-	pstCompass->iMagOffset_y = (iMaxY + iMinY) / 2; 
+	pstCompass->iMagOffset_x = (iMaxX + iMinX) / 2;
+	pstCompass->iMagOffset_y = (iMaxY + iMinY) / 2;
+	//for testing only
+	Serial.print("Offset x: ");
+	Serial.println(pstCompass->iMagOffset_x);
+	Serial.print("Offset y: ");
+	Serial.println(pstCompass->iMagOffset_y);
 
 	pstMotor->bCalibRun = false;
 	pstMotor->bCalibRunL = false;
@@ -281,14 +287,14 @@ Get actual angle from compass
 		pstCompass->iMagnet_x = pstCompass->iMagnet_x - pstCompass->iMagOffset_x;
 		pstCompass->iMagnet_y = pstCompass->iMagnet_y - pstCompass->iMagOffset_y;
 
-	   // To calculate heading in degrees. 0 degree indicates North
+		// To calculate heading in degrees. 0 degree indicates North
 		flTempAngle += (atan2((float)pstCompass->iMagnet_y, (float)pstCompass->iMagnet_x) + pstCompass->flDeclinationAngle);
-		
+
 	}
 	// Filtering angles
 	flTempAngle = flTempAngle / SAMPLES;
 
-	if (flTempAngle < 0)  flTempAngle += 2 * M_PI; 
+	if (flTempAngle < 0)  flTempAngle += 2 * M_PI;
 
 	flTempAngle = flTempAngle * 180 / M_PI;
 
@@ -303,9 +309,9 @@ Generate and set a tone on the buzzer
 {
 	signed int iAngleDiff = *pstBuzzer->stMotor.puiActAngle;
 	iAngleDiff = abs(iAngleDiff - 180);
-	
+
 	if (iAngleDiff < 30)								tone(TONEPIN, TONEFREQ);
-	else if(iAngleDiff >= 30 && iAngleDiff < 60)		tone(TONEPIN, 2 * TONEFREQ);
+	else if (iAngleDiff >= 30 && iAngleDiff < 60)		tone(TONEPIN, 2 * TONEFREQ);
 	else if (iAngleDiff >= 60 && iAngleDiff < 90)		tone(TONEPIN, 4 * TONEFREQ);
 	else if (iAngleDiff >= 90 && iAngleDiff < 120)		tone(TONEPIN, 8 * TONEFREQ);
 	else if (iAngleDiff >= 120 && iAngleDiff < 150)		tone(TONEPIN, 10 * TONEFREQ);
@@ -402,7 +408,7 @@ Complete User Interface procedure
 		break;
 
 	case enKey_3:
-		if(pstCompass->bCalibDone)
+		if (pstCompass->bCalibDone)
 		{
 			pstUIProcedure->bStartAuto = false;
 			pstUIProcedure->bStartManual = false;
@@ -443,7 +449,7 @@ Indicate different User Interface menus
 		delay(2000);
 		pstUIMenu->stUI.bMenuSet = false;
 	}
-	else if (pstUIMenu->stUI.enUIState == enUIState_undef && !pstCompass->bCalibDone)	
+	else if (pstUIMenu->stUI.enUIState == enUIState_undef && !pstCompass->bCalibDone)
 	{
 		lcd.clear();
 		lcd.println("PRESS Key 1 to  ");
@@ -451,7 +457,7 @@ Indicate different User Interface menus
 		lcd.println("calib. compass! ");
 		pstUIMenu->stUI.bMenuSet = true;
 	}
-	else if(pstUIMenu->stUI.enUIState == enUIState_undef && pstCompass->bCalibDone)
+	else if (pstUIMenu->stUI.enUIState == enUIState_undef && pstCompass->bCalibDone)
 	{
 		lcd.clear();
 		lcd.println("Key 1 - ManMode ");
