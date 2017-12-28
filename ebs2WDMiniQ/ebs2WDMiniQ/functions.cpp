@@ -31,13 +31,13 @@ FHNW - EMBEDDED SYSTEMS
 #define DirectionRight	7			// Pin for control right motor direction
 #define DirectionLeft	12			// Pin for control left motor direction
 #define MIN_V			30.0		// Minimum speed of motors
-#define MAX_V			30.0		// Maximum speed of motors
-#define ANGLE_MIN		15.0		// Minimum angle
+#define MAX_V			40.0		// Maximum speed of motors
+#define ANGLE_MIN		10.0		// Minimum angle
 #define ANGLE_MAX		350			// Maximum angle
 #define HALFCIRCLE		180.0		// Half circle in degrees
 #define LEDPIN			10			// Pin of RGB-LED
 #define SAMPLES			10			// For filter magnitude
-#define CALIB_TIME		20000		// Calibration time [ms]
+#define CALIB_TIME		30000		// Calibration time [ms]
 #define TONEPIN			16			// Pin of buzzer
 #define TONEFREQ		100			// Tone frequency buzzer
 
