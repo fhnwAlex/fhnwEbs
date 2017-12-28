@@ -109,6 +109,7 @@ typedef struct tstUI
 	unsigned short	usPrevState;
 	unsigned long	ulCycle;
 	unsigned long	ulTime;
+	unsigned long	ulOldTime;
 }tstUI;
 
 

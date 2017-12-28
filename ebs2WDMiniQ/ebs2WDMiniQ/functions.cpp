@@ -109,7 +109,8 @@ Move procedure of a motor with arguments of direction and speed
 		{
 			digitalWrite(DirectionRight, FORW);
 			analogWrite(SpeedPinRight, MIN_V);
-			delay(2);
+			//delay(2);
+			delayMicroseconds(500);
 			digitalWrite(DirectionLeft, BACK);
 			analogWrite(SpeedPinLeft, MIN_V);
 		}
@@ -117,7 +118,8 @@ Move procedure of a motor with arguments of direction and speed
 		{
 			digitalWrite(DirectionRight, BACK);
 			analogWrite(SpeedPinRight, MIN_V);
-			delay(2);
+			//delay(2);
+			delayMicroseconds(500);
 			digitalWrite(DirectionLeft, FORW);
 			analogWrite(SpeedPinLeft, MIN_V);
 		}
@@ -143,7 +145,8 @@ Move procedure of a motor with arguments of direction and speed
 			// Left turn
 			digitalWrite(DirectionRight, BACK);
 			analogWrite(SpeedPinRight, uiSpeed);
-			delay(2);
+			//delay(2);
+			delayMicroseconds(500);
 			digitalWrite(DirectionLeft, FORW);
 			analogWrite(SpeedPinLeft, uiSpeed);
 		}
@@ -152,7 +155,8 @@ Move procedure of a motor with arguments of direction and speed
 			// Right turn
 			digitalWrite(DirectionRight, FORW);
 			analogWrite(SpeedPinRight, uiSpeed);
-			delay(2);
+			//delay(2);
+			delayMicroseconds(500);
 			digitalWrite(DirectionLeft, BACK);
 			analogWrite(SpeedPinLeft, uiSpeed);
 		}
@@ -495,29 +499,21 @@ Update LCD Display
 
 *****************************************************************/
 {
-
-
-	if (pstDisplay->stUI.ulCycle == 0)	pstDisplay->stUI.ulTime = micros();
-
+	// Only for timing measurements
+	//if (pstDisplay->stUI.ulCycle == 0)	pstDisplay->stUI.ulOldTime = micros();
 
 	if (pstDisplay->stUI.ulCycle % 10 == 0)
 	{
-		pstDisplay->stUI.ulTime = micros() - pstDisplay->stUI.ulTime;
-		
-
-		Serial.print("Micros(): ");
-		Serial.print(micros());
-		Serial.print("\t");
-		Serial.print("Time: ");
-		Serial.print(pstDisplay->stUI.ulTime);
-		Serial.println("\t");
-
-
-
+		pstDisplay->stUI.ulTime = micros();
 		lcd.setCursor(12, 0);
 		lcd.print("   ");
 		lcd.setCursor(12, 0);
 		lcd.print(*pstDisplay->stMotor.puiActAngle);
+
+		// Only for timing measurements
+		//Serial.print("Time diff: ");
+		//Serial.println(pstDisplay->stUI.ulTime - pstDisplay->stUI.ulOldTime);
+		//pstDisplay->stUI.ulOldTime = pstDisplay->stUI.ulTime;
 	}
 	pstDisplay->stUI.ulCycle++;
 };
