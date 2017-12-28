@@ -168,15 +168,15 @@ Move procedure of a motor with arguments of direction and speed
 	}
 };
 
-void fsetColor(tstPrvMain *pstLed)
+void fsetColor(tstPrvMain *pstPrivate)
 /****************************************************************
 Indicates color on RGB Led
 
 *****************************************************************/
 {
-	tstRgbLed *pstColor = &pstLed->stRgbLed;
-	tstUI *pstUI = &pstLed->stUI;
-	tstMotor *pstMotor = &pstLed->stMotor;
+	tstRgbLed *pstColor = &pstPrivate->stRgbLed;
+	tstUI *pstUI = &pstPrivate->stUI;
+	tstMotor *pstMotor = &pstPrivate->stMotor;
 
 	signed int	iColor = *pstColor->puiColor;
 	iColor = abs(iColor - 180);
@@ -191,30 +191,30 @@ Indicates color on RGB Led
 	}
 	else if (pstMotor->bCalibRun || pstMotor->bCalibRunL)
 	{
-		if ((pstLed->stRgbLed.ulCycle % 200) < 100)
+		if ((pstColor->ulCycle % 200) < 100)
 		{
 			led.setPixelColor(0, 255, 0, 255);
 			led.show();
 		}
-		else if ((pstLed->stRgbLed.ulCycle % 100) < 100)
+		else if ((pstColor->ulCycle % 100) < 100)
 		{
 			led.setPixelColor(0, 0, 0, 0);
 			led.show();
 		}
-		pstLed->stRgbLed.ulCycle++;
+		pstColor->ulCycle++;
 	}
 	else led.setPixelColor(0, 0, 0, 0);
 	led.show();
 };
 
-void fcompassCalibrate(tstPrvMain *pstCalibrate) 
+void fcompassCalibrate(tstPrvMain *pstPrivate) 
 /****************************************************************
 Compass calibration
 Run for every new location
 *****************************************************************/
 {
-	tstCompass *pstCompass = &pstCalibrate->stCompass;
-	tstMotor *pstMotor = &pstCalibrate->stMotor;
+	tstCompass *pstCompass = &pstPrivate->stCompass;
+	tstMotor *pstMotor = &pstPrivate->stMotor;
 
 	bool			bStarted = false;
 	signed int		iMinX = 0;
@@ -247,7 +247,7 @@ Run for every new location
 			lcd.write(0);
 			i++;
 		}
-		fsetColor(pstCalibrate);
+		fsetColor(pstPrivate);
 	}
 
 	// Calculate offsets
@@ -361,15 +361,15 @@ Set key state
 	return usRet;
 };
 
-void fUIProcedure(tstPrvMain *pstUI)
+void fUIProcedure(tstPrvMain *pstPrivate)
 /****************************************************************
 Complete User Interface procedure
 
 *****************************************************************/
 {
-	tstCompass *pstCompass = &pstUI->stCompass;
-	tstMotor *pstMotor = &pstUI->stMotor;
-	tstUI *pstUIProcedure = &pstUI->stUI;
+	tstCompass *pstCompass = &pstPrivate->stCompass;
+	tstMotor *pstMotor = &pstPrivate->stMotor;
+	tstUI *pstUIProcedure = &pstPrivate->stUI;
 	unsigned short		usKeyState;
 
 	usKeyState = fgetKeyValue(pstUIProcedure);
@@ -381,13 +381,13 @@ Complete User Interface procedure
 		if (!pstCompass->bCalibDone)
 		{
 			pstUIProcedure->enUIState = enUIState_Calibration;
-			fsetUIMenu(pstUI);
+			fsetUIMenu(pstPrivate);
 		}
 		else if (!pstUIProcedure->bStartAuto)
 		{
 			pstUIProcedure->bStartManual = true;
 			pstUIProcedure->enUIState = enUIState_ManualMode;
-			fsetUIMenu(pstUI);
+			fsetUIMenu(pstPrivate);
 		}
 		break;
 
@@ -397,7 +397,7 @@ Complete User Interface procedure
 			pstUIProcedure->bStartAuto = true;
 			pstMotor->bRun = true;
 			pstUIProcedure->enUIState = enUIState_AutomaticMode;
-			fsetUIMenu(pstUI);
+			fsetUIMenu(pstPrivate);
 		}
 		break;
 
@@ -408,61 +408,61 @@ Complete User Interface procedure
 			pstUIProcedure->bStartManual = false;
 			pstMotor->bRun = false;
 			pstUIProcedure->enUIState = enUIState_Abort;
-			fsetUIMenu(pstUI);
+			fsetUIMenu(pstPrivate);
 		}
 		break;
 
 	case enKey_undef:
 		pstUIProcedure->enUIState = enUIState_undef;
-		if (!pstUIProcedure->bMenuSet)	fsetUIMenu(pstUI);
+		if (!pstUIProcedure->bMenuSet)	fsetUIMenu(pstPrivate);
 		break;
 	default:
 		break;
 	}
 };
 
-void fsetUIMenu(tstPrvMain *pstUIMenu)
+void fsetUIMenu(tstPrvMain *pstPrivate)
 /****************************************************************
 Indicate different User Interface menus
 
 *****************************************************************/
 {
-	tstCompass *pstCompass = &pstUIMenu->stCompass;
-	tstMotor *pstMotor = &pstUIMenu->stMotor;
+	tstCompass *pstCompass = &pstPrivate->stCompass;
+	tstMotor *pstMotor = &pstPrivate->stMotor;
 
-	if (pstUIMenu->stUI.enUIState == enUIState_Calibration)
+	if (pstPrivate->stUI.enUIState == enUIState_Calibration)
 	{
 		lcd.clear();
 		lcd.setCursor(0, 0);
 		if (!pstCompass->bCalibDone)		lcd.println("Compass calibr..");
-		fcompassCalibrate(pstUIMenu);
+		fcompassCalibrate(pstPrivate);
 		lcd.setCursor(0, 0);
 		lcd.print("                  ");
 		lcd.setCursor(4, 0);
 		lcd.print("Complete!");
 		delay(2000);
-		pstUIMenu->stUI.bMenuSet = false;
+		pstPrivate->stUI.bMenuSet = false;
 	}
-	else if (pstUIMenu->stUI.enUIState == enUIState_undef && !pstCompass->bCalibDone)	
+	else if (pstPrivate->stUI.enUIState == enUIState_undef && !pstCompass->bCalibDone)	
 	{
 		lcd.clear();
 		lcd.println("PRESS Key 1 to  ");
 		lcd.setCursor(0, 1);
 		lcd.println("calib. compass! ");
-		pstUIMenu->stUI.bMenuSet = true;
+		pstPrivate->stUI.bMenuSet = true;
 	}
-	else if(pstUIMenu->stUI.enUIState == enUIState_undef && pstCompass->bCalibDone)
+	else if(pstPrivate->stUI.enUIState == enUIState_undef && pstCompass->bCalibDone)
 	{
 		lcd.clear();
 		lcd.println("Key 1 - ManMode ");
 		lcd.setCursor(0, 1);
 		lcd.println("Key 2 - AutoMode");
-		pstUIMenu->stUI.usPrevState = enUIState_undef;
-		pstUIMenu->stUI.bMenuSet = true;
+		pstPrivate->stUI.usPrevState = enUIState_undef;
+		pstPrivate->stUI.bMenuSet = true;
 	}
-	else if (pstUIMenu->stUI.enUIState == enUIState_ManualMode)
+	else if (pstPrivate->stUI.enUIState == enUIState_ManualMode)
 	{
-		pstUIMenu->stUI.usPrevState = enUIState_ManualMode;
+		pstPrivate->stUI.usPrevState = enUIState_ManualMode;
 		lcd.clear();
 		lcd.setCursor(0, 0);
 		lcd.print("M:Act. Ang:   ");
@@ -471,9 +471,9 @@ Indicate different User Interface menus
 		lcd.setCursor(0, 1);
 		lcd.print("Key 3 - STOP");
 	}
-	else if (pstUIMenu->stUI.enUIState == enUIState_AutomaticMode)
+	else if (pstPrivate->stUI.enUIState == enUIState_AutomaticMode)
 	{
-		pstUIMenu->stUI.usPrevState = enUIState_AutomaticMode;
+		pstPrivate->stUI.usPrevState = enUIState_AutomaticMode;
 		lcd.clear();
 		lcd.setCursor(0, 0);
 		lcd.print("A:Act. Ang:   ");
@@ -482,18 +482,18 @@ Indicate different User Interface menus
 		lcd.setCursor(0, 1);
 		lcd.print("Key 3 - STOP");
 	}
-	else if ((pstUIMenu->stUI.enUIState == enUIState_Abort) && pstUIMenu->stUI.usPrevState > 0)
+	else if ((pstPrivate->stUI.enUIState == enUIState_Abort) && pstPrivate->stUI.usPrevState > 0)
 	{
 		lcd.clear();
 		lcd.setCursor(0, 0);
 		fMoveProcedure(pstMotor);
 		lcd.print("Mode aborted!");
 		delay(2000);
-		pstUIMenu->stUI.bMenuSet = false;
+		pstPrivate->stUI.bMenuSet = false;
 	}
 };
 
-void fUpdateDisplay(tstPrvMain *pstDisplay)
+void fUpdateDisplay(tstPrvMain *pstPrivate)
 /****************************************************************
 Update LCD Display
 
@@ -502,18 +502,18 @@ Update LCD Display
 	// Only for timing measurements
 	//if (pstDisplay->stUI.ulCycle == 0)	pstDisplay->stUI.ulOldTime = micros();
 
-	if (pstDisplay->stUI.ulCycle % 10 == 0)
+	if (pstPrivate->stUI.ulCycle % 10 == 0)
 	{
-		pstDisplay->stUI.ulTime = micros();
+		pstPrivate->stUI.ulTime = micros();
 		lcd.setCursor(12, 0);
 		lcd.print("   ");
 		lcd.setCursor(12, 0);
-		lcd.print(*pstDisplay->stMotor.puiActAngle);
+		lcd.print(*pstPrivate->stMotor.puiActAngle);
 
 		// Only for timing measurements
 		//Serial.print("Time diff: ");
 		//Serial.println(pstDisplay->stUI.ulTime - pstDisplay->stUI.ulOldTime);
 		//pstDisplay->stUI.ulOldTime = pstDisplay->stUI.ulTime;
 	}
-	pstDisplay->stUI.ulCycle++;
+	pstPrivate->stUI.ulCycle++;
 };

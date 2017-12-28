@@ -18,14 +18,14 @@ INCLUDES
 FUNCTIONS
 *****************************************************************/
 void finitUp(tstPrvMain *pstPrivate);
-void fcompassCalibrate(tstPrvMain *pstCalibrate);
+void fcompassCalibrate(tstPrvMain *pstPrivate);
 void fgetAngle(tstCompass *pstCompass);
 void fMoveProcedure(tstMotor *pstMotor);
 void fsetTone(tstPrvMain *pstBuzzer);
-void fsetColor(tstPrvMain *pstLed);
+void fsetColor(tstPrvMain *pstPrivate);
 unsigned short fgetKeyValue(tstUI *pstUI);
-void fUIProcedure(tstPrvMain *pstUI);
-void fUpdateDisplay(tstPrvMain *pstDisplay);
+void fUIProcedure(tstPrvMain *pstPrivate);
+void fUpdateDisplay(tstPrvMain *pstPrivate);
 
 
 /****************************************************************
