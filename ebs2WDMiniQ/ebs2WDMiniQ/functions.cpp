@@ -428,12 +428,9 @@ Indicate different User Interface menus
 		fcompassCalibrate(pstUIMenu);
 		lcd.setCursor(0, 0);
 		lcd.print("                  ");
-		lcd.setCursor(0, 0);						//lcd.setCursor(4, 0);
-		lcd.print("x: ");							//lcd.print("Complete!");
-		lcd.print(pstCompass->iMagOffset_x);		//delay(2000);
-		lcd.print(" y: ");
-		lcd.print(pstCompass->iMagOffset_y);
-		delay(10000);
+		lcd.setCursor(4, 0);
+		lcd.print("Complete!");
+		delay(2000);
 		pstUIMenu->stUI.bMenuSet = false;
 	}
 	else if (pstUIMenu->stUI.enUIState == enUIState_undef && !pstCompass->bCalibDone)	
@@ -453,8 +450,29 @@ Indicate different User Interface menus
 		pstUIMenu->stUI.usPrevState = enUIState_undef;
 		pstUIMenu->stUI.bMenuSet = true;
 	}
-	else if (pstUIMenu->stUI.enUIState == enUIState_ManualMode)		pstUIMenu->stUI.usPrevState = enUIState_ManualMode;
-	else if (pstUIMenu->stUI.enUIState == enUIState_AutomaticMode)	pstUIMenu->stUI.usPrevState = enUIState_AutomaticMode;
+	else if (pstUIMenu->stUI.enUIState == enUIState_ManualMode)
+	{
+		pstUIMenu->stUI.usPrevState = enUIState_ManualMode;
+		lcd.clear();
+		lcd.setCursor(0, 0);
+		lcd.print("M:Act. Ang:   ");
+		lcd.setCursor(15, 0);
+		lcd.write(1);
+		lcd.setCursor(0, 1);
+		lcd.print("Key 3 - STOP");
+	}
+		
+	else if (pstUIMenu->stUI.enUIState == enUIState_AutomaticMode)
+	{
+		pstUIMenu->stUI.usPrevState = enUIState_AutomaticMode;
+		lcd.clear();
+		lcd.setCursor(0, 0);
+		lcd.print("A:Act. Ang:   ");
+		lcd.setCursor(15, 0);
+		lcd.write(1);
+		lcd.setCursor(0, 1);
+		lcd.print("Key 3 - STOP");
+	}
 	else if ((pstUIMenu->stUI.enUIState == enUIState_Abort) && pstUIMenu->stUI.usPrevState > 0)
 	{
 		lcd.clear();
@@ -472,15 +490,12 @@ Update LCD Display
 
 *****************************************************************/
 {
-	lcd.clear();
-	lcd.setCursor(0, 0);
-	if (pstDisplay->bStartManual)	lcd.print("M:Act. Ang:   ");
-	if (pstDisplay->bStartAuto)		lcd.print("A:Act. Ang:   ");
-	lcd.setCursor(12, 0);
-	lcd.print(*pstDisplay->puiActAngle);
-	lcd.setCursor(15, 0);
-	lcd.write(1);
-	lcd.setCursor(0, 1);
-	lcd.print("Key 3 - STOP");
-	delay(100);
+	if (pstDisplay->ulCycle % 10 == 0)
+	{
+		lcd.setCursor(12, 0);
+		lcd.print("   ");
+		lcd.setCursor(12, 0);
+		lcd.print(*pstDisplay->puiActAngle);
+	}
+	pstDisplay->ulCycle++;
 };
