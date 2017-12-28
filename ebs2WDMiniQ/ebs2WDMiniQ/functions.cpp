@@ -37,7 +37,7 @@ FHNW - EMBEDDED SYSTEMS
 #define HALFCIRCLE		180.0		// Half circle in degrees
 #define LEDPIN			10			// Pin of RGB-LED
 #define SAMPLES			10			// For filter magnitude
-#define CALIB_TIME		30000		// Calibration time [ms]
+#define CALIB_TIME		10000		// Calibration time [ms]
 #define TONEPIN			16			// Pin of buzzer
 #define TONEFREQ		100			// Tone frequency buzzer
 
@@ -495,8 +495,21 @@ Update LCD Display
 
 *****************************************************************/
 {
+	unsigned long ulStartTime = micros();
 	if (pstDisplay->stUI.ulCycle % 10 == 0)
 	{
+		pstDisplay->stUI.ulTime = micros() - ulStartTime;
+		
+
+		Serial.print("Micros(): ");
+		Serial.print(micros());
+		Serial.print("\t");
+		Serial.print("Time: ");
+		Serial.print(pstDisplay->stUI.ulTime);
+		Serial.println("\t");
+
+
+
 		lcd.setCursor(12, 0);
 		lcd.print("   ");
 		lcd.setCursor(12, 0);

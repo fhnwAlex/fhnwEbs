@@ -108,6 +108,7 @@ typedef struct tstUI
 	unsigned int	*puiActAngle;
 	unsigned short	usPrevState;
 	unsigned long	ulCycle;
+	unsigned long	ulTime;
 }tstUI;
 
 
