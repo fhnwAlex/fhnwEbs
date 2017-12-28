@@ -285,18 +285,22 @@ Get actual angle from compass
 	pstCompass->uiAngle = (unsigned int)flTempAngle;
 };
 
-void fsetTone(tstUI *pstBuzzer)
+void fsetTone(tstPrvMain *pstBuzzer)
 /****************************************************************
 Generate and set a tone on the buzzer
 
 *****************************************************************/
 {
-	//unsigned int uiAngleDiff;
-	//
-	//uiAngleDiff = *pstUI->puiActAngle - 180;
-	//tone(TONEPIN, abs(uiAngleDiff), pstUI->stBuzzer.ulToneDurration);
-
-
+	signed int iAngleDiff = *pstBuzzer->stMotor.puiActAngle;
+	iAngleDiff = abs(iAngleDiff - 180);
+	
+	if (iAngleDiff < 30)								tone(TONEPIN, TONEFREQ);
+	else if(iAngleDiff >= 30 && iAngleDiff < 60)		tone(TONEPIN, 2 * TONEFREQ);
+	else if (iAngleDiff >= 60 && iAngleDiff < 90)		tone(TONEPIN, 4 * TONEFREQ);
+	else if (iAngleDiff >= 90 && iAngleDiff < 120)		tone(TONEPIN, 8 * TONEFREQ);
+	else if (iAngleDiff >= 120 && iAngleDiff < 150)		tone(TONEPIN, 10 * TONEFREQ);
+	else if (iAngleDiff >= 150)							tone(TONEPIN, 20 * TONEFREQ);
+	else noTone(TONEPIN);
 };
 
 unsigned short fgetKeyValue(tstUI *pstUIKey)

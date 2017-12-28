@@ -21,7 +21,7 @@ void finitUp(tstPrvMain *pstPrivate);
 void fcompassCalibrate(tstPrvMain *pstCalibrate);
 void fgetAngle(tstCompass *pstCompass);
 void fMoveProcedure(tstMotor *pstMotor);
-void fsetTone(tstUI *pstBuzzer);
+void fsetTone(tstPrvMain *pstBuzzer);
 void fsetColor(tstPrvMain *pstLed);
 unsigned short fgetKeyValue(tstUI *pstUI);
 void fUIProcedure(tstPrvMain *pstUI);
@@ -56,6 +56,7 @@ void loop()
 		fgetAngle(&stPrivate.stCompass);
 		fMoveProcedure(&stPrivate.stMotor);
 		fUpdateDisplay(&stPrivate.stUI);
+		//fsetTone(&stPrivate);
 	}
 
 }
