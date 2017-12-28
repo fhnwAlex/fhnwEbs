@@ -48,6 +48,7 @@ typedef struct tstMotor
 {
 	bool			bRun;
 	bool			bCalibRun;
+	bool			bCalibRunL;
 	bool			bCompassCalibrated;
 	unsigned int 	uiSpeed;
 	unsigned int	uiAngelNorth;

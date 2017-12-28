@@ -31,13 +31,13 @@ FHNW - EMBEDDED SYSTEMS
 #define DirectionRight	7			// Pin for control right motor direction
 #define DirectionLeft	12			// Pin for control left motor direction
 #define MIN_V			30.0		// Minimum speed of motors
-#define MAX_V			60.0		// Maximum speed of motors
-#define ANGLE_MIN		10.0		// Minimum angle
-#define ANGLE_MAX		355			// Maximum angle
+#define MAX_V			30.0		// Maximum speed of motors
+#define ANGLE_MIN		15.0		// Minimum angle
+#define ANGLE_MAX		350			// Maximum angle
 #define HALFCIRCLE		180.0		// Half circle in degrees
 #define LEDPIN			10			// Pin of RGB-LED
 #define SAMPLES			10			// For filter magnitude
-#define CALIB_TIME		10000		// Calibration time [ms]
+#define CALIB_TIME		20000		// Calibration time [ms]
 #define TONEPIN			16			// Pin of buzzer
 #define TONEFREQ		100			// Tone frequency buzzer
 
@@ -111,6 +111,14 @@ Move procedure of a motor with arguments of direction and speed
 			analogWrite(SpeedPinRight, MIN_V);
 			delay(2);
 			digitalWrite(DirectionLeft, BACK);
+			analogWrite(SpeedPinLeft, MIN_V);
+		}
+		if (pstMotor->bCalibRunL)
+		{
+			digitalWrite(DirectionRight, BACK);
+			analogWrite(SpeedPinRight, MIN_V);
+			delay(2);
+			digitalWrite(DirectionLeft, FORW);
 			analogWrite(SpeedPinLeft, MIN_V);
 		}
 		else 
@@ -210,6 +218,12 @@ Run for every new location
 
 	for (unsigned int i = 0; (millis() - ulStartTime) < CALIB_TIME;)
 	{
+		if ((millis() - ulStartTime) > (CALIB_TIME / 2))
+		{
+			pstMotor->bCalibRunL = true;
+			pstMotor->bCalibRun = false;
+			fMoveProcedure(pstMotor);
+		}
 		mag.getHeading(&pstCompass->iMagnet_x, &pstCompass->iMagnet_y, &pstCompass->iMagnet_z);
 		if (pstCompass->iMagnet_x < iMinX) iMinX = pstCompass->iMagnet_x; // TODO CHECK IF OK
 		if (pstCompass->iMagnet_x > iMaxX) iMaxX = pstCompass->iMagnet_x; // TODO CHECK IF OK
@@ -221,6 +235,7 @@ Run for every new location
 			lcd.write(0);
 			i++;
 		}
+		
 		fsetColor(pstCalibrate);
 		///Test only
 		//Serial.print(pstCompass->iMagnet_x);
@@ -239,6 +254,7 @@ Run for every new location
 	//Serial.print("offset Y: ");
 	//Serial.println(pstCompass->iMagOffset_y);
 	pstMotor->bCalibRun = false;
+	pstMotor->bCalibRunL = false;
 	pstCompass->bCalibDone = true;
 	pstMotor->bCompassCalibrated = pstCompass->bCalibDone;
 	fMoveProcedure(pstMotor);
@@ -422,9 +438,12 @@ Indicate different User Interface menus
 		fcompassCalibrate(pstUIMenu);
 		lcd.setCursor(0, 0);
 		lcd.print("                  ");
-		lcd.setCursor(4, 0);
-		lcd.print("Complete!");
-		delay(2000);
+		lcd.setCursor(0, 0);
+		lcd.print("x: ");
+		lcd.print(pstCompass->iMagOffset_x);
+		lcd.print(" y: ");
+		lcd.print(pstCompass->iMagOffset_y);
+		delay(10000);
 		pstUIMenu->stUI.bMenuSet = false;
 	}
 	else if (pstUIMenu->stUI.enUIState == enUIState_undef && !pstCompass->bCalibDone)	
