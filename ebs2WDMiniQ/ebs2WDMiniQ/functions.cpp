@@ -174,7 +174,7 @@ Indicates color on RGB Led
 	tstUI *pstUI = &pstLed->stUI;
 	tstMotor *pstMotor = &pstLed->stMotor;
 
-	signed int iColor = *pstColor->puiColor;
+	signed int	iColor = *pstColor->puiColor;
 	iColor = abs(iColor - 180);
 	led.setBrightness(60);
 
@@ -187,12 +187,17 @@ Indicates color on RGB Led
 	}
 	else if (pstMotor->bCalibRun || pstMotor->bCalibRunL)
 	{
-		led.setPixelColor(0, 255, 0, 255);
-		led.show();
-		delay(200);
-		led.setPixelColor(0, 0, 0, 0);
-		led.show();
-		delay(200);
+		if ((pstLed->stRgbLed.ulCycle % 200) < 100)
+		{
+			led.setPixelColor(0, 255, 0, 255);
+			led.show();
+		}
+		else if ((pstLed->stRgbLed.ulCycle % 100) < 100)
+		{
+			led.setPixelColor(0, 0, 0, 0);
+			led.show();
+		}
+		pstLed->stRgbLed.ulCycle++;
 	}
 	else led.setPixelColor(0, 0, 0, 0);
 	led.show();
@@ -461,7 +466,6 @@ Indicate different User Interface menus
 		lcd.setCursor(0, 1);
 		lcd.print("Key 3 - STOP");
 	}
-		
 	else if (pstUIMenu->stUI.enUIState == enUIState_AutomaticMode)
 	{
 		pstUIMenu->stUI.usPrevState = enUIState_AutomaticMode;
@@ -484,18 +488,18 @@ Indicate different User Interface menus
 	}
 };
 
-void fUpdateDisplay(tstUI *pstDisplay)
+void fUpdateDisplay(tstPrvMain *pstDisplay)
 /****************************************************************
 Update LCD Display
 
 *****************************************************************/
 {
-	if (pstDisplay->ulCycle % 10 == 0)
+	if (pstDisplay->stUI.ulCycle % 10 == 0)
 	{
 		lcd.setCursor(12, 0);
 		lcd.print("   ");
 		lcd.setCursor(12, 0);
-		lcd.print(*pstDisplay->puiActAngle);
+		lcd.print(*pstDisplay->stMotor.puiActAngle);
 	}
-	pstDisplay->ulCycle++;
+	pstDisplay->stUI.ulCycle++;
 };

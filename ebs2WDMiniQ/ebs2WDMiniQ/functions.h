@@ -70,6 +70,7 @@ RGB-LED structure
 typedef struct tstRgbLed
 {
 	unsigned int		*puiColor;
+	unsigned long		ulCycle;
 }tstRgbLed;
 
 /*----------------------------------------------------------------

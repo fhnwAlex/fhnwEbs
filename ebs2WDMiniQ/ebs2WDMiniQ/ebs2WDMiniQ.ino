@@ -25,7 +25,7 @@ void fsetTone(tstPrvMain *pstBuzzer);
 void fsetColor(tstPrvMain *pstLed);
 unsigned short fgetKeyValue(tstUI *pstUI);
 void fUIProcedure(tstPrvMain *pstUI);
-void fUpdateDisplay(tstUI *pstDisplay);
+void fUpdateDisplay(tstPrvMain *pstDisplay);
 
 
 /****************************************************************
@@ -55,7 +55,7 @@ void loop()
 	{
 		fgetAngle(&stPrivate.stCompass);
 		fMoveProcedure(&stPrivate.stMotor);
-		fUpdateDisplay(&stPrivate.stUI);
+		fUpdateDisplay(&stPrivate);
 		//fsetTone(&stPrivate);
 	}
 
