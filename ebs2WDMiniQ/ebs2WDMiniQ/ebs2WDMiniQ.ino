@@ -69,7 +69,7 @@ void loop()
 		fMoveProcedure(&stPrivate.stMotor);
 		//Serial.print("  fMoveProcedure: ");
 		//Serial.print((uiStart_t - millis()));
-		fUpdateDisplay(&stPrivate.stUI);
+		fUpdateDisplay(&stPrivate);
 		//Serial.print("  fUpdateDisplay: ");
 		//Serial.println((uiStart_t - millis()));
 	}

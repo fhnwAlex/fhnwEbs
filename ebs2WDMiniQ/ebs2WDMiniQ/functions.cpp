@@ -138,9 +138,9 @@ Move procedure of a motor with arguments of direction and speed
 			analogWrite(SpeedPinRight, LOW);
 			analogWrite(SpeedPinLeft, LOW);
 		}
-		else if ((*pstMotor->puiActAngle < ANGLE_MAX) && (*pstMotor->puiActAngle > HALFCIRCLE)) // *pstMotor->puiActAngle < ANGLE_MAX 
+		else if ((*pstMotor->puiActAngle < ANGLE_MAX) && (*pstMotor->puiActAngle > HALFCIRCLE)) 
 		{
-			// Linksdrehen
+			// Left turn
 			digitalWrite(DirectionRight, BACK);
 			analogWrite(SpeedPinRight, uiSpeed);
 			delay(2);
@@ -149,7 +149,7 @@ Move procedure of a motor with arguments of direction and speed
 		}
 		else
 		{
-			// Rechtsdrehen
+			// Right turn
 			digitalWrite(DirectionRight, FORW);
 			analogWrite(SpeedPinRight, uiSpeed);
 			delay(2);
@@ -157,7 +157,7 @@ Move procedure of a motor with arguments of direction and speed
 			analogWrite(SpeedPinLeft, uiSpeed);
 		}
 	}
-	else //stop if bRun==false
+	else 
 	{
 		analogWrite(SpeedPinRight, LOW);
 		analogWrite(SpeedPinLeft, LOW);
@@ -233,10 +233,10 @@ Run for every new location
 			fMoveProcedure(pstMotor);
 		}
 		mag.getHeading(&pstCompass->iMagnet_x, &pstCompass->iMagnet_y, &pstCompass->iMagnet_z);
-		if (pstCompass->iMagnet_x < iMinX) iMinX = pstCompass->iMagnet_x; // TODO CHECK IF OK
-		if (pstCompass->iMagnet_x > iMaxX) iMaxX = pstCompass->iMagnet_x; // TODO CHECK IF OK
-		if (pstCompass->iMagnet_y < iMinY) iMinY = pstCompass->iMagnet_y; // TODO CHECK IF OK
-		if (pstCompass->iMagnet_y > iMaxY) iMaxY = pstCompass->iMagnet_y; // TODO CHECK IF OK
+		if (pstCompass->iMagnet_x < iMinX) iMinX = pstCompass->iMagnet_x; 
+		if (pstCompass->iMagnet_x > iMaxX) iMaxX = pstCompass->iMagnet_x; 
+		if (pstCompass->iMagnet_y < iMinY) iMinY = pstCompass->iMagnet_y; 
+		if (pstCompass->iMagnet_y > iMaxY) iMaxY = pstCompass->iMagnet_y; 
 		if (i < LCDCOLS && (millis() - ulStartTime) >= (CALIB_TIME / LCDCOLS * i))
 		{
 			lcd.setCursor(i, 1);
@@ -247,8 +247,8 @@ Run for every new location
 	}
 
 	// Calculate offsets
-	pstCompass->iMagOffset_x = (iMaxX + iMinX) / 2; // TODO CHECK IF OK
-	pstCompass->iMagOffset_y = (iMaxY + iMinY) / 2; // TODO CHECK IF OK
+	pstCompass->iMagOffset_x = (iMaxX + iMinX) / 2; 
+	pstCompass->iMagOffset_y = (iMaxY + iMinY) / 2; 
 
 	pstMotor->bCalibRun = false;
 	pstMotor->bCalibRunL = false;
@@ -272,21 +272,22 @@ Get actual angle from compass
 	pstCompass->flDeclinationAngle = (2.0 + (16.0 / 60.0)) / (180.0 / M_PI);
 
 	for (int i = 1; i <= SAMPLES; i++) {
-		// read raw heading measurements from device
+		// Read raw heading measurements from device
 		mag.getHeading(&pstCompass->iMagnet_x, &pstCompass->iMagnet_y, &pstCompass->iMagnet_z);
-
-		//mx = mx - (-326); //Offset Brugg Projektraum
-		//my = my - 288; //Offset Brugg Proejktraum
-		pstCompass->iMagnet_x = pstCompass->iMagnet_x - pstCompass->iMagOffset_x;//291; //Offset Birmi
-		pstCompass->iMagnet_y = pstCompass->iMagnet_y - pstCompass->iMagOffset_y;//321; //Offset Birmi
+		pstCompass->iMagnet_x = pstCompass->iMagnet_x - pstCompass->iMagOffset_x;
+		pstCompass->iMagnet_y = pstCompass->iMagnet_y - pstCompass->iMagOffset_y;
 
 	   // To calculate heading in degrees. 0 degree indicates North
 		flTempAngle += (atan2((float)pstCompass->iMagnet_y, (float)pstCompass->iMagnet_x) + pstCompass->flDeclinationAngle);
 		
 	}
+	// Filtering angles
 	flTempAngle = flTempAngle / SAMPLES;
+
 	if (flTempAngle < 0)  flTempAngle += 2 * M_PI; 
+
 	flTempAngle = flTempAngle * 180 / M_PI;
+
 	pstCompass->uiAngle = (unsigned int)flTempAngle;
 };
 
