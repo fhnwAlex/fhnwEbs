@@ -45,17 +45,34 @@ void setup()
 // the loop function runs over and over again until power down or reset
 void loop() 
 {
+	unsigned int uiStart_t = millis();
 	/*CYCLIC FUNCTIONS*/
+	//Serial.print("Serialprint: ");
+	//Serial.print((uiStart_t - millis()));
+
 	fUIProcedure(&stPrivate);
+	//Serial.print("  fUIPr.: ");
+	//Serial.print((uiStart_t - millis()));
+
 	//fgetAngle(&stPrivate.stCompass);
 	//fMoveProcedure(&stPrivate.stMotor);
-	fsetColor(&stPrivate); 
+
+	fsetColor(&stPrivate);
+	//Serial.print("Time: ");
+	//Serial.println((uiStart_t - millis()));
 
 	if (pstUI->bStartAuto || pstUI->bStartManual)
 	{
 		fgetAngle(&stPrivate.stCompass);
+		//Serial.print("  fgetAngle: ");
+		//Serial.print((uiStart_t - millis()));
 		fMoveProcedure(&stPrivate.stMotor);
+		//Serial.print("  fMoveProcedure: ");
+		//Serial.print((uiStart_t - millis()));
 		fUpdateDisplay(&stPrivate.stUI);
+		//Serial.print("  fUpdateDisplay: ");
+		//Serial.println((uiStart_t - millis()));
 	}
+
 
 }

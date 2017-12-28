@@ -478,5 +478,5 @@ Update LCD Display
 	lcd.write(1);
 	lcd.setCursor(0, 1);
 	lcd.print("Key 3 - STOP");
-	delay(100);
+	//delay(100);
 };
