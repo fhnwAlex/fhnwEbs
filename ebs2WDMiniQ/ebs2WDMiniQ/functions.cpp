@@ -133,12 +133,20 @@ Move procedure of a motor with arguments of direction and speed
 		iDiffAngle = abs(iDiffAngle - 180);
 		unsigned int uiSpeed = (unsigned int)(((MAX_V - MIN_V) * (float)iDiffAngle / HALFCIRCLE) + MIN_V);
 
+		Serial.print("Diff Angle: ");
+		Serial.print(iDiffAngle);
+		Serial.print("\t");
 		if (iDiffAngle >= (HALFCIRCLE - ANGLE_MIN))
 		{
+			Serial.print("Speed STOP: ");
+			Serial.println("\t");
+
+
 			analogWrite(SpeedPinRight, LOW);
+			delay(2);
 			analogWrite(SpeedPinLeft, LOW);
 		}
-		if (*pstMotor->puiActAngle < ANGLE_MAX )
+		if ((*pstMotor->puiActAngle < ANGLE_MAX) && (*pstMotor->puiActAngle > HALFCIRCLE)) // *pstMotor->puiActAngle < ANGLE_MAX 
 		{
 			// Rechtsdrehen
 			digitalWrite(DirectionRight, FORW);
@@ -160,6 +168,7 @@ Move procedure of a motor with arguments of direction and speed
 	else //stop if bRun==false
 	{
 		analogWrite(SpeedPinRight, LOW);
+		delay(2);
 		analogWrite(SpeedPinLeft, LOW);
 	}
 };
@@ -288,7 +297,7 @@ Get actual angle from compass
 		
 	}
 	flTempAngle = flTempAngle / SAMPLES;
-	if (flTempAngle < 0) { flTempAngle += 2 * M_PI; }
+	if (flTempAngle < 0)  flTempAngle += 2 * M_PI; 
 	flTempAngle = flTempAngle * 180 / M_PI;
 	pstCompass->uiAngle = (unsigned int)flTempAngle;
 
@@ -383,7 +392,7 @@ Complete User Interface procedure
 			pstUIProcedure->enUIState = enUIState_Calibration;
 			fsetUIMenu(pstUI);
 		}
-		else
+		else if (!pstUIProcedure->bStartAuto)
 		{
 			pstUIProcedure->bStartManual = true;
 			pstUIProcedure->enUIState = enUIState_ManualMode;
@@ -392,7 +401,7 @@ Complete User Interface procedure
 		break;
 
 	case enKey_2:
-		if (pstCompass->bCalibDone)
+		if (pstCompass->bCalibDone && !pstUIProcedure->bStartManual)
 		{
 			pstUIProcedure->bStartAuto = true;
 			pstMotor->bRun = true;
@@ -492,5 +501,5 @@ Update LCD Display
 	lcd.write(1);
 	lcd.setCursor(0, 1);
 	lcd.print("Key 3 - STOP");
-	delay(200);
+	delay(100);
 };

@@ -47,11 +47,15 @@ void loop()
 {
 	/*CYCLIC FUNCTIONS*/
 	fUIProcedure(&stPrivate);
-	fgetAngle(&stPrivate.stCompass);
-	fMoveProcedure(&stPrivate.stMotor);
-	//fsetColor(&stPrivate); -> Problem maker!!
+	//fgetAngle(&stPrivate.stCompass);
+	//fMoveProcedure(&stPrivate.stMotor);
+	fsetColor(&stPrivate); 
 
-	if (pstUI->bStartAuto || pstUI->bStartManual) 		fUpdateDisplay(&stPrivate.stUI);
-	
+	if (pstUI->bStartAuto || pstUI->bStartManual)
+	{
+		fgetAngle(&stPrivate.stCompass);
+		fMoveProcedure(&stPrivate.stMotor);
+		fUpdateDisplay(&stPrivate.stUI);
+	}
 
 }
