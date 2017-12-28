@@ -78,7 +78,7 @@ Compass structure
 typedef struct tstCompass
 {
 	bool			bRun;
-	bool			bCalibRun;
+	//bool			bCalibRun;
 	bool			bCalibDone;
 	float			flDeclinationAngle;
 	signed int		iMagnet_x;

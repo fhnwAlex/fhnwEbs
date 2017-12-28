@@ -133,17 +133,9 @@ Move procedure of a motor with arguments of direction and speed
 		iDiffAngle = abs(iDiffAngle - 180);
 		unsigned int uiSpeed = (unsigned int)(((MAX_V - MIN_V) * (float)iDiffAngle / HALFCIRCLE) + MIN_V);
 
-		Serial.print("Diff Angle: ");
-		Serial.print(iDiffAngle);
-		Serial.print("\t");
 		if (iDiffAngle >= (HALFCIRCLE - ANGLE_MIN))
 		{
-			Serial.print("Speed STOP: ");
-			Serial.println("\t");
-
-
 			analogWrite(SpeedPinRight, LOW);
-			delay(2);
 			analogWrite(SpeedPinLeft, LOW);
 		}
 		else if ((*pstMotor->puiActAngle < ANGLE_MAX) && (*pstMotor->puiActAngle > HALFCIRCLE)) // *pstMotor->puiActAngle < ANGLE_MAX 
@@ -168,7 +160,6 @@ Move procedure of a motor with arguments of direction and speed
 	else //stop if bRun==false
 	{
 		analogWrite(SpeedPinRight, LOW);
-		delay(2);
 		analogWrite(SpeedPinLeft, LOW);
 	}
 };
@@ -216,12 +207,13 @@ Run for every new location
 	tstCompass *pstCompass = &pstCalibrate->stCompass;
 	tstMotor *pstMotor = &pstCalibrate->stMotor;
 
+	bool			bStarted = false;
 	signed int		iMinX = 0;
 	signed int		iMaxX = 0;
 	signed int		iMinY = 0;
 	signed int		iMaxY = 0;
 	unsigned long	ulStartTime = millis();
-	bool bStarted = false;
+
 	
 	pstMotor->bCalibRun = true;
 	fMoveProcedure(pstMotor);
@@ -230,9 +222,9 @@ Run for every new location
 	{
 		if ((millis() - ulStartTime) > (CALIB_TIME / 2) && !bStarted)
 		{
+			bStarted = true;
 			pstMotor->bCalibRunL = true;
 			pstMotor->bCalibRun = false;
-			bStarted = true;
 			fMoveProcedure(pstMotor);
 		}
 		mag.getHeading(&pstCompass->iMagnet_x, &pstCompass->iMagnet_y, &pstCompass->iMagnet_z);
@@ -246,24 +238,13 @@ Run for every new location
 			lcd.write(0);
 			i++;
 		}
-		
 		fsetColor(pstCalibrate);
-		///Test only
-		//Serial.print(pstCompass->iMagnet_x);
-		//Serial.print("\t");
-		//Serial.println(pstCompass->iMagnet_y);
 	}
 
 	// Calculate offsets
 	pstCompass->iMagOffset_x = (iMaxX + iMinX) / 2; // TODO CHECK IF OK
 	pstCompass->iMagOffset_y = (iMaxY + iMinY) / 2; // TODO CHECK IF OK
 
-	///test only
-	//Serial.print("offset X: ");
-	//Serial.print(pstCompass->iMagOffset_x);
-	//Serial.print("\t");
-	//Serial.print("offset Y: ");
-	//Serial.println(pstCompass->iMagOffset_y);
 	pstMotor->bCalibRun = false;
 	pstMotor->bCalibRunL = false;
 	pstCompass->bCalibDone = true;
@@ -302,12 +283,6 @@ Get actual angle from compass
 	if (flTempAngle < 0)  flTempAngle += 2 * M_PI; 
 	flTempAngle = flTempAngle * 180 / M_PI;
 	pstCompass->uiAngle = (unsigned int)flTempAngle;
-
-	///test only
-	//Serial.print("Angle compass: ");
-	//Serial.print(pstCompass->uiAngle);
-	//Serial.println("\t");
-
 };
 
 void fsetTone(tstUI *pstBuzzer)
@@ -449,9 +424,9 @@ Indicate different User Interface menus
 		fcompassCalibrate(pstUIMenu);
 		lcd.setCursor(0, 0);
 		lcd.print("                  ");
-		lcd.setCursor(0, 0);
-		lcd.print("x: ");
-		lcd.print(pstCompass->iMagOffset_x);
+		lcd.setCursor(0, 0);						//lcd.setCursor(4, 0);
+		lcd.print("x: ");							//lcd.print("Complete!");
+		lcd.print(pstCompass->iMagOffset_x);		//delay(2000);
 		lcd.print(" y: ");
 		lcd.print(pstCompass->iMagOffset_y);
 		delay(10000);
