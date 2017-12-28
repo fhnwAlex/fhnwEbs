@@ -174,7 +174,7 @@ Indicates color on RGB Led
 	tstUI *pstUI = &pstLed->stUI;
 	tstMotor *pstMotor = &pstLed->stMotor;
 
-	signed int iColor = *pstColor->puiColor;
+	signed int	iColor = *pstColor->puiColor;
 	iColor = abs(iColor - 180);
 	led.setBrightness(60);
 
@@ -187,12 +187,17 @@ Indicates color on RGB Led
 	}
 	else if (pstMotor->bCalibRun || pstMotor->bCalibRunL)
 	{
-		led.setPixelColor(0, 255, 0, 255);
-		led.show();
-		delay(200);
-		led.setPixelColor(0, 0, 0, 0);
-		led.show();
-		delay(200);
+		if ((pstLed->stRgbLed.ulCycle % 200) < 100)
+		{
+			led.setPixelColor(0, 255, 0, 255);
+			led.show();
+		}
+		else if ((pstLed->stRgbLed.ulCycle % 100) < 100)
+		{
+			led.setPixelColor(0, 0, 0, 0);
+			led.show();
+		}
+		pstLed->stRgbLed.ulCycle++;
 	}
 	else led.setPixelColor(0, 0, 0, 0);
 	led.show();
@@ -285,18 +290,22 @@ Get actual angle from compass
 	pstCompass->uiAngle = (unsigned int)flTempAngle;
 };
 
-void fsetTone(tstUI *pstBuzzer)
+void fsetTone(tstPrvMain *pstBuzzer)
 /****************************************************************
 Generate and set a tone on the buzzer
 
 *****************************************************************/
 {
-	//unsigned int uiAngleDiff;
-	//
-	//uiAngleDiff = *pstUI->puiActAngle - 180;
-	//tone(TONEPIN, abs(uiAngleDiff), pstUI->stBuzzer.ulToneDurration);
-
-
+	signed int iAngleDiff = *pstBuzzer->stMotor.puiActAngle;
+	iAngleDiff = abs(iAngleDiff - 180);
+	
+	if (iAngleDiff < 30)								tone(TONEPIN, TONEFREQ);
+	else if(iAngleDiff >= 30 && iAngleDiff < 60)		tone(TONEPIN, 2 * TONEFREQ);
+	else if (iAngleDiff >= 60 && iAngleDiff < 90)		tone(TONEPIN, 4 * TONEFREQ);
+	else if (iAngleDiff >= 90 && iAngleDiff < 120)		tone(TONEPIN, 8 * TONEFREQ);
+	else if (iAngleDiff >= 120 && iAngleDiff < 150)		tone(TONEPIN, 10 * TONEFREQ);
+	else if (iAngleDiff >= 150)							tone(TONEPIN, 20 * TONEFREQ);
+	else noTone(TONEPIN);
 };
 
 unsigned short fgetKeyValue(tstUI *pstUIKey)
@@ -424,12 +433,9 @@ Indicate different User Interface menus
 		fcompassCalibrate(pstUIMenu);
 		lcd.setCursor(0, 0);
 		lcd.print("                  ");
-		lcd.setCursor(0, 0);						//lcd.setCursor(4, 0);
-		lcd.print("x: ");							//lcd.print("Complete!");
-		lcd.print(pstCompass->iMagOffset_x);		//delay(2000);
-		lcd.print(" y: ");
-		lcd.print(pstCompass->iMagOffset_y);
-		delay(10000);
+		lcd.setCursor(4, 0);
+		lcd.print("Complete!");
+		delay(2000);
 		pstUIMenu->stUI.bMenuSet = false;
 	}
 	else if (pstUIMenu->stUI.enUIState == enUIState_undef && !pstCompass->bCalibDone)	
@@ -449,8 +455,28 @@ Indicate different User Interface menus
 		pstUIMenu->stUI.usPrevState = enUIState_undef;
 		pstUIMenu->stUI.bMenuSet = true;
 	}
-	else if (pstUIMenu->stUI.enUIState == enUIState_ManualMode)		pstUIMenu->stUI.usPrevState = enUIState_ManualMode;
-	else if (pstUIMenu->stUI.enUIState == enUIState_AutomaticMode)	pstUIMenu->stUI.usPrevState = enUIState_AutomaticMode;
+	else if (pstUIMenu->stUI.enUIState == enUIState_ManualMode)
+	{
+		pstUIMenu->stUI.usPrevState = enUIState_ManualMode;
+		lcd.clear();
+		lcd.setCursor(0, 0);
+		lcd.print("M:Act. Ang:   ");
+		lcd.setCursor(15, 0);
+		lcd.write(1);
+		lcd.setCursor(0, 1);
+		lcd.print("Key 3 - STOP");
+	}
+	else if (pstUIMenu->stUI.enUIState == enUIState_AutomaticMode)
+	{
+		pstUIMenu->stUI.usPrevState = enUIState_AutomaticMode;
+		lcd.clear();
+		lcd.setCursor(0, 0);
+		lcd.print("A:Act. Ang:   ");
+		lcd.setCursor(15, 0);
+		lcd.write(1);
+		lcd.setCursor(0, 1);
+		lcd.print("Key 3 - STOP");
+	}
 	else if ((pstUIMenu->stUI.enUIState == enUIState_Abort) && pstUIMenu->stUI.usPrevState > 0)
 	{
 		lcd.clear();
@@ -462,21 +488,18 @@ Indicate different User Interface menus
 	}
 };
 
-void fUpdateDisplay(tstUI *pstDisplay)
+void fUpdateDisplay(tstPrvMain *pstDisplay)
 /****************************************************************
 Update LCD Display
 
 *****************************************************************/
 {
-	lcd.clear();
-	lcd.setCursor(0, 0);
-	if (pstDisplay->bStartManual)	lcd.print("M:Act. Ang:   ");
-	if (pstDisplay->bStartAuto)		lcd.print("A:Act. Ang:   ");
-	lcd.setCursor(12, 0);
-	lcd.print(*pstDisplay->puiActAngle);
-	lcd.setCursor(15, 0);
-	lcd.write(1);
-	lcd.setCursor(0, 1);
-	lcd.print("Key 3 - STOP");
-	//delay(100);
+	if (pstDisplay->stUI.ulCycle % 10 == 0)
+	{
+		lcd.setCursor(12, 0);
+		lcd.print("   ");
+		lcd.setCursor(12, 0);
+		lcd.print(*pstDisplay->stMotor.puiActAngle);
+	}
+	pstDisplay->stUI.ulCycle++;
 };

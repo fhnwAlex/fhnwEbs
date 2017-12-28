@@ -21,11 +21,11 @@ void finitUp(tstPrvMain *pstPrivate);
 void fcompassCalibrate(tstPrvMain *pstCalibrate);
 void fgetAngle(tstCompass *pstCompass);
 void fMoveProcedure(tstMotor *pstMotor);
-void fsetTone(tstUI *pstBuzzer);
+void fsetTone(tstPrvMain *pstBuzzer);
 void fsetColor(tstPrvMain *pstLed);
 unsigned short fgetKeyValue(tstUI *pstUI);
 void fUIProcedure(tstPrvMain *pstUI);
-void fUpdateDisplay(tstUI *pstDisplay);
+void fUpdateDisplay(tstPrvMain *pstDisplay);
 
 
 /****************************************************************
