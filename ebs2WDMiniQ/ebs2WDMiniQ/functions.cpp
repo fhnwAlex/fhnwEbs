@@ -495,10 +495,14 @@ Update LCD Display
 
 *****************************************************************/
 {
-	unsigned long ulStartTime = micros();
+
+
+	if (pstDisplay->stUI.ulCycle == 0)	pstDisplay->stUI.ulTime = micros();
+
+
 	if (pstDisplay->stUI.ulCycle % 10 == 0)
 	{
-		pstDisplay->stUI.ulTime = micros() - ulStartTime;
+		pstDisplay->stUI.ulTime = micros() - pstDisplay->stUI.ulTime;
 		
 
 		Serial.print("Micros(): ");
