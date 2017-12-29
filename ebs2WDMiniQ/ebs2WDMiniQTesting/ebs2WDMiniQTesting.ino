@@ -42,37 +42,69 @@ void setup()
 	finitUp(&stPrivate);
 }
 
+unsigned long ulCycleTime = 0;
+unsigned long ulTimeOld = micros();
+unsigned long ulCycleTimeSum = 0;
+unsigned long ulCycleTimeMin = 10000000;
+unsigned long ulCycleTimeMax = 0;
+unsigned long ulCycleCount = 1;
+
 // the loop function runs over and over again until power down or reset
 void loop()
 {
-	unsigned int uiStart_t = millis();
 	/*CYCLIC FUNCTIONS*/
-	//Serial.print("Serialprint: ");
-	//Serial.print((uiStart_t - millis()));
-
 	fUIProcedure(&stPrivate);
-	//Serial.print("  fUIPr.: ");
-	//Serial.print((uiStart_t - millis()));
-
 	//fgetAngle(&stPrivate.stCompass);
 	//fMoveProcedure(&stPrivate.stMotor);
-
 	fsetColor(&stPrivate);
-	//Serial.print("Time: ");
-	//Serial.println((uiStart_t - millis()));
 
 	if (pstUI->bStartAuto || pstUI->bStartManual)
 	{
+		//Time from getAngle to MoveProcedure
+		ulTimeOld = micros();
+
 		fgetAngle(&stPrivate.stCompass);
-		//Serial.print("  fgetAngle: ");
-		//Serial.print((uiStart_t - millis()));
+		
+		//Time after getting Angle
+		//ulCycleTime = micros() - ulTimeOld;
+		
 		fMoveProcedure(&stPrivate.stMotor);
-		//Serial.print("  fMoveProcedure: ");
-		//Serial.print((uiStart_t - millis()));
+
+		//Time after MoveProcedure
+		ulCycleTime = micros() - ulTimeOld;
+		
 		fUpdateDisplay(&stPrivate);
-		//Serial.print("  fUpdateDisplay: ");
-		//Serial.println((uiStart_t - millis()));
 	}
 
+	//Time after everything
+	//ulCycleTime = micros() - ulTimeOld;
 
+	ulCycleTimeSum += ulCycleTime;
+	if (ulCycleTime < ulCycleTimeMin) ulCycleTimeMin = ulCycleTime;
+	if (ulCycleTime > ulCycleTimeMax) ulCycleTimeMax = ulCycleTime;
+	if (ulCycleCount == 1000)
+	{
+		ulCycleTimeSum = (ulCycleTimeSum / ulCycleCount);
+		Serial.print("Cycle Nr.: ");
+		Serial.print(ulCycleCount);
+		Serial.print("\t");
+		Serial.print("Mean CT: ");
+		Serial.print(ulCycleTimeSum);
+		Serial.print("\t");
+		Serial.print("Min. CT: ");
+		Serial.print(ulCycleTimeMin);
+		Serial.print("\t");
+		Serial.print("Max. CT: ");
+		Serial.println(ulCycleTimeMax);
+	
+		ulCycleTimeSum = 0;
+		ulCycleTimeMin = 10000000;
+		ulCycleTimeMax = 0;
+		ulCycleTime = 0;
+	}
+	ulCycleCount++;
+	
+	if(ulCycleCount > 1000) ulCycleCount = 1;
+	//Time for everything and MoveProcedure
+	//ulTimeOld = micros();
 }

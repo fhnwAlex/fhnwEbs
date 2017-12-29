@@ -36,7 +36,7 @@ FHNW - EMBEDDED SYSTEMS
 #define ANGLE_MAX		350			// Maximum angle
 #define HALFCIRCLE		180.0		// Half circle in degrees
 #define LEDPIN			10			// Pin of RGB-LED
-#define SAMPLES			10			// For filter magnitude
+#define SAMPLES			1			// For filter magnitude
 #define CALIB_TIME		20000		// Calibration time [ms]
 #define TONEPIN			16			// Pin of buzzer
 #define TONEFREQ		100			// Tone frequency buzzer
@@ -110,7 +110,7 @@ Move procedure of a motor with arguments of direction and speed
 			digitalWrite(DirectionRight, FORW);
 			analogWrite(SpeedPinRight, MIN_V);
 			//delay(1);
-			delayMicroseconds(500);
+			delayMicroseconds(200);
 			digitalWrite(DirectionLeft, BACK);
 			analogWrite(SpeedPinLeft, MIN_V);
 		}
@@ -119,7 +119,7 @@ Move procedure of a motor with arguments of direction and speed
 			digitalWrite(DirectionRight, BACK);
 			analogWrite(SpeedPinRight, MIN_V);
 			//delay(1);
-			delayMicroseconds(500);
+			delayMicroseconds(200);
 			digitalWrite(DirectionLeft, FORW);
 			analogWrite(SpeedPinLeft, MIN_V);
 		}
@@ -134,7 +134,7 @@ Move procedure of a motor with arguments of direction and speed
 		// Dynamic speed mode
 		signed int	iDiffAngle = *pstMotor->puiActAngle;
 		iDiffAngle = abs(iDiffAngle - 180);
-		unsigned int uiSpeed = (unsigned int)(((MAX_V - MIN_V) * (float)iDiffAngle / HALFCIRCLE) + MIN_V);
+		unsigned int uiSpeed = (unsigned int)(((MAX_V - MIN_V) / (-HALFCIRCLE) * (float)iDiffAngle) + MAX_V);
 
 		if (iDiffAngle >= (HALFCIRCLE - ANGLE_MIN))
 		{
@@ -147,7 +147,7 @@ Move procedure of a motor with arguments of direction and speed
 			digitalWrite(DirectionRight, BACK);
 			analogWrite(SpeedPinRight, uiSpeed);
 			//delay(1);
-			delayMicroseconds(500);
+			delayMicroseconds(200);
 			digitalWrite(DirectionLeft, FORW);
 			analogWrite(SpeedPinLeft, uiSpeed);
 		}
@@ -157,7 +157,7 @@ Move procedure of a motor with arguments of direction and speed
 			digitalWrite(DirectionRight, FORW);
 			analogWrite(SpeedPinRight, uiSpeed);
 			//delay(1);
-			delayMicroseconds(500);
+			delayMicroseconds(200);
 			digitalWrite(DirectionLeft, BACK);
 			analogWrite(SpeedPinLeft, uiSpeed);
 		}
@@ -529,20 +529,22 @@ Update LCD Display
 *****************************************************************/
 {
 	// Only for timing measurements
-	//if (pstDisplay->stUI.ulCycle == 0)	pstDisplay->stUI.ulOldTime = micros();
+	if (pstPrivate->stUI.ulCycle == 0)	pstPrivate->stUI.ulOldTime = micros();
 
-	if (pstPrivate->stUI.ulCycle % 10 == 0)
+	if (pstPrivate->stUI.ulCycle == 90)
 	{
-		pstPrivate->stUI.ulTime = micros();
 		lcd.setCursor(12, 0);
 		lcd.print("   ");
 		lcd.setCursor(12, 0);
 		lcd.print(*pstPrivate->stMotor.puiActAngle);
 
 		// Only for timing measurements
-		//Serial.print("Time diff: ");
-		//Serial.println(pstDisplay->stUI.ulTime - pstDisplay->stUI.ulOldTime);
-		//pstDisplay->stUI.ulOldTime = pstDisplay->stUI.ulTime;
+		pstPrivate->stUI.ulTime = micros();
+		Serial.print("Update Time Display: ");
+		Serial.println(pstPrivate->stUI.ulTime - pstPrivate->stUI.ulOldTime);
+		pstPrivate->stUI.ulOldTime = pstPrivate->stUI.ulTime;
+
+		pstPrivate->stUI.ulCycle = 0;
 	}
 	pstPrivate->stUI.ulCycle++;
 };
