@@ -107,21 +107,21 @@ Move procedure of a motor with arguments of direction and speed
 	{
 		if (pstMotor->bCalibRun)
 		{
-			//digitalWrite(DirectionRight, FORW);
-			//analogWrite(SpeedPinRight, MIN_V);
+			digitalWrite(DirectionRight, FORW);
+			analogWrite(SpeedPinRight, MIN_V);
 			//delay(1);
 			delayMicroseconds(500);
-			//digitalWrite(DirectionLeft, BACK);
-			//analogWrite(SpeedPinLeft, MIN_V);
+			digitalWrite(DirectionLeft, BACK);
+			analogWrite(SpeedPinLeft, MIN_V);
 		}
 		else if (pstMotor->bCalibRunL)
 		{
-			//digitalWrite(DirectionRight, BACK);
-			//analogWrite(SpeedPinRight, MIN_V);
+			digitalWrite(DirectionRight, BACK);
+			analogWrite(SpeedPinRight, MIN_V);
 			//delay(1);
 			delayMicroseconds(500);
-			//digitalWrite(DirectionLeft, FORW);
-			//analogWrite(SpeedPinLeft, MIN_V);
+			digitalWrite(DirectionLeft, FORW);
+			analogWrite(SpeedPinLeft, MIN_V);
 		}
 		else 
 		{
