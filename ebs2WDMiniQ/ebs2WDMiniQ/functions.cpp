@@ -50,7 +50,7 @@ Adafruit_NeoPixel led = Adafruit_NeoPixel(1, LEDPIN, NEO_GRB + NEO_KHZ800);
 /**********************************************************************************************************************/
 /* Functions
 **********************************************************************************************************************/
-void fsetUIMenu(tstPrvMain *pstUIMenu);
+void fsetUIMenu(tstPrvMain *pstPrivate);
 /**********************************************************************************************************************/
 
 
@@ -64,6 +64,7 @@ Initialize after Power up
 	pstPrivate->stMotor.puiActAngle = &pstPrivate->stCompass.uiAngle;
 	pstPrivate->stUI.puiActAngle = &pstPrivate->stCompass.uiAngle;
 	pstPrivate->stRgbLed.puiColor = &pstPrivate->stCompass.uiAngle;
+	pstPrivate->stUI.pfLightInVoltage = &pstPrivate->stLight.fLightInVoltage;
 
 	// Initialize LCD-Display
 	uint8_t	uiLcdSquare[] = { 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F };
@@ -315,6 +316,15 @@ Generate and set a tone on the buzzer
 	else noTone(TONEPIN);
 };
 
+void fgetLight(tstLightSensor *pstLight)
+/****************************************************************
+Get the light value and convert it into voltage for UI
+
+*****************************************************************/
+{
+	pstLight->fLightInVoltage = ((float)analogRead(5) / 1024.0) * 5.0;
+};
+
 unsigned short fgetKeyValue(tstUI *pstUIKey)
 /****************************************************************
 Determined which Key was pressed
@@ -467,9 +477,13 @@ Indicate different User Interface menus
 		pstPrivate->stUI.usPrevState = enUIState_ManualMode;
 		lcd.clear();
 		lcd.setCursor(0, 0);
-		lcd.print("M:Act. Ang:   ");
-		lcd.setCursor(15, 0);
+		lcd.print("Ang:   ");
+		lcd.setCursor(7, 0);
 		lcd.write(1);
+		lcd.setCursor(9, 0);
+		lcd.print("L:");
+		lcd.setCursor(15, 0);
+		lcd.print("V");
 		lcd.setCursor(0, 1);
 		lcd.print("Key 3 - STOP");
 	}
@@ -501,6 +515,7 @@ Update LCD Display
 
 *****************************************************************/
 {
+	
 	//// Only for timing measurements
 	////if (pstDisplay->stUI.ulCycle == 0)	pstDisplay->stUI.ulOldTime = micros();
 
@@ -520,21 +535,33 @@ Update LCD Display
 	//pstPrivate->stUI.ulCycle++;
 
 	// Only for timing measurements
-	if (pstPrivate->stUI.ulCycle == 0)	pstPrivate->stUI.ulOldTime = micros();
+	//if (pstPrivate->stUI.ulCycle == 0)	pstPrivate->stUI.ulOldTime = micros();
 
 	if (pstPrivate->stUI.ulCycle == 90)
 	{
-		lcd.setCursor(12, 0);
-		lcd.print("   ");
-		lcd.setCursor(12, 0);
-		lcd.print(*pstPrivate->stMotor.puiActAngle);
-
+		if (pstPrivate->stUI.bStartAuto)
+		{
+			lcd.setCursor(12, 0);
+			lcd.print("   ");
+			lcd.setCursor(12, 0);
+			lcd.print(*pstPrivate->stMotor.puiActAngle);
+		}
+		else if (pstPrivate->stUI.bStartManual)
+		{
+			lcd.setCursor(4, 0);
+			lcd.print("   ");
+			lcd.setCursor(4, 0);
+			lcd.print(*pstPrivate->stMotor.puiActAngle);
+			lcd.setCursor(11, 0);
+			lcd.print("    ");
+			lcd.setCursor(11, 0);
+			lcd.print(*pstPrivate->stUI.pfLightInVoltage);
+		}
 		// Only for timing measurements
-		pstPrivate->stUI.ulTime = micros();
-		Serial.print("Update Time Display: ");
-		Serial.println(pstPrivate->stUI.ulTime - pstPrivate->stUI.ulOldTime);
-		pstPrivate->stUI.ulOldTime = pstPrivate->stUI.ulTime;
-
+		//pstPrivate->stUI.ulTime = micros();
+		//Serial.print("Update Time Display: ");
+		//Serial.println(pstPrivate->stUI.ulTime - pstPrivate->stUI.ulOldTime);
+		//pstPrivate->stUI.ulOldTime = pstPrivate->stUI.ulTime;
 		pstPrivate->stUI.ulCycle = 0;
 	}
 	pstPrivate->stUI.ulCycle++;

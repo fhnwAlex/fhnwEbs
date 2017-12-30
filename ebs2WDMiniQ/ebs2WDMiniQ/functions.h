@@ -65,6 +65,14 @@ typedef struct tstBuzzer
 }tstBuzzer;
 
 /*----------------------------------------------------------------
+Lightsensor structure
+----------------------------------------------------------------*/
+typedef struct tstLightSensor
+{
+	float				fLightInVoltage;
+}tstLightSensor;
+
+/*----------------------------------------------------------------
 RGB-LED structure
 ----------------------------------------------------------------*/
 typedef struct tstRgbLed
@@ -79,7 +87,6 @@ Compass structure
 typedef struct tstCompass
 {
 	bool			bRun;
-	//bool			bCalibRun;
 	bool			bCalibDone;
 	float			flDeclinationAngle;
 	signed int		iMagnet_x;
@@ -98,13 +105,14 @@ User interface structure
 typedef struct tstUI
 {
 	bool			bInitUpDone;
-	bool			bMenuSet; //for test only!!
+	bool			bMenuSet; 
 	bool			bStartAuto;
 	bool			bStartManual;
 	bool			bRun;
 	bool			bCalibRun;
 	tenKey			enKeyState;
 	tenUIState		enUIState;
+	float			*pfLightInVoltage;
 	unsigned int	*puiActAngle;
 	unsigned short	usPrevState;
 	unsigned long	ulCycle;
@@ -120,6 +128,7 @@ typedef struct tstPrvMain
 {
 	tstMotor		stMotor;
 	tstBuzzer		stBuzzer;
+	tstLightSensor	stLight;
 	tstRgbLed		stRgbLed;
 	tstUI			stUI;
 	tstCompass		stCompass;

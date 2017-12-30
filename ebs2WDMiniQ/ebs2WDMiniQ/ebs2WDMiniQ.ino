@@ -21,6 +21,7 @@ void finitUp(tstPrvMain *pstPrivate);
 void fcompassCalibrate(tstPrvMain *pstPrivate);
 void fgetAngle(tstCompass *pstCompass);
 void fMoveProcedure(tstMotor *pstMotor);
+void fgetLight(tstLightSensor *pstLight);
 void fsetTone(tstPrvMain *pstBuzzer);
 void fsetColor(tstPrvMain *pstPrivate);
 unsigned short fgetKeyValue(tstUI *pstUI);
@@ -43,12 +44,12 @@ void setup()
 }
 
 
-unsigned long ulCycleTime = 0;
-unsigned long ulTimeOld = micros();
-unsigned long ulCycleTimeSum = 0;
-unsigned long ulCycleTimeMin = 10000000;
-unsigned long ulCycleTimeMax = 0;
-unsigned long ulCycleCount = 1;
+//unsigned long ulCycleTime = 0;
+//unsigned long ulTimeOld = micros();
+//unsigned long ulCycleTimeSum = 0;
+//unsigned long ulCycleTimeMin = 10000000;
+//unsigned long ulCycleTimeMax = 0;
+//unsigned long ulCycleCount = 1;
 
 
 
@@ -56,7 +57,7 @@ unsigned long ulCycleCount = 1;
 void loop() 
 {
 	//unsigned int uiStart_t = millis();
-	///*CYCLIC FUNCTIONS*/
+	
 	////Serial.print("Serialprint: ");
 	////Serial.print((uiStart_t - millis()));
 
@@ -94,18 +95,16 @@ void loop()
 	if (pstUI->bStartAuto || pstUI->bStartManual)
 	{
 		//Time from getAngle to MoveProcedure
-		ulTimeOld = micros();
-
+		//ulTimeOld = micros();
 		fgetAngle(&stPrivate.stCompass);
 
 		//Time after getting Angle
 		//ulCycleTime = micros() - ulTimeOld;
-
 		fMoveProcedure(&stPrivate.stMotor);
 
 		//Time after MoveProcedure
-		ulCycleTime = micros() - ulTimeOld;
-
+		//ulCycleTime = micros() - ulTimeOld;
+		fgetLight(&stPrivate.stLight);
 		fUpdateDisplay(&stPrivate);
 	}
 
