@@ -110,7 +110,6 @@ Move procedure of a motor with arguments of direction and speed
 		{
 			digitalWrite(DirectionRight, FORW);
 			analogWrite(SpeedPinRight, MIN_V);
-			//delay(1);
 			delayMicroseconds(200);
 			digitalWrite(DirectionLeft, BACK);
 			analogWrite(SpeedPinLeft, MIN_V);
@@ -119,7 +118,6 @@ Move procedure of a motor with arguments of direction and speed
 		{
 			digitalWrite(DirectionRight, BACK);
 			analogWrite(SpeedPinRight, MIN_V);
-			//delay(1);
 			delayMicroseconds(200);
 			digitalWrite(DirectionLeft, FORW);
 			analogWrite(SpeedPinLeft, MIN_V);
@@ -146,7 +144,6 @@ Move procedure of a motor with arguments of direction and speed
 			// Left turn
 			digitalWrite(DirectionRight, BACK);
 			analogWrite(SpeedPinRight, uiSpeed);
-			//delay(1);
 			delayMicroseconds(200);
 			digitalWrite(DirectionLeft, FORW);
 			analogWrite(SpeedPinLeft, uiSpeed);
@@ -156,7 +153,6 @@ Move procedure of a motor with arguments of direction and speed
 			// Right turn
 			digitalWrite(DirectionRight, FORW);
 			analogWrite(SpeedPinRight, uiSpeed);
-			//delay(1);
 			delayMicroseconds(200);
 			digitalWrite(DirectionLeft, BACK);
 			analogWrite(SpeedPinLeft, uiSpeed);
