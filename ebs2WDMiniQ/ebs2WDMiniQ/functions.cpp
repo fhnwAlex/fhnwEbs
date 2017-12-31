@@ -181,8 +181,8 @@ Indicates color on RGB Led
 
 	if (pstUI->bStartAuto || pstUI->bStartManual)
 	{
-		if (iColor <= 45)								led.setPixelColor(0, 200, 0, 0);
-		else if ((iColor > 45) && (iColor < 170))		led.setPixelColor(0, 255, 204, 0);
+		if (iColor <= 90)								led.setPixelColor(0, 200, 0, 0);
+		else if ((iColor > 90) && (iColor < 170))		led.setPixelColor(0, 255, 204, 0);
 		else if (iColor >= 170)							led.setPixelColor(0, 0, 200, 0);
 		led.show();
 	}
