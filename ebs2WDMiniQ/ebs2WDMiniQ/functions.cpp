@@ -206,7 +206,7 @@ Indicates color on RGB Led
 
 void fcompassCalibrate(tstPrvMain *pstPrivate) 
 /****************************************************************
-Compass calibration
+Compass calibration / Offset calculating
 Run for every new location
 *****************************************************************/
 {
@@ -214,10 +214,7 @@ Run for every new location
 	tstMotor *pstMotor = &pstPrivate->stMotor;
 
 	bool			bStarted = false;
-	signed int		iMinX = 0;
-	signed int		iMaxX = 0;
-	signed int		iMinY = 0;
-	signed int		iMaxY = 0;
+	signed int		iMinX, iMaxX, iMinY, iMaxY = 0;
 	unsigned long	ulStartTime = millis();
 
 	
@@ -279,9 +276,9 @@ Get actual angle from compass
 		pstCompass->iMagnet_y = pstCompass->iMagnet_y - pstCompass->iMagOffset_y;
 
 		// To calculate heading in degrees. 0 degree indicates North
-		//flTempAngle += (atan2((float)pstCompass->iMagnet_y, (float)pstCompass->iMagnet_x) + pstCompass->flDeclinationAngle);
-		flTempAngle += (atan2((float)pstCompass->iMagnet_y, (float)pstCompass->iMagnet_x) + pstCompass->flDeclinationAngle + (90.0 * M_PI / 180.0));
-
+		flTempAngle +=	(	atan2( (float)pstCompass->iMagnet_y, (float)pstCompass->iMagnet_x) +
+						(	pstCompass->flDeclinationAngle) +
+						(	90.0 * M_PI / 180.0));
 	}
 	// Filtering angles
 	flTempAngle = flTempAngle / SAMPLES;
@@ -292,24 +289,6 @@ Get actual angle from compass
 	flTempAngle = flTempAngle * 180 / M_PI;			// Calculation from radiant to degree
 
 	pstCompass->uiAngle = (unsigned int)flTempAngle;
-};
-
-void fsetTone(tstPrvMain *pstBuzzer)
-/****************************************************************
-Generate and set a tone on the buzzer
-
-*****************************************************************/
-{
-	signed int iAngleDiff = *pstBuzzer->stMotor.puiActAngle;
-	iAngleDiff = abs(iAngleDiff - 180);
-	
-	if (iAngleDiff < 30)								tone(TONEPIN, TONEFREQ);
-	else if(iAngleDiff >= 30 && iAngleDiff < 60)		tone(TONEPIN, 2 * TONEFREQ);
-	else if (iAngleDiff >= 60 && iAngleDiff < 90)		tone(TONEPIN, 4 * TONEFREQ);
-	else if (iAngleDiff >= 90 && iAngleDiff < 120)		tone(TONEPIN, 8 * TONEFREQ);
-	else if (iAngleDiff >= 120 && iAngleDiff < 150)		tone(TONEPIN, 10 * TONEFREQ);
-	else if (iAngleDiff >= 150)							tone(TONEPIN, 20 * TONEFREQ);
-	else noTone(TONEPIN);
 };
 
 void fgetLight(tstLightSensor *pstLight)

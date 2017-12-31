@@ -22,7 +22,6 @@ void fcompassCalibrate(tstPrvMain *pstPrivate);
 void fgetAngle(tstCompass *pstCompass);
 void fMoveProcedure(tstMotor *pstMotor);
 void fgetLight(tstLightSensor *pstLight);
-void fsetTone(tstPrvMain *pstBuzzer);
 void fsetColor(tstPrvMain *pstPrivate);
 unsigned short fgetKeyValue(tstUI *pstUI);
 void fUIProcedure(tstPrvMain *pstPrivate);
