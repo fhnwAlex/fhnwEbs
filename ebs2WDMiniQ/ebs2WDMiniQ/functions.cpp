@@ -383,6 +383,7 @@ Complete User Interface procedure
 			pstUIProcedure->bStartAuto = false;
 			pstUIProcedure->bStartManual = false;
 			pstMotor->bRun = false;
+			fMoveProcedure(pstMotor);
 			pstUIProcedure->enUIState = enUIState_Abort;
 			fsetUIMenu(pstPrivate);
 		}
@@ -404,7 +405,6 @@ Indicate different User Interface menus
 *****************************************************************/
 {
 	tstCompass	*pstCompass = &pstPrivate->stCompass;
-	tstMotor	*pstMotor = &pstPrivate->stMotor;
 	
 	if (pstPrivate->stUI.enUIState == enUIState_Calibration)
 	{
@@ -469,12 +469,12 @@ Indicate different User Interface menus
 		pstPrivate->stUI.bUIDone = false;
 		lcd.clear();
 		lcd.setCursor(0, 0);
-		fMoveProcedure(pstMotor);
 		lcd.print("Mode aborted!");
 		delay(2000);
 		pstPrivate->stUI.bMenuSet = false;
 	}
 };
+
 
 void fUpdateDisplay(tstPrvMain *pstPrivate)
 /****************************************************************
