@@ -1,12 +1,12 @@
 /**********************************************************************************************************************
 FHNW - EMBEDDED SYSTEMS 
 **********************************************************************************************************************
-/*  Program :: ebs2WDMiniQ.ino	*/
-/*	Revision:: 1.0	*/
-/*	Author:: A. Gessler / B. Hürzeler	*/
-/*	Date:: 2017-10-05	*/
+/*  Program:	ebs2WDMiniQ.ino				*/
+/*	Revision:	1.0							*/
+/*	Author:		A. Gessler / B. Hürzeler	*/
+/*	Date:		2018-01-12					*/
 /**********************************************************************************************************************/
-/* Main program
+/* MAIN PROGRAM
 ***********************************************************************************************************************/
 
 /****************************************************************
@@ -27,12 +27,10 @@ unsigned short fgetKeyValue(tstUI *pstUI);
 void fUIProcedure(tstPrvMain *pstPrivate);
 void fUpdateDisplay(tstPrvMain *pstPrivate);
 
-
 /****************************************************************
 MEMORY ALLOCATION
 *****************************************************************/
 tstPrvMain stPrivate;	//Allocate private memory
-
 tstUI *pstUI = &stPrivate.stUI;
 
 // the setup function runs once when you press reset or power the board

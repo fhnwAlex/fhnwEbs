@@ -1,10 +1,10 @@
 /**********************************************************************************************************************
 FHNW - EMBEDDED SYSTEMS
 **********************************************************************************************************************
-/*  Program :: Functions.cpp	*/
-/*	Revision:: 1.0	*/
-/*	Author:: A. Gessler / B. Hürzeler	*/
-/*	Date:: 2017-10-05	*/
+/*  Program:	Functions.cpp				*/
+/*	Revision:	1.0							*/
+/*	Author:		A. Gessler / B. Hürzeler	*/
+/*	Date:		2018-01-12					*/
 /**********************************************************************************************************************/
 /* Includes
 **********************************************************************************************************************/
@@ -94,7 +94,6 @@ Initialize after Power up
 
 	pstPrivate->stUI.enUIState = enUIState_undef;
 	fsetUIMenu(pstPrivate);
-	pstPrivate->stUI.bInitUpDone = true;
 };
 
 void fMoveProcedure(tstMotor *pstMotor)
