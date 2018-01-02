@@ -312,37 +312,26 @@ Set key state
 	if (usRet > 4)
 	{
 		pstUIKey->enKeyState = enKey_undef;
+		keys[0] = keys[0] + 1;
 		if (++keys[0] >= 1)
 		{
 			if (keys[1] > 700) usRet = 4;
-			else if (keys[1] > 10) usRet = 1;
-			else if (keys[2] > 10) usRet = 2;
-			else if (keys[3] > 10) usRet = 3;
-			else usRet = 0;
+			else if (keys[1] > 10) usRet = enKey_1;
+			else if (keys[2] > 10) usRet = enKey_2;
+			else if (keys[3] > 10) usRet = enKey_3;
+			else usRet = enKey_undef;
 			if (usRet) keys[0] = keys[1] = keys[2] = keys[3] = 0;
 		}
-		else usRet = pstUIKey->enKeyState;
+		else usRet = enKey_undef;
 	}
 	else
 	{
 		if (usRet >= 0 && usRet < 1)
 		{
-			if (keys[1]<32000) ++keys[1];
-			pstUIKey->enKeyState = enKey_1;
-			usRet = pstUIKey->enKeyState;
+			if (keys[1] < 32000)	keys[1] = keys[1] + 1;
 		}
-		else if (usRet >= 1 && usRet < 3)
-		{
-			++keys[2];
-			pstUIKey->enKeyState = enKey_2;
-			usRet = pstUIKey->enKeyState;
-		}
-		else if (usRet >= 3 && usRet < 4)
-		{
-			++keys[3];
-			pstUIKey->enKeyState = enKey_3;
-			usRet = pstUIKey->enKeyState;
-		}
+		else if (usRet >= 1 && usRet < 3)	keys[2] = keys[2] + 1;
+		else if (usRet >= 3 && usRet < 4)	keys[3] = keys[3] + 1;
 		usRet = pstUIKey->enKeyState;
 	}
 	return usRet;
@@ -370,7 +359,7 @@ Complete User Interface procedure
 			pstUIProcedure->enUIState = enUIState_Calibration;
 			fsetUIMenu(pstPrivate);
 		}
-		else if (!pstUIProcedure->bStartAuto)
+		else if (!pstUIProcedure->bStartAuto || !pstUIProcedure->bStartManual)
 		{
 			pstUIProcedure->bStartManual = true;
 			pstUIProcedure->enUIState = enUIState_ManualMode;
@@ -414,9 +403,9 @@ Indicate different User Interface menus
 
 *****************************************************************/
 {
-	tstCompass *pstCompass = &pstPrivate->stCompass;
-	tstMotor *pstMotor = &pstPrivate->stMotor;
-
+	tstCompass	*pstCompass = &pstPrivate->stCompass;
+	tstMotor	*pstMotor = &pstPrivate->stMotor;
+	
 	if (pstPrivate->stUI.enUIState == enUIState_Calibration)
 	{
 		lcd.clear();
@@ -447,8 +436,9 @@ Indicate different User Interface menus
 		pstPrivate->stUI.usPrevState = enUIState_undef;
 		pstPrivate->stUI.bMenuSet = true;
 	}
-	else if (pstPrivate->stUI.enUIState == enUIState_ManualMode)
+	else if (pstPrivate->stUI.enUIState == enUIState_ManualMode && !pstPrivate->stUI.bUIDone)
 	{
+		pstPrivate->stUI.bUIDone = true;
 		pstPrivate->stUI.usPrevState = enUIState_ManualMode;
 		lcd.clear();
 		lcd.setCursor(0, 0);
@@ -462,8 +452,9 @@ Indicate different User Interface menus
 		lcd.setCursor(0, 1);
 		lcd.print("Key 3 - STOP");
 	}
-	else if (pstPrivate->stUI.enUIState == enUIState_AutomaticMode)
+	else if (pstPrivate->stUI.enUIState == enUIState_AutomaticMode && !pstPrivate->stUI.bUIDone)
 	{
+		pstPrivate->stUI.bUIDone = true;
 		pstPrivate->stUI.usPrevState = enUIState_AutomaticMode;
 		lcd.clear();
 		lcd.setCursor(0, 0);
@@ -475,6 +466,7 @@ Indicate different User Interface menus
 	}
 	else if ((pstPrivate->stUI.enUIState == enUIState_Abort) && pstPrivate->stUI.usPrevState > 0)
 	{
+		pstPrivate->stUI.bUIDone = false;
 		lcd.clear();
 		lcd.setCursor(0, 0);
 		fMoveProcedure(pstMotor);

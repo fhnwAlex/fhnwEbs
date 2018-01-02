@@ -110,6 +110,7 @@ typedef struct tstUI
 	bool			bStartManual;
 	bool			bRun;
 	bool			bCalibRun;
+	bool			bUIDone;
 	tenKey			enKeyState;
 	tenUIState		enUIState;
 	float			*pfLightInVoltage;
