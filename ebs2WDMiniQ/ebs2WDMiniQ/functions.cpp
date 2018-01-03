@@ -312,26 +312,37 @@ Set key state
 	if (usRet > 4)
 	{
 		pstUIKey->enKeyState = enKey_undef;
-		keys[0] = keys[0] + 1;
 		if (++keys[0] >= 1)
 		{
 			if (keys[1] > 700) usRet = 4;
-			else if (keys[1] > 10) usRet = enKey_1;
-			else if (keys[2] > 10) usRet = enKey_2;
-			else if (keys[3] > 10) usRet = enKey_3;
-			else usRet = enKey_undef;
+			else if (keys[1] > 10) usRet = 1;
+			else if (keys[2] > 10) usRet = 2;
+			else if (keys[3] > 10) usRet = 3;
+			else usRet = 0;
 			if (usRet) keys[0] = keys[1] = keys[2] = keys[3] = 0;
 		}
-		else usRet = enKey_undef;
+		else usRet = pstUIKey->enKeyState;
 	}
 	else
 	{
 		if (usRet >= 0 && usRet < 1)
 		{
-			if (keys[1] < 32000)	keys[1] = keys[1] + 1;
+			if (keys[1]<32000) ++keys[1];
+			pstUIKey->enKeyState = enKey_1;
+			usRet = pstUIKey->enKeyState;
 		}
-		else if (usRet >= 1 && usRet < 3)	keys[2] = keys[2] + 1;
-		else if (usRet >= 3 && usRet < 4)	keys[3] = keys[3] + 1;
+		else if (usRet >= 1 && usRet < 3)
+		{
+			++keys[2];
+			pstUIKey->enKeyState = enKey_2;
+			usRet = pstUIKey->enKeyState;
+		}
+		else if (usRet >= 3 && usRet < 4)
+		{
+			++keys[3];
+			pstUIKey->enKeyState = enKey_3;
+			usRet = pstUIKey->enKeyState;
+		}
 		usRet = pstUIKey->enKeyState;
 	}
 	return usRet;
