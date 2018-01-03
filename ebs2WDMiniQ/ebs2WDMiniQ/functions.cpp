@@ -132,7 +132,7 @@ Move procedure of a motor with arguments of direction and speed
 		signed int	iDiffAngle = *pstMotor->puiActAngle;
 		iDiffAngle = abs(iDiffAngle - 180);
 		//unsigned int uiSpeed = (unsigned int)(((MAX_V - MIN_V) * (float)iDiffAngle / HALFCIRCLE) + MIN_V);
-		unsigned int uiSpeed = (unsigned int)(((MAX_V - MIN_V) / (-HALFCIRCLE) * (float)iDiffAngle) + MAX_V);
+		pstMotor->uiSpeed = (unsigned int)(((MAX_V - MIN_V) / (-HALFCIRCLE) * (float)iDiffAngle) + MAX_V);
 		if (iDiffAngle >= (HALFCIRCLE - ANGLE_MIN))
 		{
 			analogWrite(SpeedPinRight, LOW);
@@ -142,19 +142,19 @@ Move procedure of a motor with arguments of direction and speed
 		{
 			// Left turn
 			digitalWrite(DirectionRight, BACK);
-			analogWrite(SpeedPinRight, uiSpeed);
+			analogWrite(SpeedPinRight, pstMotor->uiSpeed);
 			delayMicroseconds(10);
 			digitalWrite(DirectionLeft, FORW);
-			analogWrite(SpeedPinLeft, uiSpeed);
+			analogWrite(SpeedPinLeft, pstMotor->uiSpeed);
 		}
 		else
 		{
 			// Right turn
 			digitalWrite(DirectionRight, FORW);
-			analogWrite(SpeedPinRight, uiSpeed);
+			analogWrite(SpeedPinRight, pstMotor->uiSpeed);
 			delayMicroseconds(10);
 			digitalWrite(DirectionLeft, BACK);
-			analogWrite(SpeedPinLeft, uiSpeed);
+			analogWrite(SpeedPinLeft, pstMotor->uiSpeed);
 		}
 	}
 	else 
