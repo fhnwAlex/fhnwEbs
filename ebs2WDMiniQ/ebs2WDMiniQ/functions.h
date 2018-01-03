@@ -100,6 +100,7 @@ typedef struct tstUI
 	float				*pfLightInVoltage;		// Voltage depend on Photodiode resistance
 	unsigned int		*puiActAngle;			// Actual angle compass
 	unsigned short		usPrevState;			// Previous UI state
+    unsigned short		usKeyState;             // Key state
 	unsigned long		ulCycle;				// Cycle counter
 	unsigned long		ulTime;					//DELETE AFTER TESTING!!
 	unsigned long		ulOldTime;				//DELETE AFTER TESTING!!

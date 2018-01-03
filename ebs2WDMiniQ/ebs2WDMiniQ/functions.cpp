@@ -77,7 +77,7 @@ Initialize after Power up
 
 	// Initialize compass
 	mag.initialize();
-	if (!mag.testConnection())	lcd.println("Connection to compass failed!");
+	if (!mag.testConnection()) { lcd.println("Connection to compass failed!"); }
 
 	// Initialize Motorpins
 	pinMode(SpeedPinLeft, OUTPUT);
@@ -88,6 +88,7 @@ Initialize after Power up
 	// Initialize RGB-LED
 	led.begin();
 	led.show();
+	led.setBrightness(60);
 
 	// Initialize Buzzer
 	pinMode(TONEPIN, OUTPUT);
@@ -131,7 +132,7 @@ Move procedure of a motor with arguments of direction and speed
 		// Dynamic speed mode
 		signed int	iDiffAngle = *pstMotor->puiActAngle;
 		iDiffAngle = abs(iDiffAngle - 180);
-		//unsigned int uiSpeed = (unsigned int)(((MAX_V - MIN_V) * (float)iDiffAngle / HALFCIRCLE) + MIN_V);
+		
 		pstMotor->uiSpeed = (unsigned int)(((MAX_V - MIN_V) / (-HALFCIRCLE) * (float)iDiffAngle) + MAX_V);
 		if (iDiffAngle >= (HALFCIRCLE - ANGLE_MIN))
 		{
@@ -176,13 +177,13 @@ Indicates color on RGB Led
 
 	signed int	iColor = *pstColor->puiColor;
 	iColor = abs(iColor - 180);
-	led.setBrightness(60);
+	
 
 	if (pstUI->bStartAuto || pstUI->bStartManual)
 	{
-		if (iColor <= 90)								led.setPixelColor(0, 200, 0, 0);
-		else if ((iColor > 90) && (iColor < 170))		led.setPixelColor(0, 255, 204, 0);
-		else if (iColor >= 170)							led.setPixelColor(0, 0, 200, 0);
+		if (iColor <= 90) { led.setPixelColor(0, 200, 0, 0); }
+		else if ((iColor > 90) && (iColor < 170)) { led.setPixelColor(0, 255, 204, 0); }
+		else if (iColor >= 170) { led.setPixelColor(0, 0, 200, 0); }
 		led.show();
 	}
 	else if (pstMotor->bCalibRun || pstMotor->bCalibRunL)
@@ -231,10 +232,10 @@ Run for every new location
 			fMoveProcedure(pstMotor);
 		}
 		mag.getHeading(&pstCompass->iMagnet_x, &pstCompass->iMagnet_y, &pstCompass->iMagnet_z);
-		if (pstCompass->iMagnet_x < iMinX) iMinX = pstCompass->iMagnet_x; 
-		if (pstCompass->iMagnet_x > iMaxX) iMaxX = pstCompass->iMagnet_x; 
-		if (pstCompass->iMagnet_y < iMinY) iMinY = pstCompass->iMagnet_y; 
-		if (pstCompass->iMagnet_y > iMaxY) iMaxY = pstCompass->iMagnet_y; 
+		if (pstCompass->iMagnet_x < iMinX) { iMinX = pstCompass->iMagnet_x; }
+		if (pstCompass->iMagnet_x > iMaxX) { iMaxX = pstCompass->iMagnet_x; }
+		if (pstCompass->iMagnet_y < iMinY) { iMinY = pstCompass->iMagnet_y; }
+		if (pstCompass->iMagnet_y > iMaxY) { iMaxY = pstCompass->iMagnet_y; }
 		if (i < LCDCOLS && (millis() - ulStartTime) >= (CALIB_TIME / LCDCOLS * i))
 		{
 			lcd.setCursor(i, 1);
@@ -284,7 +285,7 @@ Get actual angle from compass
 	flTempAngle = flTempAngle / SAMPLES;
 	//flTempAngle = (flTempAngle / SAMPLES) + (90 * M_PI / 180); works well
 
-	if (flTempAngle < 0)  flTempAngle += 2 * M_PI; 
+	if (flTempAngle < 0) { flTempAngle += 2 * M_PI; }
 
 	flTempAngle = flTempAngle * 180 / M_PI;			// Calculation from radiant to degree
 
@@ -314,12 +315,12 @@ Set key state
 		pstUIKey->enKeyState = enKey_undef;
 		if (++keys[0] >= 1)
 		{
-			if (keys[1] > 700) usRet = 4;
-			else if (keys[1] > 10) usRet = 1;
-			else if (keys[2] > 10) usRet = 2;
-			else if (keys[3] > 10) usRet = 3;
+			if (keys[1] > 700) { usRet = 4; }
+			else if (keys[1] > 10) { usRet = 1; }
+			else if (keys[2] > 10) { usRet = 2; }
+			else if (keys[3] > 10) { usRet = 3; }
 			else usRet = 0;
-			if (usRet) keys[0] = keys[1] = keys[2] = keys[3] = 0;
+			if (usRet) { keys[0] = keys[1] = keys[2] = keys[3] = 0; }
 		}
 		else usRet = pstUIKey->enKeyState;
 	}
@@ -357,11 +358,11 @@ Complete User Interface procedure
 	tstCompass *pstCompass = &pstPrivate->stCompass;
 	tstMotor *pstMotor = &pstPrivate->stMotor;
 	tstUI *pstUIProcedure = &pstPrivate->stUI;
-	unsigned short		usKeyState;
+	//unsigned short		usKeyState;
 
-	usKeyState = fgetKeyValue(pstUIProcedure);
+	pstUIProcedure->usKeyState = fgetKeyValue(pstUIProcedure);
 
-	switch (usKeyState)
+	switch (pstUIProcedure->usKeyState)
 	{
 	case enKey_1:
 
@@ -402,7 +403,7 @@ Complete User Interface procedure
 
 	case enKey_undef:
 		pstUIProcedure->enUIState = enUIState_undef;
-		if (!pstUIProcedure->bMenuSet)	fsetUIMenu(pstPrivate);
+		if (!pstUIProcedure->bMenuSet) { fsetUIMenu(pstPrivate); }
 		break;
 	default:
 		break;
@@ -416,8 +417,9 @@ Indicate different User Interface menus
 *****************************************************************/
 {
 	tstCompass	*pstCompass = &pstPrivate->stCompass;
+    tstUI       *pstUI = &pstPrivate->stUI;
 	
-	if (pstPrivate->stUI.enUIState == enUIState_Calibration)
+	if (pstUI->enUIState == enUIState_Calibration)
 	{
 		lcd.clear();
 		//lcd.setCursor(0, 0);
@@ -425,33 +427,33 @@ Indicate different User Interface menus
 		fcompassCalibrate(pstPrivate);
 		lcd.setCursor(0, 0);
 		lcd.print("                  ");
-		//lcd.setCursor(4, 0);
+		lcd.setCursor(4, 0);
 		lcd.print("   Complete!");
 		delay(2000);
-		pstPrivate->stUI.bMenuSet = false;
+        pstUI->bMenuSet = false;
 	}
-	else if (pstPrivate->stUI.enUIState == enUIState_undef && !pstCompass->bCalibDone)	
+	else if (pstUI->enUIState == enUIState_undef && !pstCompass->bCalibDone)
 	{
 		lcd.clear();
 		lcd.println("PRESS Key 1 to  ");
 		lcd.setCursor(0, 1);
 		lcd.println("calib. compass! ");
-		pstPrivate->stUI.bMenuSet = true;
+        pstUI->bMenuSet = true;
 	}
-	else if(pstPrivate->stUI.enUIState == enUIState_undef && pstCompass->bCalibDone)
+	else if(pstUI->enUIState == enUIState_undef && pstCompass->bCalibDone)
 	{
 		lcd.clear();
 		lcd.println("Key 1 - ManMode ");
 		lcd.setCursor(0, 1);
 		lcd.println("Key 2 - AutoMode");
-		pstPrivate->stUI.usPrevState = enUIState_undef;
-		pstPrivate->stUI.bMenuSet = true;
+        pstUI->usPrevState = enUIState_undef;
+        pstUI->bMenuSet = true;
 	}
-	else if (pstPrivate->stUI.enUIState == enUIState_ManualMode && !pstPrivate->stUI.bUIDone)
+	else if (pstUI->enUIState == enUIState_ManualMode && !pstUI->bUIDone)
 	{
-		pstPrivate->stUI.bUIDone = true;
-		pstPrivate->stUI.bMenuSet = true;
-		pstPrivate->stUI.usPrevState = enUIState_ManualMode;
+        pstUI->bUIDone = true;
+        pstUI->bMenuSet = true;
+        pstUI->usPrevState = enUIState_ManualMode;
 		lcd.clear();
 		//lcd.setCursor(0, 0);
 		lcd.print("Ang:   ");
@@ -464,11 +466,11 @@ Indicate different User Interface menus
 		lcd.setCursor(0, 1);
 		lcd.print("Key 3 - STOP");
 	}
-	else if (pstPrivate->stUI.enUIState == enUIState_AutomaticMode && !pstPrivate->stUI.bUIDone)
+	else if (pstUI->enUIState == enUIState_AutomaticMode && !pstUI->bUIDone)
 	{
-		pstPrivate->stUI.bUIDone = true;
-		pstPrivate->stUI.bMenuSet = true;
-		pstPrivate->stUI.usPrevState = enUIState_AutomaticMode;
+        pstUI->bUIDone = true;
+        pstUI->bMenuSet = true;
+        pstUI->usPrevState = enUIState_AutomaticMode;
 		lcd.clear();
 		//lcd.setCursor(0, 0);
 		lcd.print("Act. Ang:      ");
@@ -477,14 +479,14 @@ Indicate different User Interface menus
 		lcd.setCursor(0, 1);
 		lcd.print("Key 3 - STOP");
 	}
-	else if ((pstPrivate->stUI.enUIState == enUIState_Abort) && pstPrivate->stUI.usPrevState > 0)
+	else if ((pstUI->enUIState == enUIState_Abort) && pstUI->usPrevState > 0)
 	{
-		pstPrivate->stUI.bUIDone = false;
+        pstUI->bUIDone = false;
 		lcd.clear();
 		//lcd.setCursor(0, 0);
 		lcd.print("Mode aborted!");
 		delay(2000);
-		pstPrivate->stUI.bMenuSet = false;
+        pstUI->bMenuSet = false;
 	}
 };
 
