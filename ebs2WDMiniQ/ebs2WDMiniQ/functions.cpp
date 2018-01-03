@@ -503,7 +503,6 @@ Update LCD Display
 			else if(*pstPrivate->stMotor.puiActAngle >= 10 && *pstPrivate->stMotor.puiActAngle < 100)
 			{
                 sprintf(pstPrivate->stUI.chAngle, "%d", *pstPrivate->stMotor.puiActAngle);
-                strcat(pstPrivate->stUI.chAngle, " ");
                 lcd.print(strcat(pstPrivate->stUI.chAngle, " "));
 				//lcd.print(" ");
 				//lcd.print(*pstPrivate->stMotor.puiActAngle);
