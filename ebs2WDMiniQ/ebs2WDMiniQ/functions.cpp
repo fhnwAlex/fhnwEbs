@@ -420,13 +420,13 @@ Indicate different User Interface menus
 	if (pstPrivate->stUI.enUIState == enUIState_Calibration)
 	{
 		lcd.clear();
-		lcd.setCursor(0, 0);
-		if (!pstCompass->bCalibDone)		lcd.println("Compass calibr..");
+		//lcd.setCursor(0, 0);
+		if (!pstCompass->bCalibDone) { lcd.println("Compass calibr.."); }
 		fcompassCalibrate(pstPrivate);
 		lcd.setCursor(0, 0);
 		lcd.print("                  ");
-		lcd.setCursor(4, 0);
-		lcd.print("Complete!");
+		//lcd.setCursor(4, 0);
+		lcd.print("   Complete!");
 		delay(2000);
 		pstPrivate->stUI.bMenuSet = false;
 	}
@@ -453,14 +453,14 @@ Indicate different User Interface menus
 		pstPrivate->stUI.bMenuSet = true;
 		pstPrivate->stUI.usPrevState = enUIState_ManualMode;
 		lcd.clear();
-		lcd.setCursor(0, 0);
+		//lcd.setCursor(0, 0);
 		lcd.print("Ang:   ");
-		lcd.setCursor(7, 0);
+		//lcd.setCursor(7, 0);
 		lcd.write(1);
-		lcd.setCursor(9, 0);
-		lcd.print("L:");
-		lcd.setCursor(15, 0);
-		lcd.print("V");
+		//lcd.setCursor(9, 0);
+		lcd.print(" L:    V");
+		//lcd.setCursor(15, 0);
+		//lcd.print("V");
 		lcd.setCursor(0, 1);
 		lcd.print("Key 3 - STOP");
 	}
@@ -481,7 +481,7 @@ Indicate different User Interface menus
 	{
 		pstPrivate->stUI.bUIDone = false;
 		lcd.clear();
-		lcd.setCursor(0, 0);
+		//lcd.setCursor(0, 0);
 		lcd.print("Mode aborted!");
 		delay(2000);
 		pstPrivate->stUI.bMenuSet = false;
