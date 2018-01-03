@@ -119,6 +119,9 @@ typedef struct tstUI
 	unsigned long	ulTimeLCDPrint;
 	unsigned long	ulTimeLCDPrintOld;
 	unsigned long	ulTimeLCDPrintDiff;
+	unsigned long	ulTimeLCDPrint2;
+	unsigned long	ulTimeLCDPrintOld2;
+	unsigned long	ulTimeLCDPrintDiff2;
 }tstUI;
 
 

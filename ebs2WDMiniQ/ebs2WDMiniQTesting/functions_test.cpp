@@ -548,6 +548,7 @@ Update LCD Display
 	//}
 	//pstPrivate->stUI.ulCycle++;
 
+
 	//Tests Nr.2 timing of LCD functions
 	pstPrivate->stUI.ulTimeLCDClearOld = micros();
 	lcd.clear();
@@ -558,10 +559,15 @@ Update LCD Display
 	pstPrivate->stUI.ulTimeLCDCursor = micros();
 
 	pstPrivate->stUI.ulTimeLCDPrintOld = micros();
-	lcd.print("0123456789abcdef");
+	lcd.print("  ");
 	pstPrivate->stUI.ulTimeLCDPrint = micros();
-	
+
+	pstPrivate->stUI.ulTimeLCDPrintOld2 = micros();
+	lcd.print("9");
+	pstPrivate->stUI.ulTimeLCDPrint2 = micros();
+
 	pstPrivate->stUI.ulTimeLCDClearDiff = pstPrivate->stUI.ulTimeLCDClear - pstPrivate->stUI.ulTimeLCDClearOld;
 	pstPrivate->stUI.ulTimeLCDCursorDiff = pstPrivate->stUI.ulTimeLCDCursor - pstPrivate->stUI.ulTimeLCDCursorOld;
 	pstPrivate->stUI.ulTimeLCDPrintDiff = pstPrivate->stUI.ulTimeLCDPrint - pstPrivate->stUI.ulTimeLCDPrintOld;
+	pstPrivate->stUI.ulTimeLCDPrintDiff2 = pstPrivate->stUI.ulTimeLCDPrint2 - pstPrivate->stUI.ulTimeLCDPrintOld2;
 };

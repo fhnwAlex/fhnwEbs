@@ -46,7 +46,9 @@ void setup()
 	Serial.print("\t");
 	Serial.print("T LCD Cursor");
 	Serial.print("\t");
-	Serial.println("T LCD Print");
+	Serial.print("T LCD Print");
+	Serial.print("\t");
+	Serial.println("T LCD Print2");
 }
 
 
@@ -115,7 +117,9 @@ void loop()
 	Serial.print("\t");
 	Serial.print(stPrivate.stUI.ulTimeLCDCursorDiff);
 	Serial.print("\t");
-	Serial.println(stPrivate.stUI.ulTimeLCDPrintDiff);
+	Serial.print(stPrivate.stUI.ulTimeLCDPrintDiff);
+	Serial.print("\t");
+	Serial.println(stPrivate.stUI.ulTimeLCDPrintDiff2);
 	delay(1000);
 
 }
