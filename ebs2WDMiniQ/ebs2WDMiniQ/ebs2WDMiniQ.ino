@@ -40,7 +40,6 @@ void setup()
 	finitUp(&stPrivate);
 
 	////FOR TIMING TESTS
-	//delay(500);
 	//Serial.print("CC");
 	//Serial.print("\t");
 	//Serial.print("Min.UI");
@@ -65,39 +64,46 @@ void setup()
 	//Serial.print("\t");
 	//Serial.print("Min.LCD");
 	//Serial.print("\t");
-	//Serial.println("Max.LCD");
+	//Serial.print("Max.LCD");
+	//Serial.print("\t");
+	//Serial.print("Min.LCD_UD");
+	//Serial.print("\t");
+	//Serial.println("Max.LCD_UD");
 }
 
 ////FOR TIMING TESTS
 //unsigned long ulCtfgetAngle = 0;
-//unsigned long ulCtOldfgetAngle = micros();
+//unsigned long ulCtOldfgetAngle = 0;
 //unsigned long ulCtfgetAngleMin = 10000000;
 //unsigned long ulCtfgetAngleMax = 0;
 //
 //unsigned long ulCtfUIProcedure = 0;
-//unsigned long ulCtOldfUIProcedure = micros();
+//unsigned long ulCtOldfUIProcedure = 0;
 //unsigned long ulCtfUIProcedureMin = 10000000;
 //unsigned long ulCtfUIProcedureMax = 0;
 //
 //unsigned long ulCtfsetColor = 0;
-//unsigned long ulCtOldfsetColor = micros();
+//unsigned long ulCtOldfsetColor = 0;
 //unsigned long ulCtfsetColorMin = 10000000;
 //unsigned long ulCtfsetColorMax = 0;
 //
 //unsigned long ulCtfMoveProcedure = 0;
-//unsigned long ulCtOldfMoveProcedure = micros();
+//unsigned long ulCtOldfMoveProcedure = 0;
 //unsigned long ulCtfMoveProcedureMin = 10000000;
 //unsigned long ulCtfMoveProcedureMax = 0;
 //
 //unsigned long ulCtfgetLight = 0;
-//unsigned long ulCtOldfgetLight = micros();
+//unsigned long ulCtOldfgetLight = 0;
 //unsigned long ulCtfgetLightMin = 10000000;
 //unsigned long ulCtfgetLightMax = 0;
 //
 //unsigned long ulCtfUpdateDisplay = 0;
-//unsigned long ulCtOldfUpdateDisplay = micros();
+//unsigned long ulCtOldfUpdateDisplay = 0;
 //unsigned long ulCtfUpdateDisplayMin = 10000000;
 //unsigned long ulCtfUpdateDisplayMax = 0;
+//
+//unsigned long ulTimeUpdateLcdMin = 10000000;
+//unsigned long ulTimeUpdateLcdMax = 0;
 //
 //unsigned long ulCycleCount = 1;
 
@@ -161,6 +167,9 @@ void loop()
 	//if (ulCtfUpdateDisplay < ulCtfUpdateDisplayMin) ulCtfUpdateDisplayMin = ulCtfUpdateDisplay;
 	//if (ulCtfUpdateDisplay > ulCtfUpdateDisplayMax) ulCtfUpdateDisplayMax = ulCtfUpdateDisplay;
 
+	//if (stPrivate.stUI.ulTimeDiff < ulTimeUpdateLcdMin) ulTimeUpdateLcdMin = stPrivate.stUI.ulTimeDiff;
+	//if (stPrivate.stUI.ulTimeDiff > ulTimeUpdateLcdMax) ulTimeUpdateLcdMax = stPrivate.stUI.ulTimeDiff;
+
 	//if (ulCycleCount == 1000)
 	//{
 	//	Serial.print(ulCycleCount);
@@ -189,8 +198,10 @@ void loop()
 	//	Serial.print("\t");
 	//	Serial.print(ulCtfUpdateDisplayMax);
 	//	Serial.print("\t");
-	//	Serial.println(stPrivate.stUI.ulTimeDiff);
-
+	//	Serial.print(ulTimeUpdateLcdMin);
+	//	Serial.print("\t");
+	//	Serial.println(ulTimeUpdateLcdMax);
+	//
 	//	ulCtfgetAngleMin = 10000000;
 	//	ulCtfgetAngleMax = 0;
 	//	ulCtfUIProcedureMin = 10000000;
@@ -203,11 +214,14 @@ void loop()
 	//	ulCtfgetLightMax = 0;
 	//	ulCtfUpdateDisplayMin = 10000000;
 	//	ulCtfUpdateDisplayMax = 0;
+	//	ulTimeUpdateLcdMin = 10000000;
+	//	ulTimeUpdateLcdMax = 0;
+
 	//}
+
 	//ulCycleCount++;
 
 	//if (ulCycleCount > 1000) ulCycleCount = 1;
-
 
 
 	//UNCOMMENT AFTER TIMING TESTS
