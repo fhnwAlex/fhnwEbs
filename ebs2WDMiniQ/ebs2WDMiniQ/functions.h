@@ -101,8 +101,9 @@ typedef struct tstUI
 	unsigned int		*puiActAngle;			// Actual angle compass
 	unsigned short		usPrevState;			// Previous UI state
 	unsigned long		ulCycle;				// Cycle counter
-	//unsigned long		ulTime;					DELETE AFTER TESTING!!
-	//unsigned long		ulOldTime;				DELETE AFTER TESTING!!
+	unsigned long		ulTime;					//DELETE AFTER TESTING!!
+	unsigned long		ulOldTime;				//DELETE AFTER TESTING!!
+	unsigned long		ulTimeDiff;				//DELETE AFTER TESTING!!
 }tstUI;
 
 

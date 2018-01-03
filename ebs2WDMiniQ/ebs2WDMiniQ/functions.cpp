@@ -109,7 +109,7 @@ Move procedure of a motor with arguments of direction and speed
 		{
 			digitalWrite(DirectionRight, FORW);
 			analogWrite(SpeedPinRight, MIN_V);
-			delayMicroseconds(200);
+			delayMicroseconds(10);
 			digitalWrite(DirectionLeft, BACK);
 			analogWrite(SpeedPinLeft, MIN_V);
 		}
@@ -117,7 +117,7 @@ Move procedure of a motor with arguments of direction and speed
 		{
 			digitalWrite(DirectionRight, BACK);
 			analogWrite(SpeedPinRight, MIN_V);
-			delayMicroseconds(200);
+			delayMicroseconds(10);
 			digitalWrite(DirectionLeft, FORW);
 			analogWrite(SpeedPinLeft, MIN_V);
 		}
@@ -143,7 +143,7 @@ Move procedure of a motor with arguments of direction and speed
 			// Left turn
 			digitalWrite(DirectionRight, BACK);
 			analogWrite(SpeedPinRight, uiSpeed);
-			delayMicroseconds(200);
+			delayMicroseconds(10);
 			digitalWrite(DirectionLeft, FORW);
 			analogWrite(SpeedPinLeft, uiSpeed);
 		}
@@ -152,7 +152,7 @@ Move procedure of a motor with arguments of direction and speed
 			// Right turn
 			digitalWrite(DirectionRight, FORW);
 			analogWrite(SpeedPinRight, uiSpeed);
-			delayMicroseconds(200);
+			delayMicroseconds(10);
 			digitalWrite(DirectionLeft, BACK);
 			analogWrite(SpeedPinLeft, uiSpeed);
 		}
@@ -213,7 +213,8 @@ Run for every new location
 	tstMotor *pstMotor = &pstPrivate->stMotor;
 
 	bool			bStarted = false;
-	signed int		iMinX, iMaxX, iMinY, iMaxY = 0;
+	signed int		iMaxX, iMaxY = 0;
+	signed int		iMinX, iMinY = 1000;
 	unsigned long	ulStartTime = millis();
 
 	
@@ -438,6 +439,7 @@ Indicate different User Interface menus
 	else if (pstPrivate->stUI.enUIState == enUIState_ManualMode && !pstPrivate->stUI.bUIDone)
 	{
 		pstPrivate->stUI.bUIDone = true;
+		pstPrivate->stUI.bMenuSet = true;
 		pstPrivate->stUI.usPrevState = enUIState_ManualMode;
 		lcd.clear();
 		lcd.setCursor(0, 0);
@@ -454,11 +456,12 @@ Indicate different User Interface menus
 	else if (pstPrivate->stUI.enUIState == enUIState_AutomaticMode && !pstPrivate->stUI.bUIDone)
 	{
 		pstPrivate->stUI.bUIDone = true;
+		pstPrivate->stUI.bMenuSet = true;
 		pstPrivate->stUI.usPrevState = enUIState_AutomaticMode;
 		lcd.clear();
-		lcd.setCursor(0, 0);
-		lcd.print("A:Act. Ang:   ");
-		lcd.setCursor(15, 0);
+		//lcd.setCursor(0, 0);
+		lcd.print("Act. Ang:      ");
+		//lcd.setCursor(15, 0);
 		lcd.write(1);
 		lcd.setCursor(0, 1);
 		lcd.print("Key 3 - STOP");
@@ -481,53 +484,56 @@ Update LCD Display
 
 *****************************************************************/
 {
-	
-	//// Only for timing measurements
-	////if (pstDisplay->stUI.ulCycle == 0)	pstDisplay->stUI.ulOldTime = micros();
-
-	//if (pstPrivate->stUI.ulCycle % 10 == 0)
-	//{
-	//	pstPrivate->stUI.ulTime = micros();
-	//	lcd.setCursor(12, 0);
-	//	lcd.print("   ");
-	//	lcd.setCursor(12, 0);
-	//	lcd.print(*pstPrivate->stMotor.puiActAngle);
-
-	//	// Only for timing measurements
-	//	//Serial.print("Time diff: ");
-	//	//Serial.println(pstDisplay->stUI.ulTime - pstDisplay->stUI.ulOldTime);
-	//	//pstDisplay->stUI.ulOldTime = pstDisplay->stUI.ulTime;
-	//}
-	//pstPrivate->stUI.ulCycle++;
-
-	// Only for timing measurements
-	//if (pstPrivate->stUI.ulCycle == 0)	pstPrivate->stUI.ulOldTime = micros();
-
 	if (pstPrivate->stUI.ulCycle == 90)
 	{
 		if (pstPrivate->stUI.bStartAuto)
 		{
+			//test: it's 2x faster
 			lcd.setCursor(12, 0);
-			lcd.print("   ");
-			lcd.setCursor(12, 0);
-			lcd.print(*pstPrivate->stMotor.puiActAngle);
+
+			if(*pstPrivate->stMotor.puiActAngle >= 100)
+			{
+				lcd.print(*pstPrivate->stMotor.puiActAngle);
+			}
+			else if(*pstPrivate->stMotor.puiActAngle >= 10 && *pstPrivate->stMotor.puiActAngle < 100)
+			{
+				lcd.print(" ");
+				lcd.print(*pstPrivate->stMotor.puiActAngle);
+			}
+			else
+			{
+				lcd.print("  ");
+				lcd.print(*pstPrivate->stMotor.puiActAngle);
+			}
 		}
 		else if (pstPrivate->stUI.bStartManual)
 		{
+			//test: it's 2x faster
 			lcd.setCursor(4, 0);
-			lcd.print("   ");
-			lcd.setCursor(4, 0);
-			lcd.print(*pstPrivate->stMotor.puiActAngle);
-			lcd.setCursor(11, 0);
-			lcd.print("    ");
+
+			if (*pstPrivate->stMotor.puiActAngle >= 100)
+			{
+				lcd.print(*pstPrivate->stMotor.puiActAngle);
+			}
+			else if (*pstPrivate->stMotor.puiActAngle >= 10 && *pstPrivate->stMotor.puiActAngle < 100)
+			{
+				lcd.print(" ");
+				lcd.print(*pstPrivate->stMotor.puiActAngle);
+			}
+			else
+			{
+				lcd.print("  ");
+				lcd.print(*pstPrivate->stMotor.puiActAngle);
+			}
+
 			lcd.setCursor(11, 0);
 			lcd.print(*pstPrivate->stUI.pfLightInVoltage);
+
 		}
 		// Only for timing measurements
-		//pstPrivate->stUI.ulTime = micros();
-		//Serial.print("Update Time Display: ");
-		//Serial.println(pstPrivate->stUI.ulTime - pstPrivate->stUI.ulOldTime);
-		//pstPrivate->stUI.ulOldTime = pstPrivate->stUI.ulTime;
+		pstPrivate->stUI.ulTime = micros();
+		pstPrivate->stUI.ulTimeDiff = pstPrivate->stUI.ulTime - pstPrivate->stUI.ulOldTime;
+		pstPrivate->stUI.ulOldTime = pstPrivate->stUI.ulTime;
 		pstPrivate->stUI.ulCycle = 0;
 	}
 	pstPrivate->stUI.ulCycle++;
