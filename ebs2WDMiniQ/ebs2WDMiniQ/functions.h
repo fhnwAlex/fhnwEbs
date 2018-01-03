@@ -95,12 +95,16 @@ typedef struct tstUI
 	bool				bStartAuto;				// Start automatic mode
 	bool				bStartManual;			// Start manual mode
 	bool				bUIDone;				// LCD write done
+    
 	tenKey				enKeyState;				// Key states
 	tenUIState			enUIState;				// User Interface states
+
 	float				*pfLightInVoltage;		// Voltage depend on Photodiode resistance
 	unsigned int		*puiActAngle;			// Actual angle compass
 	unsigned short		usPrevState;			// Previous UI state
     unsigned short		usKeyState;             // Key state
+    char                chAngle[3];             // Angle for LCD-Print
+    char                chVoltage[4];           // Voltage for LCD-Print
 	unsigned long		ulCycle;				// Cycle counter
 	unsigned long		ulTime;					//DELETE AFTER TESTING!!
 	unsigned long		ulOldTime;				//DELETE AFTER TESTING!!

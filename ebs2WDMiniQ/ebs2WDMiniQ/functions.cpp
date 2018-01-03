@@ -499,8 +499,10 @@ Update LCD Display
 			}
 			else if(*pstPrivate->stMotor.puiActAngle >= 10 && *pstPrivate->stMotor.puiActAngle < 100)
 			{
-				lcd.print(" ");
-				lcd.print(*pstPrivate->stMotor.puiActAngle);
+                sprintf(pstPrivate->stUI.chAngle, "%d", *pstPrivate->stMotor.puiActAngle);
+                lcd.print(strcat(pstPrivate->stUI.chAngle, " "));
+				//lcd.print(" ");
+				//lcd.print(*pstPrivate->stMotor.puiActAngle);
 			}
 			else
 			{
