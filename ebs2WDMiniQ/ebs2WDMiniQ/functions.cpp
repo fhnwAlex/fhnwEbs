@@ -77,7 +77,7 @@ Initialize after Power up
 
 	// Initialize compass
 	mag.initialize();
-	if (!mag.testConnection()) { lcd.println("Connection to compass failed!"); }
+	if (!mag.testConnection()) { lcd.print("Connection to compass failed!"); }
 
 	// Initialize Motorpins
 	pinMode(SpeedPinLeft, OUTPUT);
@@ -422,30 +422,27 @@ Indicate different User Interface menus
 	if (pstUI->enUIState == enUIState_Calibration)
 	{
 		lcd.clear();
-		//lcd.setCursor(0, 0);
-		if (!pstCompass->bCalibDone) { lcd.println("Compass calibr.."); }
+		lcd.print("Compass calibr..");
 		fcompassCalibrate(pstPrivate);
 		lcd.setCursor(0, 0);
-		lcd.print("                  ");
-		lcd.setCursor(4, 0);
-		lcd.print("   Complete!");
+		lcd.print("   Complete!   ");
 		delay(2000);
         pstUI->bMenuSet = false;
 	}
 	else if (pstUI->enUIState == enUIState_undef && !pstCompass->bCalibDone)
 	{
 		lcd.clear();
-		lcd.println("PRESS Key 1 to  ");
+		lcd.print("PRESS Key 1 to");
 		lcd.setCursor(0, 1);
-		lcd.println("calib. compass! ");
+		lcd.print("calib. compass! ");
         pstUI->bMenuSet = true;
 	}
 	else if(pstUI->enUIState == enUIState_undef && pstCompass->bCalibDone)
 	{
 		lcd.clear();
-		lcd.println("Key 1 - ManMode ");
+		lcd.print("Key 1 - ManMode ");
 		lcd.setCursor(0, 1);
-		lcd.println("Key 2 - AutoMode");
+		lcd.print("Key 2 - AutoMode");
         pstUI->usPrevState = enUIState_undef;
         pstUI->bMenuSet = true;
 	}
@@ -455,14 +452,9 @@ Indicate different User Interface menus
         pstUI->bMenuSet = true;
         pstUI->usPrevState = enUIState_ManualMode;
 		lcd.clear();
-		//lcd.setCursor(0, 0);
 		lcd.print("Ang:   ");
-		//lcd.setCursor(7, 0);
 		lcd.write(1);
-		//lcd.setCursor(9, 0);
 		lcd.print(" L:    V");
-		//lcd.setCursor(15, 0);
-		//lcd.print("V");
 		lcd.setCursor(0, 1);
 		lcd.print("Key 3 - STOP");
 	}
