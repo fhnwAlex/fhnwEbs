@@ -190,7 +190,7 @@ Indicates color on RGB Led
 	{
 		if ((pstColor->ulCycle % 200) < 100)
 		{
-			led.setPixelColor(0, 255, 0, 255);
+			led.setPixelColor(0, 255, 255, 255);
 			led.show();
 		}
 		else if ((pstColor->ulCycle % 100) < 100)

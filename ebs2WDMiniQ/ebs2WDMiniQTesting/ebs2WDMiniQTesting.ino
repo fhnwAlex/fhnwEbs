@@ -40,71 +40,82 @@ void setup()
 {
 	memset(&stPrivate, 0, sizeof(stPrivate));		// Set whole privat memory 0
 	finitUp(&stPrivate);
+
+	//FOR TEST Nr. 2
+	Serial.print("T LCD Clear");
+	Serial.print("\t");
+	Serial.print("T LCD Cursor");
+	Serial.print("\t");
+	Serial.println("T LCD Print");
 }
 
-unsigned long ulCycleTime = 0;
-unsigned long ulTimeOld = micros();
-unsigned long ulCycleTimeSum = 0;
-unsigned long ulCycleTimeMin = 10000000;
-unsigned long ulCycleTimeMax = 0;
+
 unsigned long ulCycleCount = 1;
 
 // the loop function runs over and over again until power down or reset
 void loop()
 {
-	/*CYCLIC FUNCTIONS*/
-	fUIProcedure(&stPrivate);
-	//fgetAngle(&stPrivate.stCompass);
-	//fMoveProcedure(&stPrivate.stMotor);
-	fsetColor(&stPrivate);
+	///*CYCLIC FUNCTIONS*/
+	//fUIProcedure(&stPrivate);
+	////fgetAngle(&stPrivate.stCompass);
+	////fMoveProcedure(&stPrivate.stMotor);
+	//fsetColor(&stPrivate);
 
-	if (pstUI->bStartAuto || pstUI->bStartManual)
-	{
-		//Time from getAngle to MoveProcedure
-		ulTimeOld = micros();
+	//if (pstUI->bStartAuto || pstUI->bStartManual)
+	//{
+	//	//Time from getAngle to MoveProcedure
+	//	ulTimeOld = micros();
 
-		fgetAngle(&stPrivate.stCompass);
-		
-		//Time after getting Angle
-		//ulCycleTime = micros() - ulTimeOld;
-		
-		fMoveProcedure(&stPrivate.stMotor);
+	//	fgetAngle(&stPrivate.stCompass);
+	//	
+	//	//Time after getting Angle
+	//	//ulCycleTime = micros() - ulTimeOld;
+	//	
+	//	fMoveProcedure(&stPrivate.stMotor);
 
-		//Time after MoveProcedure
-		ulCycleTime = micros() - ulTimeOld;
-		
-		fUpdateDisplay(&stPrivate);
-	}
+	//	//Time after MoveProcedure
+	//	ulCycleTime = micros() - ulTimeOld;
+	//	
+	//	fUpdateDisplay(&stPrivate);
+	//}
 
-	//Time after everything
-	//ulCycleTime = micros() - ulTimeOld;
+	////Time after everything
+	////ulCycleTime = micros() - ulTimeOld;
 
-	ulCycleTimeSum += ulCycleTime;
-	if (ulCycleTime < ulCycleTimeMin) ulCycleTimeMin = ulCycleTime;
-	if (ulCycleTime > ulCycleTimeMax) ulCycleTimeMax = ulCycleTime;
-	if (ulCycleCount == 1000)
-	{
-		ulCycleTimeSum = (ulCycleTimeSum / ulCycleCount);
-		Serial.print("Cycle Nr.: ");
-		Serial.print(ulCycleCount);
-		Serial.print("\t");
-		Serial.print("Mean CT: ");
-		Serial.print(ulCycleTimeSum);
-		Serial.print("\t");
-		Serial.print("Min. CT: ");
-		Serial.print(ulCycleTimeMin);
-		Serial.print("\t");
-		Serial.print("Max. CT: ");
-		Serial.println(ulCycleTimeMax);
-	
-		ulCycleTimeSum = 0;
-		ulCycleTimeMin = 10000000;
-		ulCycleTimeMax = 0;
-		ulCycleTime = 0;
-	}
-	ulCycleCount++;
-	
-	if(ulCycleCount > 1000) ulCycleCount = 1;
-	//Time for everything and MoveProcedure
-	//ulTimeOld = micros();
+	//ulCycleTimeSum += ulCycleTime;
+	//if (ulCycleTime < ulCycleTimeMin) ulCycleTimeMin = ulCycleTime;
+	//if (ulCycleTime > ulCycleTimeMax) ulCycleTimeMax = ulCycleTime;
+	//if (ulCycleCount == 1000)
+	//{
+	//	ulCycleTimeSum = (ulCycleTimeSum / ulCycleCount);
+	//	Serial.print("Cycle Nr.: ");
+	//	Serial.print(ulCycleCount);
+	//	Serial.print("\t");
+	//	Serial.print("Mean CT: ");
+	//	Serial.print(ulCycleTimeSum);
+	//	Serial.print("\t");
+	//	Serial.print("Min. CT: ");
+	//	Serial.print(ulCycleTimeMin);
+	//	Serial.print("\t");
+	//	Serial.print("Max. CT: ");
+	//	Serial.println(ulCycleTimeMax);
+
+	//	ulCycleTimeSum = 0;
+	//	ulCycleTimeMin = 10000000;
+	//	ulCycleTimeMax = 0;
+	//	ulCycleTime = 0;
+	//}
+	//ulCycleCount++;
+	//
+	//if(ulCycleCount > 1000) ulCycleCount = 1;
+
+	//TEST NR. 2
+	fUpdateDisplay(&stPrivate);
+	Serial.print(stPrivate.stUI.ulTimeLCDClearDiff);
+	Serial.print("\t");
+	Serial.print(stPrivate.stUI.ulTimeLCDCursorDiff);
+	Serial.print("\t");
+	Serial.println(stPrivate.stUI.ulTimeLCDPrintDiff);
+	delay(1000);
+
 }

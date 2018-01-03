@@ -110,6 +110,15 @@ typedef struct tstUI
 	unsigned long	ulCycle;
 	unsigned long	ulTime;
 	unsigned long	ulOldTime;
+	unsigned long	ulTimeLCDClear;
+	unsigned long	ulTimeLCDClearOld;
+	unsigned long	ulTimeLCDClearDiff;
+	unsigned long	ulTimeLCDCursor;
+	unsigned long	ulTimeLCDCursorOld;
+	unsigned long	ulTimeLCDCursorDiff;
+	unsigned long	ulTimeLCDPrint;
+	unsigned long	ulTimeLCDPrintOld;
+	unsigned long	ulTimeLCDPrintDiff;
 }tstUI;
 
 

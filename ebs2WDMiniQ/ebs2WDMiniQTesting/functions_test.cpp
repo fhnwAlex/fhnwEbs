@@ -528,23 +528,40 @@ Update LCD Display
 
 *****************************************************************/
 {
-	// Only for timing measurements
-	if (pstPrivate->stUI.ulCycle == 0)	pstPrivate->stUI.ulOldTime = micros();
+	//// Only for timing measurements
+	//if (pstPrivate->stUI.ulCycle == 0)	pstPrivate->stUI.ulOldTime = micros();
 
-	if (pstPrivate->stUI.ulCycle == 90)
-	{
-		lcd.setCursor(12, 0);
-		lcd.print("   ");
-		lcd.setCursor(12, 0);
-		lcd.print(*pstPrivate->stMotor.puiActAngle);
+	//if (pstPrivate->stUI.ulCycle == 90)
+	//{
+	//	lcd.setCursor(12, 0);
+	//	lcd.print("   ");
+	//	lcd.setCursor(12, 0);
+	//	lcd.print(*pstPrivate->stMotor.puiActAngle);
 
-		// Only for timing measurements
-		pstPrivate->stUI.ulTime = micros();
-		Serial.print("Update Time Display: ");
-		Serial.println(pstPrivate->stUI.ulTime - pstPrivate->stUI.ulOldTime);
-		pstPrivate->stUI.ulOldTime = pstPrivate->stUI.ulTime;
+	//	// Only for timing measurements
+	//	pstPrivate->stUI.ulTime = micros();
+	//	Serial.print("Update Time Display: ");
+	//	Serial.println(pstPrivate->stUI.ulTime - pstPrivate->stUI.ulOldTime);
+	//	pstPrivate->stUI.ulOldTime = pstPrivate->stUI.ulTime;
 
-		pstPrivate->stUI.ulCycle = 0;
-	}
-	pstPrivate->stUI.ulCycle++;
+	//	pstPrivate->stUI.ulCycle = 0;
+	//}
+	//pstPrivate->stUI.ulCycle++;
+
+	//Tests Nr.2 timing of LCD functions
+	pstPrivate->stUI.ulTimeLCDClearOld = micros();
+	lcd.clear();
+	pstPrivate->stUI.ulTimeLCDClear = micros();
+	
+	pstPrivate->stUI.ulTimeLCDCursorOld = micros();
+	lcd.setCursor(0, 0);
+	pstPrivate->stUI.ulTimeLCDCursor = micros();
+
+	pstPrivate->stUI.ulTimeLCDPrintOld = micros();
+	lcd.print("0123456789abcdef");
+	pstPrivate->stUI.ulTimeLCDPrint = micros();
+	
+	pstPrivate->stUI.ulTimeLCDClearDiff = pstPrivate->stUI.ulTimeLCDClear - pstPrivate->stUI.ulTimeLCDClearOld;
+	pstPrivate->stUI.ulTimeLCDCursorDiff = pstPrivate->stUI.ulTimeLCDCursor - pstPrivate->stUI.ulTimeLCDCursorOld;
+	pstPrivate->stUI.ulTimeLCDPrintDiff = pstPrivate->stUI.ulTimeLCDPrint - pstPrivate->stUI.ulTimeLCDPrintOld;
 };
