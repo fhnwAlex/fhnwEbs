@@ -51,7 +51,7 @@ typedef struct tstMotor
     bool                bCalibRunL;             // Start motors static left turn
     bool                bCompassCalibrated;     // Compass calibration successfull
     unsigned int        uiSpeed;                // Actual speed of motors
-    unsigned int       *puiActAngle;           // Actual angle of compass
+    unsigned int       *puiActAngle;            // Actual angle of compass
 }tstMotor;
 
 /*----------------------------------------------------------------
@@ -59,7 +59,7 @@ Lightsensor structure
 ----------------------------------------------------------------*/
 typedef struct tstLightSensor
 {
-    float               fLightInVoltage;        // Voltage depend on Photodiode resistance
+    unsigned int        uiLightInVoltage;        // Voltage depend on Photodiode resistance
 }tstLightSensor;
 
 /*----------------------------------------------------------------
@@ -67,7 +67,7 @@ RGB-LED structure
 ----------------------------------------------------------------*/
 typedef struct tstRgbLed
 {
-    unsigned int       *puiColor;              // Actual color of LED
+    unsigned int       *puiColor;               // Actual color of LED
     unsigned long       ulCycle;                // Cycle counter 	
 }tstRgbLed;
 
@@ -97,7 +97,7 @@ typedef struct tstUI
     bool                bUIDone;                // LCD write done
     tenKey              enKeyState;             // Key states
     tenUIState          enUIState;              // User Interface states
-    float              *pfLightInVoltage;       // Voltage depend on Photodiode resistance
+    unsigned int       *puiLightInVoltage;      // Voltage depend on Photodiode resistance
     unsigned int       *puiActAngle;            // Actual angle compass
     unsigned short      usPrevState;            // Previous UI state
     unsigned short      usKeyState;             // Key state
@@ -105,9 +105,15 @@ typedef struct tstUI
 
     char                szAngle[4];
     char                szVoltage[5];
-    char                szDisplayData[32];
-    char                szOldDisplayData[32];
-    unsigned char       uchIx;
+    char                szDisplayData[33];
+    char                szOldDisplayData[33];
+    unsigned char       uchDisplayIx;
+    unsigned char       uchFirstDigit_SV;
+    unsigned char       uchSecondDigit_SV;
+    unsigned char       uchThirdDigit_SV;
+    unsigned char       uchFirstDigit_DV;
+    unsigned char       uchSecondDigit_DV;
+    unsigned char       uchThirdDigit_DV;
 
     unsigned long       ulTime;                 //DELETE AFTER TESTING!!
     unsigned long       ulOldTime;              //DELETE AFTER TESTING!!

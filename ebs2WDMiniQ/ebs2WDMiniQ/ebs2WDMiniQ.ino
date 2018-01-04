@@ -25,7 +25,8 @@ void fgetLight(tstLightSensor *pstLight);
 void fsetColor(tstPrvMain *pstPrivate);
 unsigned short fgetKeyValue(tstUI *pstUI);
 void fUIProcedure(tstPrvMain *pstPrivate);
-void fCreateLcdText(tstPrvMain *pstPrivate);
+void fWriteSingleValue(tstPrvMain *pstPrivate, char szStringLine[16], unsigned int uiValue);
+void fDisplayProcedure(tstUI *pstDisplay);
 void fUpdateDisplay(tstPrvMain *pstPrivate);
 
 /****************************************************************
@@ -233,12 +234,19 @@ void loop()
 
 
 
-	if (pstUI->bStartAuto || pstUI->bStartManual)
+	if (pstUI->bStartAuto)
 	{
 		fgetAngle(&stPrivate.stCompass);
 		fMoveProcedure(&stPrivate.stMotor);
 		fgetLight(&stPrivate.stLight);
 		//fUpdateDisplay(&stPrivate);
-        fCreateLcdText(&stPrivate);
-	}
+        fWriteSingleValue(&stPrivate, "Act. Angle: XXX°", *pstUI->puiActAngle);
+    }
+    else if (pstUI->bStartManual)
+    {
+        fgetAngle(&stPrivate.stCompass);
+        fMoveProcedure(&stPrivate.stMotor);
+        fgetLight(&stPrivate.stLight);
+
+    }
 }
