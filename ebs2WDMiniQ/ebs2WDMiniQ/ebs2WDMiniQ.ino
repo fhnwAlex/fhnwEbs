@@ -25,6 +25,7 @@ void fgetLight(tstLightSensor *pstLight);
 void fsetColor(tstPrvMain *pstPrivate);
 unsigned short fgetKeyValue(tstUI *pstUI);
 void fUIProcedure(tstPrvMain *pstPrivate);
+void fCreateLcdText(tstPrvMain *pstPrivate);
 void fUpdateDisplay(tstPrvMain *pstPrivate);
 
 /****************************************************************
@@ -228,12 +229,16 @@ void loop()
 	/*CYCLIC FUNCTIONS*/
 	fUIProcedure(&stPrivate);
 	fsetColor(&stPrivate);
+    
+
+
 
 	if (pstUI->bStartAuto || pstUI->bStartManual)
 	{
 		fgetAngle(&stPrivate.stCompass);
 		fMoveProcedure(&stPrivate.stMotor);
 		fgetLight(&stPrivate.stLight);
-		fUpdateDisplay(&stPrivate);
+		//fUpdateDisplay(&stPrivate);
+        fCreateLcdText(&stPrivate);
 	}
 }

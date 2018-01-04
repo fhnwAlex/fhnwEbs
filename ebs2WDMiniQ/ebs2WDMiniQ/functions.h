@@ -102,6 +102,13 @@ typedef struct tstUI
     unsigned short      usPrevState;            // Previous UI state
     unsigned short      usKeyState;             // Key state
     unsigned long       ulCycle;                // Cycle counter
+
+    char                szAngle[4];
+    char                szVoltage[5];
+    char                szDisplayData[32];
+    char                szOldDisplayData[32];
+    unsigned char       uchIx;
+
     unsigned long       ulTime;                 //DELETE AFTER TESTING!!
     unsigned long       ulOldTime;              //DELETE AFTER TESTING!!
     unsigned long       ulTimeDiff;             //DELETE AFTER TESTING!!

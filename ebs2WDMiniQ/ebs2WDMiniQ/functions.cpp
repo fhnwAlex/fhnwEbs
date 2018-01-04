@@ -9,6 +9,7 @@ FHNW - EMBEDDED SYSTEMS
 /* Includes
 **********************************************************************************************************************/
 #include <math.h>
+#include "string.h"
 #include "functions.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,7 +38,7 @@ FHNW - EMBEDDED SYSTEMS
 #define HALFCIRCLE      180.0       // Half circle in degrees
 #define LEDPIN          10          // Pin of RGB-LED
 #define SAMPLES         1           // For filter magnitude
-#define CALIB_TIME      20000       // Calibration time [ms]
+#define CALIB_TIME      2000       // Calibration time [ms]
 #define TONEPIN         16          // Pin of buzzer
 #define TONEFREQ        100         // Tone frequency buzzer
 
@@ -448,11 +449,12 @@ Indicate different User Interface menus
         pstUI->bMenuSet = true;
         pstUI->usPrevState = enUIState_ManualMode;
         lcd.clear();
-        lcd.print("Ang:   ");
-        lcd.write(1);
-        lcd.print(" L:    V");
-        lcd.setCursor(0, 1);
-        lcd.print("Key 3 - STOP");
+        fAutoling("Act. Ang: xxxxx°" , *pstPrivate->stMotor.puiActAngle)
+        //lcd.print("Ang:   ");
+        //lcd.write(1);
+        //lcd.print(" L:    V");
+        //lcd.setCursor(0, 1);
+        //lcd.print("Key 3 - STOP");
     }
     else if (pstUI->enUIState == enUIState_AutomaticMode && !pstUI->bUIDone)
     {
@@ -460,10 +462,10 @@ Indicate different User Interface menus
         pstUI->bMenuSet = true;
         pstUI->usPrevState = enUIState_AutomaticMode;
         lcd.clear();
-        lcd.print("Act. Ang:      ");
-        lcd.write(1);
-        lcd.setCursor(0, 1);
-        lcd.print("Key 3 - STOP");
+        //lcd.print("Act. Ang:      ");
+        //lcd.write(1);
+        //lcd.setCursor(0, 1);
+        //lcd.print("Key 3 - STOP");
     }
     else if ((pstUI->enUIState == enUIState_Abort) && pstUI->usPrevState > 0)
     {
@@ -472,6 +474,52 @@ Indicate different User Interface menus
         lcd.print("Mode aborted!");
         delay(2000);
         pstUI->bMenuSet = false;
+    }
+};
+
+void fCreateLcdText(tstPrvMain *pstPrivate)
+/****************************************************************
+Creates text for LCD Display
+
+*****************************************************************/
+{
+    // Write values in char array
+    pstPrivate->stUI.szAngle[0] = *pstPrivate->stMotor.puiActAngle;
+    pstPrivate->stUI.szVoltage[0] = pstPrivate->stLight.fLightInVoltage;
+
+    if (pstPrivate->stUI.enUIState == enUIState_AutomaticMode)
+    {
+        // Concat string
+        strcpy(pstPrivate->stUI.szDisplayData, "Act. Ang:   ");
+        strcat(pstPrivate->stUI.szDisplayData, pstPrivate->stUI.szAngle);
+        strcat(pstPrivate->stUI.szDisplayData, "°");
+        // 2nd LCD line
+        //strcat(pstPrivate->stUI.chDisplayData, "Key 3 - STOP");
+    }
+    else if (pstPrivate->stUI.enUIState == enUIState_ManualMode)
+    {
+        // Concat string
+        strcpy(pstPrivate->stUI.szDisplayData, "Ang:");
+        strcat(pstPrivate->stUI.szDisplayData, &pstPrivate->stUI.szAngle[0]);
+        strcat(pstPrivate->stUI.szDisplayData, "°");
+        strcat(pstPrivate->stUI.szDisplayData, " L:");
+        strcat(pstPrivate->stUI.szDisplayData, &pstPrivate->stUI.szVoltage[0]);
+        strcat(pstPrivate->stUI.szDisplayData, "V");
+        // 2nd LCD line
+        //strcat(pstPrivate->stUI.chDisplayData, "Key 3 - STOP");
+    }
+
+    if (pstPrivate->stUI.szDisplayData[pstPrivate->stUI.uchIx] != pstPrivate->stUI.szOldDisplayData[pstPrivate->stUI.uchIx])
+    {
+        lcd.print(pstPrivate->stUI.szDisplayData[pstPrivate->stUI.uchIx]);
+        pstPrivate->stUI.szOldDisplayData[pstPrivate->stUI.uchIx] = pstPrivate->stUI.szDisplayData[pstPrivate->stUI.uchIx];
+    }
+    pstPrivate->stUI.uchIx++;
+
+    if (pstPrivate->stUI.uchIx > sizeof(pstPrivate->stUI.szDisplayData))
+    {
+        // Reset index
+        pstPrivate->stUI.uchIx = 0;
     }
 };
 
