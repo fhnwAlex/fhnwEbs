@@ -25,7 +25,8 @@ void fgetLight(tstLightSensor *pstLight);
 void fsetColor(tstPrvMain *pstPrivate);
 unsigned short fgetKeyValue(tstUI *pstUI);
 void fUIProcedure(tstPrvMain *pstPrivate);
-void fWriteSingleValue(tstPrvMain *pstPrivate, char szStringLine[16], unsigned int uiValue);
+void fsetUIMenu(tstPrvMain *pstPrivate);
+void fWriteSingleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue);
 void fDisplayProcedure(tstUI *pstDisplay);
 void fUpdateDisplay(tstPrvMain *pstPrivate);
 
@@ -229,10 +230,13 @@ void loop()
 	//UNCOMMENT AFTER TIMING TESTS
 	/*CYCLIC FUNCTIONS*/
 	fUIProcedure(&stPrivate);
+    fsetUIMenu(&stPrivate);
 	fsetColor(&stPrivate);
-    
+    fDisplayProcedure(pstUI);
 
-
+ /*   Serial.print("UI State: ");
+    Serial.print("\t");
+    Serial.println(pstUI->enUIState);*/
 
 	if (pstUI->bStartAuto)
 	{
@@ -240,7 +244,7 @@ void loop()
 		fMoveProcedure(&stPrivate.stMotor);
 		fgetLight(&stPrivate.stLight);
 		//fUpdateDisplay(&stPrivate);
-        fWriteSingleValue(&stPrivate, "Act. Angle: XXX°", *pstUI->puiActAngle);
+        //fWriteSingleValue(&stPrivate, "Act. Angle: XXX ", *pstUI->puiActAngle);
     }
     else if (pstUI->bStartManual)
     {

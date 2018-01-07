@@ -51,8 +51,10 @@ Adafruit_NeoPixel led = Adafruit_NeoPixel(1, LEDPIN, NEO_GRB + NEO_KHZ800);
 /**********************************************************************************************************************/
 /* Functions
 **********************************************************************************************************************/
-void fsetUIMenu(tstPrvMain *pstPrivate);
-void fWriteSingleValue(tstPrvMain *pstPrivate, char szStringLine[16], unsigned int uiValue);
+//void fsetUIMenu(tstPrvMain *pstPrivate);
+void fWriteSingleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue);
+void fWriteDoubleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue_1, unsigned int uiValue_2);
+void fWriteString(tstPrvMain *pstPrivate, char szStringLine[], unsigned char uchLcdRow);
 
 /**********************************************************************************************************************/
 
@@ -93,11 +95,11 @@ Initialize after Power up
     led.show();
     led.setBrightness(60);
 
-    // Initialize Buzzer
-    pinMode(TONEPIN, OUTPUT);
+    //memset(pstPrivate->stUI.szDisplayData,'\0' , sizeof(pstPrivate->stUI.szOldDisplayData));
+    //memset(pstPrivate->stUI.szOldDisplayData, '\0' , sizeof(pstPrivate->stUI.szOldDisplayData));
 
-    pstPrivate->stUI.enUIState = enUIState_undef;
-    fsetUIMenu(pstPrivate);
+    pstPrivate->stUI.enUIState = enUIState_StartUp;
+    //fsetUIMenu(pstPrivate);
 };
 
 void fMoveProcedure(tstMotor *pstMotor)
@@ -257,6 +259,7 @@ Run for every new location
     pstCompass->bCalibDone = true;
     pstMotor->bCompassCalibrated = pstCompass->bCalibDone;
     fMoveProcedure(pstMotor);
+    lcd.setCursor(0, 0);
 };
 
 void fgetAngle(tstCompass *pstCompass)
@@ -369,13 +372,11 @@ Complete User Interface procedure
         if (!pstCompass->bCalibDone)
         {
             pstUIProcedure->enUIState = enUIState_Calibration;
-            fsetUIMenu(pstPrivate);
         }
         else if (!pstUIProcedure->bStartAuto || !pstUIProcedure->bStartManual)
         {
             pstUIProcedure->bStartManual = true;
             pstUIProcedure->enUIState = enUIState_ManualMode;
-            fsetUIMenu(pstPrivate);
         }
         break;
 
@@ -385,7 +386,6 @@ Complete User Interface procedure
             pstUIProcedure->bStartAuto = true;
             pstMotor->bRun = true;
             pstUIProcedure->enUIState = enUIState_AutomaticMode;
-            fsetUIMenu(pstPrivate);
         }
         break;
 
@@ -397,14 +397,20 @@ Complete User Interface procedure
             pstMotor->bRun = false;
             fMoveProcedure(pstMotor);
             pstUIProcedure->enUIState = enUIState_Abort;
-            fsetUIMenu(pstPrivate);
         }
         break;
 
     case enKey_undef:
-        pstUIProcedure->enUIState = enUIState_undef;
-        if (!pstUIProcedure->bMenuSet) { fsetUIMenu(pstPrivate); }
+        if (!pstCompass->bCalibDone)
+        {
+            pstUIProcedure->enUIState = enUIState_StartUp;
+        }
+        else if(!(pstUIProcedure->bStartAuto || pstUIProcedure->bStartManual))
+        {
+            pstUIProcedure->enUIState = enUIState_Wait;
+        }
         break;
+
     default:
         break;
     }
@@ -419,71 +425,45 @@ Indicate different User Interface menus
     tstCompass	*pstCompass = &pstPrivate->stCompass;
     tstUI       *pstUI = &pstPrivate->stUI;
     
-    if (pstUI->enUIState == enUIState_Calibration)
+    switch (pstUI->enUIState)
     {
+    case enUIState_StartUp:
+        fWriteString(pstPrivate, "PRESS Key 1 to  ", 1);
+        fWriteString(pstPrivate, "calib. compass! ", 2);
+        break;
+
+    case enUIState_Wait:
+        fWriteString(pstPrivate, "Key 1 - ManMode ", 1);
+        fWriteString(pstPrivate, "Key 2 - AutoMode", 2);
+        break;
+
+    case enUIState_Calibration:
         lcd.clear();
         lcd.print("Compass calibr..");
         fcompassCalibrate(pstPrivate);
         lcd.setCursor(0, 0);
         lcd.print("   Complete!    ");
         delay(2000);
-        pstUI->bMenuSet = false;
-    }
-    else if (pstUI->enUIState == enUIState_undef && !pstCompass->bCalibDone)
-    {
-        lcd.clear();
-        lcd.print("PRESS Key 1 to");
-        lcd.setCursor(0, 1);
-        lcd.print("calib. compass!");
-        pstUI->bMenuSet = true;
-    }
-    else if(pstUI->enUIState == enUIState_undef && pstCompass->bCalibDone)
-    {
-        lcd.clear();
-        lcd.print("Key 1 - ManMode");
-        lcd.setCursor(0, 1);
-        lcd.print("Key 2 - AutoMode");
-        pstUI->usPrevState = enUIState_undef;
-        pstUI->bMenuSet = true;
-    }
-    else if (pstUI->enUIState == enUIState_ManualMode && !pstUI->bUIDone)
-    {
-        pstUI->bUIDone = true;
-        pstUI->bMenuSet = true;
-        pstUI->usPrevState = enUIState_ManualMode;
-        lcd.clear();
+        break;
 
-        
+    case enUIState_ManualMode:
+        fWriteDoubleValue(pstPrivate, "Ang:XXX  L:X.XXV", *pstUI->puiActAngle, *pstUI->puiLightInVoltage);
+        fWriteString(pstPrivate, "Key 3 - STOP    ", 2);
+        break;
 
-        
-        //lcd.print("Ang:   ");
-        //lcd.write(1);
-        //lcd.print(" L:    V");
-        //lcd.setCursor(0, 1);
-        //lcd.print("Key 3 - STOP");
-    }
-    else if (pstUI->enUIState == enUIState_AutomaticMode && !pstUI->bUIDone)
-    {
-        pstUI->bUIDone = true;
-        pstUI->bMenuSet = true;
-        pstUI->usPrevState = enUIState_AutomaticMode;
-        lcd.clear();
+    case enUIState_AutomaticMode:
+        fWriteSingleValue(pstPrivate, "Act. Angle: XXX ", *pstPrivate->stMotor.puiActAngle);
+        break;
 
-        //fWriteSingleValue(&pstPrivate,"Act. Angle: XXX°", *pstPrivate->stMotor.puiActAngle); /// NICHT ZYKLISCH!!! WIRD NUR EINMAL GESCHRIEBEN!!!
-
-
-        //lcd.print("Act. Ang:      ");
-        //lcd.write(1);
-        //lcd.setCursor(0, 1);
-        //lcd.print("Key 3 - STOP");
-    }
-    else if ((pstUI->enUIState == enUIState_Abort) && pstUI->usPrevState > 0)
-    {
+    case enUIState_Abort:
         pstUI->bUIDone = false;
         lcd.clear();
         lcd.print("Mode aborted!");
         delay(2000);
         pstUI->bMenuSet = false;
+
+    default:
+        break;
     }
 };
 
@@ -493,36 +473,57 @@ Display text driver / sending every cycle one char if needed
 
 *****************************************************************/
 {
-    if (pstDisplay->szDisplayData[pstDisplay->uchDisplayIx] != pstDisplay->szOldDisplayData[pstDisplay->uchDisplayIx])
+    if (pstDisplay->bCursorSet)
     {
-        lcd.print(pstDisplay->szDisplayData[pstDisplay->uchDisplayIx]);
-        pstDisplay->szOldDisplayData[pstDisplay->uchDisplayIx] = pstDisplay->szDisplayData[pstDisplay->uchDisplayIx];
-    }
-    pstDisplay->uchDisplayIx++;
+        if (pstDisplay->szDisplayData[pstDisplay->uchDisplayIx] != pstDisplay->szOldDisplayData[pstDisplay->uchDisplayIx])
+        {
+            lcd.print(pstDisplay->szDisplayData[pstDisplay->uchDisplayIx]);
+            pstDisplay->szOldDisplayData[pstDisplay->uchDisplayIx] = pstDisplay->szDisplayData[pstDisplay->uchDisplayIx];
+        }
+        pstDisplay->uchDisplayIx++;
 
-    if (pstDisplay->uchDisplayIx == 16)
-    {   
-        // Set cursor to 2nd line
-        lcd.setCursor(0, 1);
-    }
+        if (pstDisplay->uchDisplayIx == 16)
+        {
+            // Set cursor to 2nd line
+            lcd.setCursor(0, 1);
+        }
 
-    if (pstDisplay->uchDisplayIx > sizeof(pstDisplay->szDisplayData))
+        if (pstDisplay->uchDisplayIx > sizeof(pstDisplay->szDisplayData))
+        {
+            // Reset index
+            pstDisplay->uchDisplayIx = 0;
+            pstDisplay->bCursorSet = false;
+        }
+    }
+    else 
     {
-        // Reset index
-        pstDisplay->uchDisplayIx = 0;
+        lcd.setCursor(0, 0);
+        pstDisplay->bCursorSet = true;
     }
+
+    Serial.print("Data:  ");
+    char *pstData = &pstDisplay->szDisplayData[0];
+    Serial.println(pstData);
+
+    Serial.print("Old Data:  ");
+    char *pstOldData = &pstDisplay->szOldDisplayData[0];
+    Serial.println(pstOldData);
+    Serial.println(pstDisplay->bCursorSet);
 };
 
-void fWriteSingleValue(tstPrvMain *pstPrivate, char szStringLine[16], unsigned int uiValue)
+void fWriteSingleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue)
 /****************************************************************
 Function for create and write a string which has one value
 
 *****************************************************************/
 {
     tstUI *pstSingleValue = &pstPrivate->stUI;
+    //char *pstStringLine = &pstPrivate->stUI.szDisplayData[0];
+    char *pszStringline = szStringLine;
+    char *pszStringBegin = &pstSingleValue->szDisplayData[0];
 
-    // Write string into buffer
-    memcpy(&pstSingleValue->szDisplayData, &szStringLine, sizeof(szStringLine));    /// KÖNNTE PROBLEME GEBEN WEIL DIE ARRAYS NICHT GLEICH LANG SIND!
+    //strncpy(pszStringBegin, pszStringline, sizeof(szStringLine));
+    memmove(pstSingleValue->szDisplayData, szStringLine, sizeof(szStringLine));
 
     // Convert integer (3 digit) to chars
     pstSingleValue->uchFirstDigit_SV = *pstSingleValue->puiActAngle / 100;
@@ -530,32 +531,15 @@ Function for create and write a string which has one value
     pstSingleValue->uchThirdDigit_SV = (*pstSingleValue->puiActAngle - 
                                        ( pstSingleValue->uchFirstDigit_SV * 100) - 
                                        ( pstSingleValue->uchSecondDigit_SV * 10) / 1);
-    /// TEST ONLY
-    Serial.print(*pstSingleValue->puiActAngle);
-    Serial.print("\t");
 
     // ASCII convert: ('0' to '9' is 48 to 57) and insert chars into buffer
     if (pstSingleValue->uchFirstDigit_SV == 0) { pstSingleValue->szDisplayData[12] = ' '; }
     else { pstSingleValue->szDisplayData[12] = 48 + pstSingleValue->uchFirstDigit_SV; }
     pstSingleValue->szDisplayData[13] = 48 + pstSingleValue->uchSecondDigit_SV;
     pstSingleValue->szDisplayData[14] = 48 + pstSingleValue->uchThirdDigit_SV;
-
-    /// TEST ONLY
-    Serial.print(pstSingleValue->szDisplayData[12]);
-    Serial.print("\t");
-    Serial.print(pstSingleValue->szDisplayData[13]);
-    Serial.print("\t");
-    Serial.print(pstSingleValue->szDisplayData[14]);
-    Serial.print("\t");
-
-    for (int i = 0; i < sizeof(pstSingleValue->szDisplayData); i++)
-    {
-        Serial.print(pstSingleValue->szDisplayData[i]);
-    }
-
 };
 
-void fWriteDoubleValue()
+void fWriteDoubleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue_1, unsigned int uiValue_2)
 /****************************************************************
 Function for create and write a string which has two values
 
@@ -564,21 +548,29 @@ Function for create and write a string which has two values
 
 };
 
-void fWriteString(char szStringLine[16], unsigned char uchLcdRow)
+void fWriteString(tstPrvMain *pstPrivate, char szStringLine[], unsigned char uchLcdRow)
 /****************************************************************
 Function for create and write a string which has no values
 
 *****************************************************************/
 {
-    //tstUI *pstString = &pstPrivate->stUI;
+    tstUI *pstString = &pstPrivate->stUI;
+    char *pszStrLineEnd = pstString->szDisplayData + 16;
+    char *pszLine = szStringLine;
     
-    if (uchLcdRow == 1)
+    if (uchLcdRow <= 1)
     {
-        //memcpy();
+
+        //memmove(pstString->szDisplayData, szStringLine, sizeof(szStringLine));
+        strncpy(pstString->szDisplayData, szStringLine, sizeof(szStringLine));
+        pstString->szDisplayData[16] = '\0';
     }
     else
     {
-
+        //memmove(pszStrLineEnd, szStringLine,sizeof(szStringLine));
+        //strncat(pstString->szDisplayData, szStringLine, sizeof(szStringLine));
+        strncat(pstString->szDisplayData, szStringLine, sizeof(szStringLine));
+        pstString->szDisplayData[sizeof(pstString->szDisplayData)-1] = '\0';
     }
 };
 

@@ -39,6 +39,8 @@ typedef enum tenUIState
     enUIState_ManualMode,                       // State - Manual mode
     enUIState_AutomaticMode,                    // State - Automatic mode
     enUIState_Abort,                            // State - Aborting
+    enUIState_StartUp,                          // State - After StartUp
+    enUIState_Wait,                             // State - Wait
 }tenUIState;
 
 /*----------------------------------------------------------------
@@ -95,6 +97,7 @@ typedef struct tstUI
     bool                bStartAuto;             // Start automatic mode
     bool                bStartManual;           // Start manual mode
     bool                bUIDone;                // LCD write done
+    bool                bCursorSet;
     tenKey              enKeyState;             // Key states
     tenUIState          enUIState;              // User Interface states
     unsigned int       *puiLightInVoltage;      // Voltage depend on Photodiode resistance
@@ -105,8 +108,8 @@ typedef struct tstUI
 
     char                szAngle[4];
     char                szVoltage[5];
-    char                szDisplayData[33];
-    char                szOldDisplayData[33];
+    char                szDisplayData[34];
+    char                szOldDisplayData[34];
     unsigned char       uchDisplayIx;
     unsigned char       uchFirstDigit_SV;
     unsigned char       uchSecondDigit_SV;
