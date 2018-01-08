@@ -108,15 +108,21 @@ typedef struct tstUI
 
     char                szAngle[4];
     char                szVoltage[5];
-    char                szDisplayData[34];
-    char                szOldDisplayData[34];
+    char                szDisplayData[32];
+    char                szOldDisplayData[32];
+    unsigned char       uchAbortCycIx;
     unsigned char       uchDisplayIx;
     unsigned char       uchFirstDigit_SV;
     unsigned char       uchSecondDigit_SV;
     unsigned char       uchThirdDigit_SV;
-    unsigned char       uchFirstDigit_DV;
-    unsigned char       uchSecondDigit_DV;
-    unsigned char       uchThirdDigit_DV;
+
+    unsigned char       uchAngleFirstDigit_DV;
+    unsigned char       uchAngleSecondDigit_DV;
+    unsigned char       uchAngleThirdDigit_DV;
+
+    unsigned char       uchVoltageFirstDigit_DV;
+    unsigned char       uchVoltageSecondDigit_DV;
+    unsigned char       uchVoltageThirdDigit_DV;
 
     unsigned long       ulTime;                 //DELETE AFTER TESTING!!
     unsigned long       ulOldTime;              //DELETE AFTER TESTING!!

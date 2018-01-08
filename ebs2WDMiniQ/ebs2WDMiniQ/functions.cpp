@@ -52,8 +52,8 @@ Adafruit_NeoPixel led = Adafruit_NeoPixel(1, LEDPIN, NEO_GRB + NEO_KHZ800);
 /* Functions
 **********************************************************************************************************************/
 //void fsetUIMenu(tstPrvMain *pstPrivate);
-void fWriteSingleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue);
-void fWriteDoubleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue_1, unsigned int uiValue_2);
+void fWriteSingleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue, unsigned char uchLcdRow);
+void fWriteDoubleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue_1, unsigned int uiValue_2, unsigned char uchLcdRow);
 void fWriteString(tstPrvMain *pstPrivate, char szStringLine[], unsigned char uchLcdRow);
 
 /**********************************************************************************************************************/
@@ -94,12 +94,12 @@ Initialize after Power up
     led.begin();
     led.show();
     led.setBrightness(60);
+    lcd.setCursor(0, 0);
 
-    //memset(pstPrivate->stUI.szDisplayData,'\0' , sizeof(pstPrivate->stUI.szOldDisplayData));
-    //memset(pstPrivate->stUI.szOldDisplayData, '\0' , sizeof(pstPrivate->stUI.szOldDisplayData));
+    
+    pstPrivate->stUI.szOldDisplayData[sizeof(pstPrivate->stUI.szOldDisplayData)] = '\0';
 
     pstPrivate->stUI.enUIState = enUIState_StartUp;
-    //fsetUIMenu(pstPrivate);
 };
 
 void fMoveProcedure(tstMotor *pstMotor)
@@ -301,8 +301,18 @@ Get the light value and convert it into voltage for UI
 
 *****************************************************************/
 {
-    pstLight->uiLightInVoltage = (analogRead(5) * (500 >> 3)) >> 7;
+    //unsigned int uiAnalogValue = analogRead(5);
+    byte btAnalogValue = (byte)(analogRead(5) * 500);
 
+    Serial.println(btAnalogValue);
+    //uiAnalogValue = (uiAnalogValue * 500 ) >> 3;
+    //pstLight->uiLightInVoltage = uiAnalogValue >> 7;
+
+    //Serial.print(pstLight->uiLightInVoltage);
+    //Serial.print("\t");
+    //Serial.print(uiAnalogValue);
+    //Serial.print("\t");
+    //Serial.println(analogRead(5));
 };
 
 unsigned short fgetKeyValue(tstUI *pstUIKey)
@@ -433,13 +443,13 @@ Indicate different User Interface menus
         break;
 
     case enUIState_Wait:
-        fWriteString(pstPrivate, "Key 1 - ManMode ", 1);
-        fWriteString(pstPrivate, "Key 2 - AutoMode", 2);
+        fWriteString(pstPrivate, "Key1 - ManMode  ", 1);
+        fWriteString(pstPrivate, "Key2 - AutoMode ", 2);
         break;
 
     case enUIState_Calibration:
         lcd.clear();
-        lcd.print("Compass calibr..");
+        lcd.print("Compass calibr. ");
         fcompassCalibrate(pstPrivate);
         lcd.setCursor(0, 0);
         lcd.print("   Complete!    ");
@@ -447,20 +457,28 @@ Indicate different User Interface menus
         break;
 
     case enUIState_ManualMode:
-        fWriteDoubleValue(pstPrivate, "Ang:XXX  L:X.XXV", *pstUI->puiActAngle, *pstUI->puiLightInVoltage);
-        fWriteString(pstPrivate, "Key 3 - STOP    ", 2);
+        fWriteDoubleValue(pstPrivate, "Ang:XXX  L:X.XXV", *pstUI->puiActAngle, *pstUI->puiLightInVoltage, 1);
+        fWriteString(pstPrivate, "KEY3 - STOP    ", 2);
         break;
 
     case enUIState_AutomaticMode:
-        fWriteSingleValue(pstPrivate, "Act. Angle: XXX ", *pstPrivate->stMotor.puiActAngle);
+        fWriteSingleValue(pstPrivate, "Act. Angle: XXX ", *pstPrivate->stMotor.puiActAngle, 1);
+        fWriteString(pstPrivate, "KEY3 - STOP     ", 2);
         break;
 
     case enUIState_Abort:
-        pstUI->bUIDone = false;
-        lcd.clear();
-        lcd.print("Mode aborted!");
-        delay(2000);
-        pstUI->bMenuSet = false;
+        if (pstUI->uchAbortCycIx < 100000)
+        {
+            fWriteString(pstPrivate, "MODE ABORTED!   ", 1);
+            fWriteString(pstPrivate, "                ", 2);
+            pstUI->uchDisplayIx++;
+        }
+        else 
+        {
+            pstUI->uchDisplayIx = 0;
+            pstUI->enUIState = enUIState_Wait;
+        }
+        break;
 
     default:
         break;
@@ -473,79 +491,81 @@ Display text driver / sending every cycle one char if needed
 
 *****************************************************************/
 {
-    if (pstDisplay->bCursorSet)
+    if (&pstDisplay->szDisplayData[pstDisplay->uchDisplayIx] != &pstDisplay->szOldDisplayData[pstDisplay->uchDisplayIx])
     {
-        if (pstDisplay->szDisplayData[pstDisplay->uchDisplayIx] != pstDisplay->szOldDisplayData[pstDisplay->uchDisplayIx])
-        {
-            lcd.print(pstDisplay->szDisplayData[pstDisplay->uchDisplayIx]);
-            pstDisplay->szOldDisplayData[pstDisplay->uchDisplayIx] = pstDisplay->szDisplayData[pstDisplay->uchDisplayIx];
-        }
-        pstDisplay->uchDisplayIx++;
-
-        if (pstDisplay->uchDisplayIx == 16)
-        {
-            // Set cursor to 2nd line
-            lcd.setCursor(0, 1);
-        }
-
-        if (pstDisplay->uchDisplayIx > sizeof(pstDisplay->szDisplayData))
-        {
-            // Reset index
-            pstDisplay->uchDisplayIx = 0;
-            pstDisplay->bCursorSet = false;
-        }
+        lcd.print(pstDisplay->szDisplayData[pstDisplay->uchDisplayIx]);
+        pstDisplay->szOldDisplayData[pstDisplay->uchDisplayIx] = pstDisplay->szDisplayData[pstDisplay->uchDisplayIx];
     }
-    else 
+    pstDisplay->uchDisplayIx++;
+
+    if (pstDisplay->uchDisplayIx == 16)
     {
+        // Set cursor to 2nd line
+        lcd.setCursor(0, 1);
+    }
+
+    if (pstDisplay->uchDisplayIx > sizeof(pstDisplay->szDisplayData))
+    {
+        // Reset index
+        pstDisplay->uchDisplayIx = 0;
         lcd.setCursor(0, 0);
-        pstDisplay->bCursorSet = true;
     }
-
-    Serial.print("Data:  ");
-    char *pstData = &pstDisplay->szDisplayData[0];
-    Serial.println(pstData);
-
-    Serial.print("Old Data:  ");
-    char *pstOldData = &pstDisplay->szOldDisplayData[0];
-    Serial.println(pstOldData);
-    Serial.println(pstDisplay->bCursorSet);
 };
 
-void fWriteSingleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue)
+void fWriteSingleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue, unsigned char uchLcdRow)
 /****************************************************************
 Function for create and write a string which has one value
 
 *****************************************************************/
 {
     tstUI *pstSingleValue = &pstPrivate->stUI;
-    //char *pstStringLine = &pstPrivate->stUI.szDisplayData[0];
-    char *pszStringline = szStringLine;
-    char *pszStringBegin = &pstSingleValue->szDisplayData[0];
 
-    //strncpy(pszStringBegin, pszStringline, sizeof(szStringLine));
-    memmove(pstSingleValue->szDisplayData, szStringLine, sizeof(szStringLine));
+    memcpy(&pstSingleValue->szDisplayData[(uchLcdRow - 1) * 16], &szStringLine[0], strlen(szStringLine));
+    pstSingleValue->szDisplayData[uchLcdRow * 16] = '\0';
 
     // Convert integer (3 digit) to chars
-    pstSingleValue->uchFirstDigit_SV = *pstSingleValue->puiActAngle / 100;
-    pstSingleValue->uchSecondDigit_SV = (*pstSingleValue->puiActAngle - (pstSingleValue->uchFirstDigit_SV * 100)) / 10;
-    pstSingleValue->uchThirdDigit_SV = (*pstSingleValue->puiActAngle - 
-                                       ( pstSingleValue->uchFirstDigit_SV * 100) - 
-                                       ( pstSingleValue->uchSecondDigit_SV * 10) / 1);
+    pstSingleValue->uchFirstDigit_SV  =  uiValue / 100;
+    pstSingleValue->uchSecondDigit_SV = (uiValue - (pstSingleValue->uchFirstDigit_SV * 100)) / 10;
+    pstSingleValue->uchThirdDigit_SV  = (uiValue - ( pstSingleValue->uchFirstDigit_SV * 100) - ( pstSingleValue->uchSecondDigit_SV * 10) / 1);
 
-    // ASCII convert: ('0' to '9' is 48 to 57) and insert chars into buffer
-    if (pstSingleValue->uchFirstDigit_SV == 0) { pstSingleValue->szDisplayData[12] = ' '; }
-    else { pstSingleValue->szDisplayData[12] = 48 + pstSingleValue->uchFirstDigit_SV; }
-    pstSingleValue->szDisplayData[13] = 48 + pstSingleValue->uchSecondDigit_SV;
-    pstSingleValue->szDisplayData[14] = 48 + pstSingleValue->uchThirdDigit_SV;
+    pstSingleValue->szDisplayData[12] = (48 + pstSingleValue->uchFirstDigit_SV);
+    pstSingleValue->szDisplayData[13] = (48 + pstSingleValue->uchSecondDigit_SV);
+    pstSingleValue->szDisplayData[14] = (48 + pstSingleValue->uchThirdDigit_SV);
 };
 
-void fWriteDoubleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue_1, unsigned int uiValue_2)
+void fWriteDoubleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue_1, unsigned int uiValue_2, unsigned char uchLcdRow)
 /****************************************************************
 Function for create and write a string which has two values
 
 *****************************************************************/
 {
+    tstUI *pstDoubleValue = &pstPrivate->stUI;
 
+    memcpy(&pstDoubleValue->szDisplayData[(uchLcdRow - 1) * 16], &szStringLine[0], strlen(szStringLine));
+    pstDoubleValue->szDisplayData[uchLcdRow * 16] = '\0';
+
+    // Convert Angle integer (3 digit) to chars
+    pstDoubleValue->uchAngleFirstDigit_DV  =   uiValue_1 / 100;
+    pstDoubleValue->uchAngleSecondDigit_DV = ( uiValue_1 - (pstDoubleValue->uchAngleFirstDigit_DV * 100)) / 10;
+    pstDoubleValue->uchAngleThirdDigit_DV  = ( uiValue_1 - (pstDoubleValue->uchAngleFirstDigit_DV * 100) - 
+                                             ( pstDoubleValue->uchAngleSecondDigit_DV * 10) / 1);
+
+    // Convert Voltage integer (3 digit) to chars
+    pstDoubleValue->uchVoltageFirstDigit_DV   =   uiValue_2 / 100;
+    pstDoubleValue->uchVoltageSecondDigit_DV  = ( uiValue_2 - (pstDoubleValue->uchVoltageFirstDigit_DV * 100)) / 10;;
+    pstDoubleValue->uchVoltageThirdDigit_DV   = ( uiValue_2 - ( pstDoubleValue->uchVoltageFirstDigit_DV * 100) -
+                                                ( pstDoubleValue->uchSecondDigit_SV * 10) / 1);;
+
+    // Insert Angle chars into String
+    pstDoubleValue->szDisplayData[4] = (48 + pstDoubleValue->uchAngleFirstDigit_DV);
+    pstDoubleValue->szDisplayData[5] = (48 + pstDoubleValue->uchAngleSecondDigit_DV);
+    pstDoubleValue->szDisplayData[6] = (48 + pstDoubleValue->uchAngleThirdDigit_DV);
+
+    // Insert Voltage chars into String
+    pstDoubleValue->szDisplayData[11] = (48 + pstDoubleValue->uchVoltageFirstDigit_DV);
+    pstDoubleValue->szDisplayData[12] = '.';
+    pstDoubleValue->szDisplayData[13] = (48 + pstDoubleValue->uchVoltageSecondDigit_DV);
+    pstDoubleValue->szDisplayData[14] = (48 + pstDoubleValue->uchVoltageThirdDigit_DV);
 };
 
 void fWriteString(tstPrvMain *pstPrivate, char szStringLine[], unsigned char uchLcdRow)
@@ -555,82 +575,69 @@ Function for create and write a string which has no values
 *****************************************************************/
 {
     tstUI *pstString = &pstPrivate->stUI;
-    char *pszStrLineEnd = pstString->szDisplayData + 16;
-    char *pszLine = szStringLine;
-    
-    if (uchLcdRow <= 1)
-    {
 
-        //memmove(pstString->szDisplayData, szStringLine, sizeof(szStringLine));
-        strncpy(pstString->szDisplayData, szStringLine, sizeof(szStringLine));
-        pstString->szDisplayData[16] = '\0';
-    }
-    else
-    {
-        //memmove(pszStrLineEnd, szStringLine,sizeof(szStringLine));
-        //strncat(pstString->szDisplayData, szStringLine, sizeof(szStringLine));
-        strncat(pstString->szDisplayData, szStringLine, sizeof(szStringLine));
-        pstString->szDisplayData[sizeof(pstString->szDisplayData)-1] = '\0';
-    }
+    memcpy(&pstString->szDisplayData[(uchLcdRow - 1) * 16], &szStringLine[0], strlen(szStringLine));
+    pstString->szDisplayData[uchLcdRow * 16] = '\0';
+
 };
 
-void fUpdateDisplay(tstPrvMain *pstPrivate)
-/****************************************************************
-Update LCD Display
-
-*****************************************************************/
-{
-    if (pstPrivate->stUI.ulCycle == 90)
-    {
-        if (pstPrivate->stUI.bStartAuto)
-        {
-            //test: it's 2x faster
-            lcd.setCursor(12, 0);
-
-            if(*pstPrivate->stMotor.puiActAngle >= 100)
-            {
-                lcd.print(*pstPrivate->stMotor.puiActAngle);
-            }
-            else if(*pstPrivate->stMotor.puiActAngle >= 10 && *pstPrivate->stMotor.puiActAngle < 100)
-            {
-                lcd.print(" ");
-                lcd.print(*pstPrivate->stMotor.puiActAngle);
-            }
-            else
-            {
-                lcd.print("  ");
-                lcd.print(*pstPrivate->stMotor.puiActAngle);
-            }
-        }
-        else if (pstPrivate->stUI.bStartManual)
-        {
-            //test: it's 2x faster
-            lcd.setCursor(4, 0);
-
-            if (*pstPrivate->stMotor.puiActAngle >= 100)
-            {
-                lcd.print(*pstPrivate->stMotor.puiActAngle);
-            }
-            else if (*pstPrivate->stMotor.puiActAngle >= 10 && *pstPrivate->stMotor.puiActAngle < 100)
-            {
-                lcd.print(" ");
-                lcd.print(*pstPrivate->stMotor.puiActAngle);
-            }
-            else
-            {
-                lcd.print("  ");
-                lcd.print(*pstPrivate->stMotor.puiActAngle);
-            }
-
-            lcd.setCursor(11, 0);
-            lcd.print(*pstPrivate->stUI.puiLightInVoltage);
-
-        }
-        // Only for timing measurements
-        pstPrivate->stUI.ulTime = micros();
-        pstPrivate->stUI.ulTimeDiff = pstPrivate->stUI.ulTime - pstPrivate->stUI.ulOldTime;
-        pstPrivate->stUI.ulOldTime = pstPrivate->stUI.ulTime;
-        pstPrivate->stUI.ulCycle = 0;
-    }
-    pstPrivate->stUI.ulCycle++;
-};
+//void fUpdateDisplay(tstPrvMain *pstPrivate)
+///****************************************************************
+//Update LCD Display
+//
+//*****************************************************************/
+//{
+//    if (pstPrivate->stUI.ulCycle == 90)
+//    {
+//        if (pstPrivate->stUI.bStartAuto)
+//        {
+//            //test: it's 2x faster
+//            lcd.setCursor(12, 0);
+//
+//            if(*pstPrivate->stMotor.puiActAngle >= 100)
+//            {
+//                lcd.print(*pstPrivate->stMotor.puiActAngle);
+//            }
+//            else if(*pstPrivate->stMotor.puiActAngle >= 10 && *pstPrivate->stMotor.puiActAngle < 100)
+//            {
+//                lcd.print(" ");
+//                lcd.print(*pstPrivate->stMotor.puiActAngle);
+//            }
+//            else
+//            {
+//                lcd.print("  ");
+//                lcd.print(*pstPrivate->stMotor.puiActAngle);
+//            }
+//        }
+//        else if (pstPrivate->stUI.bStartManual)
+//        {
+//            //test: it's 2x faster
+//            lcd.setCursor(4, 0);
+//
+//            if (*pstPrivate->stMotor.puiActAngle >= 100)
+//            {
+//                lcd.print(*pstPrivate->stMotor.puiActAngle);
+//            }
+//            else if (*pstPrivate->stMotor.puiActAngle >= 10 && *pstPrivate->stMotor.puiActAngle < 100)
+//            {
+//                lcd.print(" ");
+//                lcd.print(*pstPrivate->stMotor.puiActAngle);
+//            }
+//            else
+//            {
+//                lcd.print("  ");
+//                lcd.print(*pstPrivate->stMotor.puiActAngle);
+//            }
+//
+//            lcd.setCursor(11, 0);
+//            lcd.print(*pstPrivate->stUI.puiLightInVoltage);
+//
+//        }
+//        // Only for timing measurements
+//        pstPrivate->stUI.ulTime = micros();
+//        pstPrivate->stUI.ulTimeDiff = pstPrivate->stUI.ulTime - pstPrivate->stUI.ulOldTime;
+//        pstPrivate->stUI.ulOldTime = pstPrivate->stUI.ulTime;
+//        pstPrivate->stUI.ulCycle = 0;
+//    }
+//    pstPrivate->stUI.ulCycle++;
+//};

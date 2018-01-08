@@ -234,9 +234,9 @@ void loop()
 	fsetColor(&stPrivate);
     fDisplayProcedure(pstUI);
 
- /*   Serial.print("UI State: ");
-    Serial.print("\t");
-    Serial.println(pstUI->enUIState);*/
+    //Serial.print("UI State: ");
+    //Serial.print("\t");
+    //Serial.println(pstUI->enUIState);
 
 	if (pstUI->bStartAuto)
 	{
