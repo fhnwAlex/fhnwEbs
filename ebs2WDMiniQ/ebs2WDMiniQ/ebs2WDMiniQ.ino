@@ -26,7 +26,6 @@ void fsetColor(tstPrvMain *pstPrivate);
 unsigned short fgetKeyValue(tstUI *pstUI);
 void fUIProcedure(tstPrvMain *pstPrivate);
 void fsetUIMenu(tstPrvMain *pstPrivate);
-void fWriteSingleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue);
 void fDisplayProcedure(tstUI *pstDisplay);
 void fUpdateDisplay(tstPrvMain *pstPrivate);
 

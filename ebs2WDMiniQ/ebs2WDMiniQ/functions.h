@@ -61,7 +61,7 @@ Lightsensor structure
 ----------------------------------------------------------------*/
 typedef struct tstLightSensor
 {
-    unsigned int        uiLightInVoltage;        // Voltage depend on Photodiode resistance
+    float        flLightInVoltage;              // Voltage depend on Photodiode resistance
 }tstLightSensor;
 
 /*----------------------------------------------------------------
@@ -93,40 +93,31 @@ User interface structure
 ----------------------------------------------------------------*/
 typedef struct tstUI
 {
-    bool                bMenuSet;               // For UI-Menu controll
-    bool                bStartAuto;             // Start automatic mode
-    bool                bStartManual;           // Start manual mode
-    bool                bUIDone;                // LCD write done
-    bool                bCursorSet;
-    tenKey              enKeyState;             // Key states
-    tenUIState          enUIState;              // User Interface states
-    unsigned int       *puiLightInVoltage;      // Voltage depend on Photodiode resistance
-    unsigned int       *puiActAngle;            // Actual angle compass
-    unsigned short      usPrevState;            // Previous UI state
-    unsigned short      usKeyState;             // Key state
-    unsigned long       ulCycle;                // Cycle counter
-
-    char                szAngle[4];
-    char                szVoltage[5];
-    char                szDisplayData[32];
-    char                szOldDisplayData[32];
-    unsigned char       uchAbortCycIx;
-    unsigned char       uchDisplayIx;
-    unsigned char       uchFirstDigit_SV;
-    unsigned char       uchSecondDigit_SV;
-    unsigned char       uchThirdDigit_SV;
-
-    unsigned char       uchAngleFirstDigit_DV;
-    unsigned char       uchAngleSecondDigit_DV;
-    unsigned char       uchAngleThirdDigit_DV;
-
-    unsigned char       uchVoltageFirstDigit_DV;
-    unsigned char       uchVoltageSecondDigit_DV;
-    unsigned char       uchVoltageThirdDigit_DV;
-
-    unsigned long       ulTime;                 //DELETE AFTER TESTING!!
-    unsigned long       ulOldTime;              //DELETE AFTER TESTING!!
-    unsigned long       ulTimeDiff;             //DELETE AFTER TESTING!!
+    bool                bMenuSet;                   // For UI-Menu controll
+    bool                bStartAuto;                 // Start automatic mode
+    bool                bStartManual;               // Start manual mode
+    tenKey              enKeyState;                 // Key states
+    tenUIState          enUIState;                  // User Interface states
+    float              *pflLightInVoltage;          // Voltage depend on Photodiode resistance
+    unsigned int       *puiActAngle;                // Actual angle compass
+    unsigned short      usKeyState;                 // Key state
+    unsigned long       ulCycle;                    // Cycle counter
+    char                szDisplayData[32];          // Data buffer
+    char                szOldDisplayData[32];       // Old data buffer
+    unsigned char       uchDisplayIx;               // Index for data buffer read
+    unsigned char       uchFirstDigit_SV;           // First char digit single value
+    unsigned char       uchSecondDigit_SV;          // Second char digit single value
+    unsigned char       uchThirdDigit_SV;           // Third char digit single value
+    unsigned char       uchAngleFirstDigit_DV;      // First char digit (Angle) double value
+    unsigned char       uchAngleSecondDigit_DV;     // Second char digit (Angle) double value
+    unsigned char       uchAngleThirdDigit_DV;      // Third char digit (Angle) double value
+    unsigned char       uchVoltageFirstDigit_DV;    // First char digit (Voltage) double value
+    unsigned char       uchVoltageSecondDigit_DV;   // Second char digit (Voltage) double value
+    unsigned char       uchVoltageThirdDigit_DV;    // Third char digit (Voltage) double value
+    unsigned long       ulTimeTextOnHold;
+    unsigned long       ulTime;                     // DELETE AFTER TESTING!!
+    unsigned long       ulOldTime;                  // DELETE AFTER TESTING!!
+    unsigned long       ulTimeDiff;                 // DELETE AFTER TESTING!!
 }tstUI;
 
 
