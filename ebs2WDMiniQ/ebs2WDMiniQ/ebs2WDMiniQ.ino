@@ -27,7 +27,7 @@ unsigned short fgetKeyValue(tstUI *pstUI);
 void fUIProcedure(tstPrvMain *pstPrivate);
 void fsetUIMenu(tstPrvMain *pstPrivate);
 void fDisplayProcedure(tstUI *pstDisplay);
-void fUpdateDisplay(tstPrvMain *pstPrivate);
+//void fUpdateDisplay(tstPrvMain *pstPrivate);
 
 /****************************************************************
 MEMORY ALLOCATION
@@ -232,24 +232,26 @@ void loop()
     fsetUIMenu(&stPrivate);
 	fsetColor(&stPrivate);
     fDisplayProcedure(pstUI);
+    fgetAngle(&stPrivate.stCompass);
+    fMoveProcedure(&stPrivate.stMotor);
+    fgetLight(&stPrivate.stLight);
 
     //Serial.print("UI State: ");
     //Serial.print("\t");
     //Serial.println(pstUI->enUIState);
 
-	if (pstUI->bStartAuto)
-	{
-		fgetAngle(&stPrivate.stCompass);
-		fMoveProcedure(&stPrivate.stMotor);
-		fgetLight(&stPrivate.stLight);
-		//fUpdateDisplay(&stPrivate);
-        //fWriteSingleValue(&stPrivate, "Act. Angle: XXX ", *pstUI->puiActAngle);
-    }
-    else if (pstUI->bStartManual)
-    {
-        fgetAngle(&stPrivate.stCompass);
-        fMoveProcedure(&stPrivate.stMotor);
-        fgetLight(&stPrivate.stLight);
+	//if (pstUI->bStartAuto)
+	//{
+	//	fgetAngle(&stPrivate.stCompass);
+	//	fMoveProcedure(&stPrivate.stMotor);
+	//	fgetLight(&stPrivate.stLight);
 
-    }
+ //   }
+ //   else if (pstUI->bStartManual)
+ //   {
+ //       fgetAngle(&stPrivate.stCompass);
+ //       fMoveProcedure(&stPrivate.stMotor);
+ //       fgetLight(&stPrivate.stLight);
+
+ //   }
 }

@@ -457,10 +457,6 @@ Indicate different User Interface menus
         break;
 
     case enUIState_Abort:
-        Serial.print("TimeAbort: ");
-        Serial.println(millis() - pstUI->ulTimeTextOnHold);
-
-
         if ((millis() - pstUI->ulTimeTextOnHold) < 2000)
         {
             fWriteString(pstPrivate, "MODE ABORTED!   ", 1);
@@ -471,7 +467,6 @@ Indicate different User Interface menus
             pstUI->bModeAborted = false;
             pstUI->enUIState = enUIState_Wait;
         }
-
         break;
 
     default:
