@@ -185,7 +185,6 @@ Indicates color on RGB Led
     signed int	iColor = *pstColor->puiColor;
     iColor = abs(iColor - 180);
 
-
     if (pstUI->bStartAuto || pstUI->bStartManual)
     {
         if (iColor <= 90) { led.setPixelColor(0, 200, 0, 0); }
@@ -224,7 +223,6 @@ Run for every new location
     signed int      iMaxX, iMaxY = 0;
     signed int      iMinX, iMinY = 1000;
     unsigned long   ulStartTime = millis();
-
 
     pstMotor->bCalibRun = true;
     fMoveProcedure(pstMotor);
