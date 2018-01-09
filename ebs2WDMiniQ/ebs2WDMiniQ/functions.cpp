@@ -447,7 +447,7 @@ Indicate different User Interface menus
         break;
 
     case enUIState_ManualMode:
-        fWriteDoubleValue(pstPrivate, "Ang:XXX  L:X.XXV", *pstUI->puiActAngle, *pstUI->pflLightInVoltage, 1);
+        fWriteDoubleValue(pstPrivate, "Ang:XXX  L:X.XXV", *pstPrivate->stMotor.puiActAngle, *pstUI->pflLightInVoltage, 1);
         fWriteString(pstPrivate, "KEY3 - STOP    ", 2);
         break;
 
@@ -517,6 +517,7 @@ Function for create and write a string which has one value
     pstSingleValue->uchSecondDigit_SV = (uiValue - (pstSingleValue->uchFirstDigit_SV * 100)) / 10;
     pstSingleValue->uchThirdDigit_SV = (uiValue - (pstSingleValue->uchFirstDigit_SV * 100) - (pstSingleValue->uchSecondDigit_SV * 10) / 1);
 
+    // Insert Angle chars into string (ASCII 48 == '0')
     pstSingleValue->szDisplayData[12] = (48 + pstSingleValue->uchFirstDigit_SV);
     pstSingleValue->szDisplayData[13] = (48 + pstSingleValue->uchSecondDigit_SV);
     pstSingleValue->szDisplayData[14] = (48 + pstSingleValue->uchThirdDigit_SV);
@@ -534,16 +535,16 @@ Function for create and write a string which has two values
     pstDoubleValue->szDisplayData[uchLcdRow * 16] = '\0';
 
     // Convert Angle integer (3 digit) to chars
-    pstDoubleValue->uchAngleFirstDigit_DV = uiValue_1 / 100;
+    pstDoubleValue->uchAngleFirstDigit_DV =   uiValue_1 / 100;
     pstDoubleValue->uchAngleSecondDigit_DV = (uiValue_1 - (pstDoubleValue->uchAngleFirstDigit_DV * 100)) / 10;
-    pstDoubleValue->uchAngleThirdDigit_DV = (uiValue_1 - (pstDoubleValue->uchAngleFirstDigit_DV * 100) -
-        (pstDoubleValue->uchAngleSecondDigit_DV * 10) / 1);
+    pstDoubleValue->uchAngleThirdDigit_DV =  (uiValue_1 - (pstDoubleValue->uchAngleFirstDigit_DV * 100) -
+                                             (pstDoubleValue->uchAngleSecondDigit_DV * 10) / 1);
 
     // Convert Voltage integer (3 digit) to chars
-    pstDoubleValue->uchVoltageFirstDigit_DV = flValue_2;
+    pstDoubleValue->uchVoltageFirstDigit_DV =    flValue_2;
     pstDoubleValue->uchVoltageSecondDigit_DV = ((flValue_2 * 100) - (pstDoubleValue->uchVoltageFirstDigit_DV * 100)) / 10;;
-    pstDoubleValue->uchVoltageThirdDigit_DV = ((flValue_2 * 100) - (pstDoubleValue->uchVoltageFirstDigit_DV * 100) -
-        (pstDoubleValue->uchVoltageSecondDigit_DV * 10) / 1);
+    pstDoubleValue->uchVoltageThirdDigit_DV =  ((flValue_2 * 100) - (pstDoubleValue->uchVoltageFirstDigit_DV * 100) -
+                                               ( pstDoubleValue->uchVoltageSecondDigit_DV * 10) / 1);
 
     // Insert Angle chars into string (ASCII 48 == '0')
     pstDoubleValue->szDisplayData[4] = (48 + pstDoubleValue->uchAngleFirstDigit_DV);
@@ -567,5 +568,4 @@ Function for create and write a string which has no values
 
     memcpy(&pstString->szDisplayData[(uchLcdRow - 1) * 16], &szStringLine[0], strlen(szStringLine));
     pstString->szDisplayData[uchLcdRow * 16] = '\0';
-
 };
