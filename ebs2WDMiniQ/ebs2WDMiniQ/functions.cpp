@@ -53,7 +53,7 @@ Adafruit_NeoPixel led = Adafruit_NeoPixel(1, LEDPIN, NEO_GRB + NEO_KHZ800);
 **********************************************************************************************************************/
 //void fsetUIMenu(tstPrvMain *pstPrivate);
 void fWriteSingleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue, unsigned char uchLcdRow);
-void fWriteDoubleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue_1, unsigned int uiValue_2, unsigned char uchLcdRow);
+void fWriteDoubleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue_1, float flValue_2, unsigned char uchLcdRow);
 void fWriteString(tstPrvMain *pstPrivate, char szStringLine[], unsigned char uchLcdRow);
 
 /**********************************************************************************************************************/
@@ -69,7 +69,7 @@ Initialize after Power up
     pstPrivate->stMotor.puiActAngle = &pstPrivate->stCompass.uiAngle;
     pstPrivate->stUI.puiActAngle = &pstPrivate->stCompass.uiAngle;
     pstPrivate->stRgbLed.puiColor = &pstPrivate->stCompass.uiAngle;
-    pstPrivate->stUI.puiLightInVoltage = &pstPrivate->stLight.uiLightInVoltage;
+    pstPrivate->stUI.pflLightInVoltage = &pstPrivate->stLight.flLightInVoltage;
 
     // Initialize LCD-Display
     uint8_t uiLcdSquare[] = { 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F };
@@ -96,9 +96,10 @@ Initialize after Power up
     led.setBrightness(60);
     lcd.setCursor(0, 0);
 
-
+    // Set terminating 0 in OldDisplayData-Buffer
     pstPrivate->stUI.szOldDisplayData[sizeof(pstPrivate->stUI.szOldDisplayData)] = '\0';
 
+    // Set UI-State to Start - Up
     pstPrivate->stUI.enUIState = enUIState_StartUp;
 };
 
@@ -302,18 +303,7 @@ Get the light value and convert it into voltage for UI
 
 *****************************************************************/
 {
-    //unsigned int uiAnalogValue = analogRead(5);
-    byte btAnalogValue = (byte)(analogRead(5) * 500);
-
-    Serial.println(btAnalogValue);
-    //uiAnalogValue = (uiAnalogValue * 500 ) >> 3;
-    //pstLight->uiLightInVoltage = uiAnalogValue >> 7;
-
-    //Serial.print(pstLight->uiLightInVoltage);
-    //Serial.print("\t");
-    //Serial.print(uiAnalogValue);
-    //Serial.print("\t");
-    //Serial.println(analogRead(5));
+    pstLight->flLightInVoltage = ((float)analogRead(5) / 1024.0) * 5.0;
 };
 
 unsigned short fgetKeyValue(tstUI *pstUIKey)
@@ -418,8 +408,22 @@ Complete User Interface procedure
         }
         else if (!(pstUIProcedure->bStartAuto || pstUIProcedure->bStartManual))
         {
+            //if (pstUIProcedure->enUIState == enUIState_Abort)
+            //{
+            //    pstUIProcedure->ulTimeTextOnHold = millis();
+            //}else{}
             pstUIProcedure->enUIState = enUIState_Wait;
         }
+
+        //if ((millis() - pstUI->ulTimeTextOnHold) < 1000)
+        //{
+        //    fWriteString(pstPrivate, "MODE ABORTED!   ", 1);
+        //    fWriteString(pstPrivate, "                ", 2);
+        //}
+        //else
+        //{
+        //    pstUI->enUIState = enUIState_Wait;
+        //}
         break;
 
     default:
@@ -458,7 +462,7 @@ Indicate different User Interface menus
         break;
 
     case enUIState_ManualMode:
-        fWriteDoubleValue(pstPrivate, "Ang:XXX  L:X.XXV", *pstUI->puiActAngle, *pstUI->puiLightInVoltage, 1);
+        fWriteDoubleValue(pstPrivate, "Ang:XXX  L:X.XXV", *pstUI->puiActAngle, *pstUI->pflLightInVoltage, 1);
         fWriteString(pstPrivate, "KEY3 - STOP    ", 2);
         break;
 
@@ -534,12 +538,40 @@ Function for create and write a string which has one value
     pstSingleValue->szDisplayData[14] = (48 + pstSingleValue->uchThirdDigit_SV);
 };
 
-void fWriteDoubleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue_1, unsigned int uiValue_2, unsigned char uchLcdRow)
+void fWriteDoubleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue_1, float flValue_2, unsigned char uchLcdRow)
 /****************************************************************
 Function for create and write a string which has two values
 
 *****************************************************************/
 {
+    //tstUI *pstDoubleValue = &pstPrivate->stUI;
+
+    //memcpy(&pstDoubleValue->szDisplayData[(uchLcdRow - 1) * 16], &szStringLine[0], strlen(szStringLine));
+    //pstDoubleValue->szDisplayData[uchLcdRow * 16] = '\0';
+
+    //// Convert Angle integer (3 digit) to chars
+    //pstDoubleValue->uchAngleFirstDigit_DV = uiValue_1 / 100;
+    //pstDoubleValue->uchAngleSecondDigit_DV = (uiValue_1 - (pstDoubleValue->uchAngleFirstDigit_DV * 100)) / 10;
+    //pstDoubleValue->uchAngleThirdDigit_DV = (uiValue_1 - (pstDoubleValue->uchAngleFirstDigit_DV * 100) -
+    //    (pstDoubleValue->uchAngleSecondDigit_DV * 10) / 1);
+
+    //// Convert Voltage integer (3 digit) to chars
+    //pstDoubleValue->uchVoltageFirstDigit_DV = uiValue_2 / 100;
+    //pstDoubleValue->uchVoltageSecondDigit_DV = (uiValue_2 - (pstDoubleValue->uchVoltageFirstDigit_DV * 100)) / 10;;
+    //pstDoubleValue->uchVoltageThirdDigit_DV = (uiValue_2 - (pstDoubleValue->uchVoltageFirstDigit_DV * 100) -
+    //    (pstDoubleValue->uchSecondDigit_SV * 10) / 1);;
+
+    //// Insert Angle chars into String
+    //pstDoubleValue->szDisplayData[4] = (48 + pstDoubleValue->uchAngleFirstDigit_DV);
+    //pstDoubleValue->szDisplayData[5] = (48 + pstDoubleValue->uchAngleSecondDigit_DV);
+    //pstDoubleValue->szDisplayData[6] = (48 + pstDoubleValue->uchAngleThirdDigit_DV);
+
+    //// Insert Voltage chars into String
+    //pstDoubleValue->szDisplayData[11] = (48 + pstDoubleValue->uchVoltageFirstDigit_DV);
+    //pstDoubleValue->szDisplayData[12] = '.';
+    //pstDoubleValue->szDisplayData[13] = (48 + pstDoubleValue->uchVoltageSecondDigit_DV);
+    //pstDoubleValue->szDisplayData[14] = (48 + pstDoubleValue->uchVoltageThirdDigit_DV);
+
     tstUI *pstDoubleValue = &pstPrivate->stUI;
 
     memcpy(&pstDoubleValue->szDisplayData[(uchLcdRow - 1) * 16], &szStringLine[0], strlen(szStringLine));
@@ -552,17 +584,17 @@ Function for create and write a string which has two values
         (pstDoubleValue->uchAngleSecondDigit_DV * 10) / 1);
 
     // Convert Voltage integer (3 digit) to chars
-    pstDoubleValue->uchVoltageFirstDigit_DV = uiValue_2 / 100;
-    pstDoubleValue->uchVoltageSecondDigit_DV = (uiValue_2 - (pstDoubleValue->uchVoltageFirstDigit_DV * 100)) / 10;;
-    pstDoubleValue->uchVoltageThirdDigit_DV = (uiValue_2 - (pstDoubleValue->uchVoltageFirstDigit_DV * 100) -
-        (pstDoubleValue->uchSecondDigit_SV * 10) / 1);;
+    pstDoubleValue->uchVoltageFirstDigit_DV = flValue_2;
+    pstDoubleValue->uchVoltageSecondDigit_DV = ((flValue_2 * 100) - (pstDoubleValue->uchVoltageFirstDigit_DV * 100)) / 10;;
+    pstDoubleValue->uchVoltageThirdDigit_DV = ((flValue_2 * 100) - (pstDoubleValue->uchVoltageFirstDigit_DV * 100) -
+        (pstDoubleValue->uchVoltageSecondDigit_DV * 10) / 1);
 
-    // Insert Angle chars into String
+    // Insert Angle chars into string (ASCII 48 == '0')
     pstDoubleValue->szDisplayData[4] = (48 + pstDoubleValue->uchAngleFirstDigit_DV);
     pstDoubleValue->szDisplayData[5] = (48 + pstDoubleValue->uchAngleSecondDigit_DV);
     pstDoubleValue->szDisplayData[6] = (48 + pstDoubleValue->uchAngleThirdDigit_DV);
 
-    // Insert Voltage chars into String
+    // Insert Voltage chars into string (ASCII 48 == '0')
     pstDoubleValue->szDisplayData[11] = (48 + pstDoubleValue->uchVoltageFirstDigit_DV);
     pstDoubleValue->szDisplayData[12] = '.';
     pstDoubleValue->szDisplayData[13] = (48 + pstDoubleValue->uchVoltageSecondDigit_DV);

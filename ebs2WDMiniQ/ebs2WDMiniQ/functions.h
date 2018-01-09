@@ -61,7 +61,7 @@ Lightsensor structure
 ----------------------------------------------------------------*/
 typedef struct tstLightSensor
 {
-    unsigned int        uiLightInVoltage;        // Voltage depend on Photodiode resistance
+    float               flLightInVoltage;       // Voltage depend on Photodiode resistance
 }tstLightSensor;
 
 /*----------------------------------------------------------------
@@ -100,7 +100,7 @@ typedef struct tstUI
     bool                bCursorSet;
     tenKey              enKeyState;             // Key states
     tenUIState          enUIState;              // User Interface states
-    unsigned int       *puiLightInVoltage;      // Voltage depend on Photodiode resistance
+    float              *pflLightInVoltage;      // Voltage depend on Photodiode resistance
     unsigned int       *puiActAngle;            // Actual angle compass
     unsigned short      usPrevState;            // Previous UI state
     unsigned short      usKeyState;             // Key state
