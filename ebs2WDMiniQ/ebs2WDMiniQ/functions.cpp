@@ -373,11 +373,13 @@ Complete User Interface procedure
         if (!pstCompass->bCalibDone)
         {
             pstUIProcedure->enUIState = enUIState_Calibration;
+            pstUIProcedure->uchPrevState = pstUIProcedure->enUIState;
         }
         else if (!pstUIProcedure->bStartAuto || !pstUIProcedure->bStartManual)
         {
             pstUIProcedure->bStartManual = true;
             pstUIProcedure->enUIState = enUIState_ManualMode;
+            pstUIProcedure->uchPrevState = pstUIProcedure->enUIState;
         }
         break;
 
@@ -387,43 +389,25 @@ Complete User Interface procedure
             pstUIProcedure->bStartAuto = true;
             pstMotor->bRun = true;
             pstUIProcedure->enUIState = enUIState_AutomaticMode;
+            pstUIProcedure->uchPrevState = pstUIProcedure->enUIState;
         }
         break;
 
     case enKey_3:
-        if (pstCompass->bCalibDone)
+        if (pstCompass->bCalibDone && (pstUIProcedure->uchPrevState != enUIState_Abort))
         {
+            pstUIProcedure->ulTimeTextOnHold = millis();
             pstUIProcedure->bStartAuto = false;
             pstUIProcedure->bStartManual = false;
             pstUIProcedure->bModeAborted = true;
             pstMotor->bRun = false;
             fMoveProcedure(pstMotor);
             pstUIProcedure->enUIState = enUIState_Abort;
+            pstUIProcedure->uchPrevState = pstUIProcedure->enUIState;
         }
         break;
 
     case enKey_undef:
-        if (!pstCompass->bCalibDone)
-        {
-            pstUIProcedure->enUIState = enUIState_StartUp;
-        }
-
-        else if (pstUIProcedure->enUIState == enUIState_Abort)
-        {
-            pstUIProcedure->ulTimeTextOnHold = millis();
-        }
-        /// WORKS NOT PROPERLY!
-        else if (!(pstUIProcedure->bStartAuto || pstUIProcedure->bStartManual) && pstCompass->bCalibDone)
-        {
-            if (pstUIProcedure->bModeAborted)
-            {
-                pstUIProcedure->enUIState = enUIState_Abort;
-            }
-            else
-            {
-                pstUIProcedure->enUIState = enUIState_Wait;
-            }
-        }
         break;
 
     default:
@@ -459,6 +443,7 @@ Indicate different User Interface menus
         lcd.setCursor(0, 0);
         lcd.print("   Complete!    ");
         delay(2000);
+        pstUI->enUIState = enUIState_Wait;
         break;
 
     case enUIState_ManualMode:
@@ -472,7 +457,10 @@ Indicate different User Interface menus
         break;
 
     case enUIState_Abort:
-        /// WORKS NOT PROPERLY!!
+        Serial.print("TimeAbort: ");
+        Serial.println(millis() - pstUI->ulTimeTextOnHold);
+
+
         if ((millis() - pstUI->ulTimeTextOnHold) < 2000)
         {
             fWriteString(pstPrivate, "MODE ABORTED!   ", 1);
