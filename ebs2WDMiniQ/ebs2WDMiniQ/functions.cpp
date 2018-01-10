@@ -33,7 +33,7 @@ FHNW - EMBEDDED SYSTEMS
 #define MIN_V           30.0        // Minimum speed of motors
 #define MAX_V           60.0        // Maximum speed of motors
 #define ANGLE_MIN       10.0        // Minimum angle
-#define ANGLE_MAX       35          // Maximum angle
+#define ANGLE_MAX       350.0          // Maximum angle
 #define HALFCIRCLE      180.0       // Half circle in degrees
 #define LEDPIN          10          // Pin of RGB-LED
 #define SAMPLES         1           // For filter magnitude
