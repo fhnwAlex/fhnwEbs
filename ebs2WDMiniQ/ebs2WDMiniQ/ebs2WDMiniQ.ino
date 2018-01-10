@@ -41,73 +41,77 @@ void setup()
 	memset(&stPrivate, 0, sizeof(stPrivate));		// Set whole privat memory 0
 	finitUp(&stPrivate);
 
-	////FOR TIMING TESTS
-	//Serial.print("CC");
-	//Serial.print("\t");
+	//FOR TIMING TESTS
+	Serial.print("CC");
+	Serial.print("\t");
 	//Serial.print("Min.UI");
 	//Serial.print("\t");
 	//Serial.print("Max.UI");
-	//Serial.print("\t");
-	//Serial.print("Min.Col");
-	//Serial.print("\t");
-	//Serial.print("Max.Col");
-	//Serial.print("\t");
-	//Serial.print("Min.Ang");
-	//Serial.print("\t");
-	//Serial.print("Max.Ang");
-	//Serial.print("\t");
-	//Serial.print("Min.Mo");
-	//Serial.print("\t");
-	//Serial.print("Max.Mo");
 	//Serial.print("\t");
 	//Serial.print("Min.Li");
 	//Serial.print("\t");
 	//Serial.print("Max.Li");
 	//Serial.print("\t");
+	//Serial.print("Min.Ang");
+	//Serial.print("\t");
+	//Serial.print("Max.Ang");
+	//Serial.print("\t");
+	//Serial.print("Min.Mot");
+	//Serial.print("\t");
+	//Serial.print("Max.Mot");
+	//Serial.print("\t");
+	Serial.print("Min.Buff");
+	Serial.print("\t");
+	Serial.println("Max.Buff");
+	//Serial.print("\t");
 	//Serial.print("Min.LCD");
 	//Serial.print("\t");
 	//Serial.print("Max.LCD");
 	//Serial.print("\t");
-	//Serial.print("Min.LCD_UD");
+	//Serial.print("Min.LED");
 	//Serial.print("\t");
-	//Serial.println("Max.LCD_UD");
+	//Serial.print("Max.LED");
+
 }
 
-////FOR TIMING TESTS
-//unsigned long ulCtfgetAngle = 0;
-//unsigned long ulCtOldfgetAngle = 0;
-//unsigned long ulCtfgetAngleMin = 10000000;
-//unsigned long ulCtfgetAngleMax = 0;
-//
+//FOR TIMING TESTS
+
 //unsigned long ulCtfUIProcedure = 0;
 //unsigned long ulCtOldfUIProcedure = 0;
 //unsigned long ulCtfUIProcedureMin = 10000000;
 //unsigned long ulCtfUIProcedureMax = 0;
-//
-//unsigned long ulCtfsetColor = 0;
-//unsigned long ulCtOldfsetColor = 0;
-//unsigned long ulCtfsetColorMin = 10000000;
-//unsigned long ulCtfsetColorMax = 0;
-//
-//unsigned long ulCtfMoveProcedure = 0;
-//unsigned long ulCtOldfMoveProcedure = 0;
-//unsigned long ulCtfMoveProcedureMin = 10000000;
-//unsigned long ulCtfMoveProcedureMax = 0;
-//
+
 //unsigned long ulCtfgetLight = 0;
 //unsigned long ulCtOldfgetLight = 0;
 //unsigned long ulCtfgetLightMin = 10000000;
 //unsigned long ulCtfgetLightMax = 0;
-//
-//unsigned long ulCtfUpdateDisplay = 0;
-//unsigned long ulCtOldfUpdateDisplay = 0;
-//unsigned long ulCtfUpdateDisplayMin = 10000000;
-//unsigned long ulCtfUpdateDisplayMax = 0;
-//
-//unsigned long ulTimeUpdateLcdMin = 10000000;
-//unsigned long ulTimeUpdateLcdMax = 0;
-//
-//unsigned long ulCycleCount = 1;
+
+//unsigned long ulCtfgetAngle = 0;
+//unsigned long ulCtOldfgetAngle = 0;
+//unsigned long ulCtfgetAngleMin = 10000000;
+//unsigned long ulCtfgetAngleMax = 0;
+
+//unsigned long ulCtfMoveProcedure = 0;
+//unsigned long ulCtOldfMoveProcedure = 0;
+//unsigned long ulCtfMoveProcedureMin = 10000000;
+//unsigned long ulCtfMoveProcedureMax = 0;
+
+//unsigned long ulCtfsetUIMenu = 0;
+//unsigned long ulCtOldfsetUIMenu = 0;
+//unsigned long ulCtfsetUIMenuMin = 10000000;
+//unsigned long ulCtfsetUIMenuMax = 0;
+
+unsigned long ulCtfDisplayPro = 0;
+unsigned long ulCtOldfDisplayPro = 0;
+unsigned long ulCtfDisplayProMin = 10000000;
+unsigned long ulCtfDisplayProMax = 0;
+
+//unsigned long ulCtfsetColor = 0;
+//unsigned long ulCtOldfsetColor = 0;
+//unsigned long ulCtfsetColorMin = 10000000;
+//unsigned long ulCtfsetColorMax = 0;
+
+unsigned long ulCycleCount = 1;
 
 
 
@@ -116,46 +120,49 @@ void loop()
 {
 	////FOR TIMING TESTS
 	///*CYCLIC FUNCTIONS*/
+
 	//ulCtOldfUIProcedure = micros();
-	//fUIProcedure(&stPrivate);
+	fUIProcedure(&stPrivate);
 	//ulCtfUIProcedure = micros();
 
+	//ulCtOldfgetLight = micros();
+	fgetLight(&stPrivate.stLight);
+	//ulCtfgetLight = micros();
+
+	//ulCtOldfgetAngle = micros();
+	fgetAngle(&stPrivate.stCompass);
+	//ulCtfgetAngle = micros();
+
+	//ulCtOldfMoveProcedure = micros();
+	fMoveProcedure(&stPrivate.stMotor);
+	//ulCtfMoveProcedure = micros();
+
+	//ulCtOldfsetUIMenu = micros();
+	fsetUIMenu(&stPrivate);
+	//ulCtfsetUIMenu = micros();
+
+	ulCtOldfDisplayPro = micros();
+	fDisplayProcedure(pstUI);
+	ulCtfDisplayPro = micros();
+
 	//ulCtOldfsetColor = micros();
-	//fsetColor(&stPrivate);
+	fsetColor(&stPrivate);
 	//ulCtfsetColor = micros();
 
-	//if (pstUI->bStartAuto || pstUI->bStartManual)
-	//{
-
-	//	ulCtOldfgetAngle = micros();
-	//	fgetAngle(&stPrivate.stCompass);
-	//	ulCtfgetAngle = micros();
-	//	
-	//	ulCtOldfMoveProcedure = micros();
-	//	fMoveProcedure(&stPrivate.stMotor);
-	//	ulCtfMoveProcedure = micros();
-
-	//	ulCtOldfgetLight = micros();
-	//	fgetLight(&stPrivate.stLight);
-	//	ulCtfgetLight = micros();
-
-	//	ulCtOldfUpdateDisplay = micros();
-	//	fUpdateDisplay(&stPrivate);
-	//	ulCtfUpdateDisplay = micros();
-	//}
 
 	//ulCtfUIProcedure = ulCtfUIProcedure - ulCtOldfUIProcedure;
-	//ulCtfsetColor = ulCtfsetColor - ulCtOldfsetColor;
+	//ulCtfgetLight = ulCtfgetLight - ulCtOldfgetLight;
 	//ulCtfgetAngle = ulCtfgetAngle - ulCtOldfgetAngle;
 	//ulCtfMoveProcedure = ulCtfMoveProcedure - ulCtOldfMoveProcedure;
-	//ulCtfgetLight = ulCtfgetLight - ulCtOldfgetLight;
-	//ulCtfUpdateDisplay = ulCtfUpdateDisplay - ulCtOldfUpdateDisplay;
+	//ulCtfsetUIMenu = ulCtfsetUIMenu - ulCtOldfsetUIMenu;
+	ulCtfDisplayPro = ulCtfDisplayPro - ulCtOldfDisplayPro;
+	//ulCtfsetColor = ulCtfsetColor - ulCtOldfsetColor;
 
 	//if (ulCtfUIProcedure < ulCtfUIProcedureMin) ulCtfUIProcedureMin = ulCtfUIProcedure;
 	//if (ulCtfUIProcedure > ulCtfUIProcedureMax) ulCtfUIProcedureMax = ulCtfUIProcedure;
 
-	//if (ulCtfsetColor < ulCtfsetColorMin) ulCtfsetColorMin = ulCtfsetColor;
-	//if (ulCtfsetColor > ulCtfsetColorMax) ulCtfsetColorMax = ulCtfsetColor;
+	//if (ulCtfgetLight < ulCtfgetLightMin) ulCtfgetLightMin = ulCtfgetLight;
+	//if (ulCtfgetLight > ulCtfgetLightMax) ulCtfgetLightMax = ulCtfgetLight;
 
 	//if (ulCtfgetAngle < ulCtfgetAngleMin) ulCtfgetAngleMin = ulCtfgetAngle;
 	//if (ulCtfgetAngle > ulCtfgetAngleMax) ulCtfgetAngleMax = ulCtfgetAngle;
@@ -163,95 +170,81 @@ void loop()
 	//if (ulCtfMoveProcedure < ulCtfMoveProcedureMin) ulCtfMoveProcedureMin = ulCtfMoveProcedure;
 	//if (ulCtfMoveProcedure > ulCtfMoveProcedureMax) ulCtfMoveProcedureMax = ulCtfMoveProcedure;
 
-	//if (ulCtfgetLight < ulCtfgetLightMin) ulCtfgetLightMin = ulCtfgetLight;
-	//if (ulCtfgetLight > ulCtfgetLightMax) ulCtfgetLightMax = ulCtfgetLight;
+	//if (ulCtfsetUIMenu < ulCtfsetUIMenuMin) ulCtfsetUIMenuMin = ulCtfsetUIMenu;
+	//if (ulCtfsetUIMenu > ulCtfsetUIMenuMax) ulCtfsetUIMenuMax = ulCtfsetUIMenu;
 
-	//if (ulCtfUpdateDisplay < ulCtfUpdateDisplayMin) ulCtfUpdateDisplayMin = ulCtfUpdateDisplay;
-	//if (ulCtfUpdateDisplay > ulCtfUpdateDisplayMax) ulCtfUpdateDisplayMax = ulCtfUpdateDisplay;
+	if (ulCtfDisplayPro < ulCtfDisplayProMin) ulCtfDisplayProMin = ulCtfDisplayPro;
+	if (ulCtfDisplayPro > ulCtfDisplayProMax) ulCtfDisplayProMax = ulCtfDisplayPro;
 
-	//if (stPrivate.stUI.ulTimeDiff < ulTimeUpdateLcdMin) ulTimeUpdateLcdMin = stPrivate.stUI.ulTimeDiff;
-	//if (stPrivate.stUI.ulTimeDiff > ulTimeUpdateLcdMax) ulTimeUpdateLcdMax = stPrivate.stUI.ulTimeDiff;
+	//if (ulCtfsetColor < ulCtfsetColorMin) ulCtfsetColorMin = ulCtfsetColor;
+	//if (ulCtfsetColor > ulCtfsetColorMax) ulCtfsetColorMax = ulCtfsetColor;
 
-	//if (ulCycleCount == 1000)
-	//{
-	//	Serial.print(ulCycleCount);
-	//	Serial.print("\t");
-	//	Serial.print(ulCtfUIProcedureMin);
-	//	Serial.print("\t");
-	//	Serial.print(ulCtfUIProcedureMax);
-	//	Serial.print("\t");
-	//	Serial.print(ulCtfsetColorMin);
-	//	Serial.print("\t");
-	//	Serial.print(ulCtfsetColorMax);
-	//	Serial.print("\t");
-	//	Serial.print(ulCtfgetAngleMin);
-	//	Serial.print("\t");
-	//	Serial.print(ulCtfgetAngleMax);
-	//	Serial.print("\t");
-	//	Serial.print(ulCtfMoveProcedureMin);
-	//	Serial.print("\t");
-	//	Serial.print(ulCtfMoveProcedureMax);
-	//	Serial.print("\t");
-	//	Serial.print(ulCtfgetLightMin);
-	//	Serial.print("\t");
-	//	Serial.print(ulCtfgetLightMax);
-	//	Serial.print("\t");
-	//	Serial.print(ulCtfUpdateDisplayMin);
-	//	Serial.print("\t");
-	//	Serial.print(ulCtfUpdateDisplayMax);
-	//	Serial.print("\t");
-	//	Serial.print(ulTimeUpdateLcdMin);
-	//	Serial.print("\t");
-	//	Serial.println(ulTimeUpdateLcdMax);
-	//
-	//	ulCtfgetAngleMin = 10000000;
-	//	ulCtfgetAngleMax = 0;
-	//	ulCtfUIProcedureMin = 10000000;
-	//	ulCtfUIProcedureMax = 0;
-	//	ulCtfsetColorMin = 10000000;
-	//	ulCtfsetColorMax = 0;
-	//	ulCtfMoveProcedureMin = 10000000;
-	//	ulCtfMoveProcedureMax = 0;
-	//	ulCtfgetLightMin = 10000000;
-	//	ulCtfgetLightMax = 0;
-	//	ulCtfUpdateDisplayMin = 10000000;
-	//	ulCtfUpdateDisplayMax = 0;
-	//	ulTimeUpdateLcdMin = 10000000;
-	//	ulTimeUpdateLcdMax = 0;
+	if (ulCycleCount == 1000)
+	{
+		Serial.print(ulCycleCount);
+		Serial.print("\t");
+		//Serial.print(ulCtfUIProcedureMin);
+		//Serial.print("\t");
+		//Serial.print(ulCtfUIProcedureMax);
+		//Serial.print("\t");
+		//Serial.print(ulCtfgetLightMin);
+		//Serial.print("\t");
+		//Serial.print(ulCtfgetLightMax);
+		//Serial.print("\t");
+		//Serial.print(ulCtfgetAngleMin);
+		//Serial.print("\t");
+		//Serial.print(ulCtfgetAngleMax);
+		//Serial.print("\t");
+		//Serial.print(ulCtfMoveProcedureMin);
+		//Serial.print("\t");
+		//Serial.print(ulCtfMoveProcedureMax);
+		//Serial.print("\t");
+		//Serial.print(ulCtfsetUIMenuMin);
+		//Serial.print("\t");
+		//Serial.print(ulCtfsetUIMenuMax);
+		//Serial.print("\t");
+		Serial.print(ulCtfDisplayProMin);
+		Serial.print("\t");
+		Serial.println(ulCtfDisplayProMax);
+		//Serial.print("\t");
+		//Serial.print(ulCtfsetColorMin);
+		//Serial.print("\t");
+		//Serial.println(ulCtfsetColorMax);
+	
 
-	//}
+		//ulCtfUIProcedureMin = 10000000;
+		//ulCtfUIProcedureMax = 0;
+		//ulCtfgetLightMin = 10000000;
+		//ulCtfgetLightMax = 0;
+		//ulCtfgetAngleMin = 10000000;
+		//ulCtfgetAngleMax = 0;
+		//ulCtfMoveProcedureMin = 10000000;
+		//ulCtfMoveProcedureMax = 0;
+		//ulCtfsetUIMenuMin = 10000000;
+		//ulCtfsetUIMenuMax = 0;
+		ulCtfDisplayProMin = 10000000;
+		ulCtfDisplayProMax = 0;
+		//ulCtfsetColorMin = 10000000;
+		//ulCtfsetColorMax = 0;
 
-	//ulCycleCount++;
+	}
 
-	//if (ulCycleCount > 1000) ulCycleCount = 1;
+	ulCycleCount++;
+
+	if (ulCycleCount > 1000) ulCycleCount = 1;
 
 
-	//UNCOMMENT AFTER TIMING TESTS
-	/*CYCLIC FUNCTIONS*/
-	fUIProcedure(&stPrivate);
-    fsetUIMenu(&stPrivate);
-	fsetColor(&stPrivate);
-    fDisplayProcedure(pstUI);
-    fgetAngle(&stPrivate.stCompass);
-    fMoveProcedure(&stPrivate.stMotor);
-    fgetLight(&stPrivate.stLight);
+	////UNCOMMENT AFTER TIMING TESTS
+	///*CYCLIC FUNCTIONS*/
+	//fUIProcedure(&stPrivate);
+	//fsetUIMenu(&stPrivate);
+	//fsetColor(&stPrivate);
+	//fDisplayProcedure(pstUI);
+	//fgetAngle(&stPrivate.stCompass);
+	//fMoveProcedure(&stPrivate.stMotor);
+	//fgetLight(&stPrivate.stLight);
 
     //Serial.print("UI State: ");
     //Serial.print("\t");
     //Serial.println(pstUI->enUIState);
-
-	//if (pstUI->bStartAuto)
-	//{
-	//	fgetAngle(&stPrivate.stCompass);
-	//	fMoveProcedure(&stPrivate.stMotor);
-	//	fgetLight(&stPrivate.stLight);
-
- //   }
- //   else if (pstUI->bStartManual)
- //   {
- //       fgetAngle(&stPrivate.stCompass);
- //       fMoveProcedure(&stPrivate.stMotor);
- //       fgetLight(&stPrivate.stLight);
-
- //   }
 }

@@ -34,11 +34,11 @@ FHNW - EMBEDDED SYSTEMS
 #define MIN_V           30.0        // Minimum speed of motors
 #define MAX_V           60.0        // Maximum speed of motors
 #define ANGLE_MIN       10.0        // Minimum angle
-#define ANGLE_MAX       35          // Maximum angle
+#define ANGLE_MAX       350.0          // Maximum angle
 #define HALFCIRCLE      180.0       // Half circle in degrees
 #define LEDPIN          10          // Pin of RGB-LED
 #define SAMPLES         1           // For filter magnitude
-#define CALIB_TIME      2000       // Calibration time [ms]
+#define CALIB_TIME      20000       // Calibration time [ms]
 #define TONEPIN         16          // Pin of buzzer
 #define TONEFREQ        100         // Tone frequency buzzer
 
@@ -109,7 +109,7 @@ Move procedure of a motor with arguments of direction and speed
 
 *****************************************************************/
 {
-    // Static speed mode
+    // Static speed mode for calibration
     if (!pstMotor->bCompassCalibrated)
     {
         if (pstMotor->bCalibRun)
@@ -482,7 +482,7 @@ Display text driver / sending every cycle one char if needed
 {
     if (&pstDisplay->szDisplayData[pstDisplay->uchDisplayIx] != &pstDisplay->szOldDisplayData[pstDisplay->uchDisplayIx])
     {
-        lcd.print(pstDisplay->szDisplayData[pstDisplay->uchDisplayIx]);
+		lcd.print(pstDisplay->szDisplayData[pstDisplay->uchDisplayIx]);
         pstDisplay->szOldDisplayData[pstDisplay->uchDisplayIx] = pstDisplay->szDisplayData[pstDisplay->uchDisplayIx];
     }
     pstDisplay->uchDisplayIx++;

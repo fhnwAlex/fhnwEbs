@@ -118,9 +118,6 @@ typedef struct tstUI
     unsigned short      usKeyState;                 // Key state
     unsigned long       ulCycle;                    // Cycle counter
     unsigned long       ulTimeTextOnHold;           // Time delay for display hold (Text)
-    unsigned long       ulTime;                 //DELETE AFTER TESTING!!
-    unsigned long       ulOldTime;              //DELETE AFTER TESTING!!
-    unsigned long       ulTimeDiff;             //DELETE AFTER TESTING!!
 }tstUI;
 
 
