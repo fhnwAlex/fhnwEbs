@@ -520,6 +520,7 @@ Function for create and write a string which has one value
     pstSingleValue->szDisplayData[13] = ('0' + pstSingleValue->uchSecondDigit_SV);
     pstSingleValue->szDisplayData[14] = ('0' + pstSingleValue->uchThirdDigit_SV);
     pstSingleValue->szDisplayData[15] = 223;    // Degrees char -> Depends on LCD type
+}
 
 void fWriteDoubleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue_1, float flValue_2, unsigned char uchLcdRow)
 /****************************************************************
