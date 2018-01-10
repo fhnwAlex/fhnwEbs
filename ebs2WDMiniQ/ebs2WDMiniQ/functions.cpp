@@ -38,7 +38,7 @@ FHNW - EMBEDDED SYSTEMS
 #define HALFCIRCLE      180.0       // Half circle in degrees
 #define LEDPIN          10          // Pin of RGB-LED
 #define SAMPLES         1           // For filter magnitude
-#define CALIB_TIME      20000       // Calibration time [ms]
+#define CALIB_TIME      2000       // Calibration time [ms]
 #define TONEPIN         16          // Pin of buzzer
 #define TONEFREQ        100         // Tone frequency buzzer
 
@@ -97,6 +97,7 @@ Initialize after Power up
     lcd.setCursor(0, 0);
 
     // Set terminating 0 in OldDisplayData-Buffer
+    memset(&pstPrivate->stUI.szOldDisplayData[0], '0', sizeof(pstPrivate->stUI.szOldDisplayData));
     pstPrivate->stUI.szOldDisplayData[sizeof(pstPrivate->stUI.szOldDisplayData)] = '\0';
 
     // Set UI-State to Start - Up
@@ -446,7 +447,7 @@ Indicate different User Interface menus
 
     case enUIState_ManualMode:
         fWriteDoubleValue(pstPrivate, "Ang:XXX  L:X.XXV", *pstPrivate->stMotor.puiActAngle, *pstUI->pflLightInVoltage, 1);
-        fWriteString(pstPrivate, "KEY3 - STOP    ", 2);
+        fWriteString(pstPrivate, "KEY3 - STOP     ", 2);
         break;
 
     case enUIState_AutomaticMode:
@@ -478,7 +479,7 @@ Display text driver / sending every cycle one char if needed
 
 *****************************************************************/
 {
-    if (&pstDisplay->szDisplayData[pstDisplay->uchDisplayIx] != &pstDisplay->szOldDisplayData[pstDisplay->uchDisplayIx])
+    if (pstDisplay->szDisplayData[pstDisplay->uchDisplayIx] != pstDisplay->szOldDisplayData[pstDisplay->uchDisplayIx])
     {
         lcd.print(pstDisplay->szDisplayData[pstDisplay->uchDisplayIx]);
         pstDisplay->szOldDisplayData[pstDisplay->uchDisplayIx] = pstDisplay->szDisplayData[pstDisplay->uchDisplayIx];
@@ -491,7 +492,7 @@ Display text driver / sending every cycle one char if needed
         lcd.setCursor(0, 1);
     }
 
-    if (pstDisplay->uchDisplayIx > sizeof(pstDisplay->szDisplayData))
+    if (pstDisplay->uchDisplayIx > (sizeof(pstDisplay->szDisplayData)-1))
     {
         // Reset index
         pstDisplay->uchDisplayIx = 0;
