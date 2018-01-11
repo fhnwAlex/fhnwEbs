@@ -96,9 +96,8 @@ Initialize after Power up
     led.setBrightness(60);
     lcd.setCursor(0, 0);
 
-    // Set terminating 0 in OldDisplayData-Buffer
-    memset(&pstPrivate->stUI.szOldDisplayData[0], '0', sizeof(pstPrivate->stUI.szOldDisplayData));
-    pstPrivate->stUI.szOldDisplayData[sizeof(pstPrivate->stUI.szOldDisplayData)] = '\0';
+    // Fill up Buffer with zeros
+    memset(&pstPrivate->stUI.szDisplayData[0], '0', sizeof(pstPrivate->stUI.szDisplayData));
 
     // Set UI-State to Start - Up
     pstPrivate->stUI.enUIState = enUIState_StartUp;
@@ -446,7 +445,7 @@ Indicate different User Interface menus
         break;
 
     case enUIState_ManualMode:
-        fWriteDoubleValue(pstPrivate, "Ang:XXX  L:X.XXV", *pstPrivate->stMotor.puiActAngle, *pstUI->pflLightInVoltage, 1);
+        fWriteDoubleValue(pstPrivate, "Ang:XXX  L:X.XX ", *pstPrivate->stMotor.puiActAngle, *pstUI->pflLightInVoltage, 1);
         fWriteString(pstPrivate, "KEY3 - STOP     ", 2);
         break;
 
@@ -479,18 +478,29 @@ Display text driver / sending every cycle one char if needed
 
 *****************************************************************/
 {
-    if (pstDisplay->szDisplayData[pstDisplay->uchDisplayIx] != pstDisplay->szOldDisplayData[pstDisplay->uchDisplayIx])
-    {
-        lcd.print(pstDisplay->szDisplayData[pstDisplay->uchDisplayIx]);
-        pstDisplay->szOldDisplayData[pstDisplay->uchDisplayIx] = pstDisplay->szDisplayData[pstDisplay->uchDisplayIx];
-    }
-    pstDisplay->uchDisplayIx++;
-
-    if (pstDisplay->uchDisplayIx == 16)
+    if ((pstDisplay->uchDisplayIx == 16) && !pstDisplay->bSetCursorFlag)
     {
         // Set cursor to 2nd line
         lcd.setCursor(0, 1);
+        pstDisplay->bSetCursorFlag = true;
+        pstDisplay->ulPrevCycle = pstDisplay->ulCycle;
+        pstDisplay->uchDisplayIx = 15;
     }
+
+    if ((pstDisplay->ulCycle - pstDisplay->ulPrevCycle) != 0)
+    {
+        pstDisplay->bSetCursorFlag = false;
+    }
+
+    pstDisplay->ulPrevCycle = pstDisplay->ulCycle;
+
+    if (!pstDisplay->bSetCursorFlag)
+    {
+        // Send each char to LCD-Display
+        lcd.print(pstDisplay->szDisplayData[pstDisplay->uchDisplayIx]);
+    }
+
+    pstDisplay->uchDisplayIx++;
 
     if (pstDisplay->uchDisplayIx > (sizeof(pstDisplay->szDisplayData)-1))
     {
@@ -498,6 +508,7 @@ Display text driver / sending every cycle one char if needed
         pstDisplay->uchDisplayIx = 0;
         lcd.setCursor(0, 0);
     }
+    pstDisplay->ulCycle++;
 };
 
 void fWriteSingleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue, unsigned char uchLcdRow)
@@ -517,9 +528,18 @@ Function for create and write a string which has one value
     pstSingleValue->uchThirdDigit_SV = (uiValue - (pstSingleValue->uchFirstDigit_SV * 100) - (pstSingleValue->uchSecondDigit_SV * 10) / 1);
 
     // Insert Angle chars into string (ASCII 48 == '0')
-    pstSingleValue->szDisplayData[12] = ('0' + pstSingleValue->uchFirstDigit_SV);
-    pstSingleValue->szDisplayData[13] = ('0' + pstSingleValue->uchSecondDigit_SV);
-    pstSingleValue->szDisplayData[14] = ('0' + pstSingleValue->uchThirdDigit_SV);
+    if (pstSingleValue->uchFirstDigit_SV == 0)
+    {
+        pstSingleValue->szDisplayData[12] = (' ' + pstSingleValue->uchFirstDigit_SV);
+        pstSingleValue->szDisplayData[13] = ('0' + pstSingleValue->uchSecondDigit_SV);
+        pstSingleValue->szDisplayData[14] = ('0' + pstSingleValue->uchThirdDigit_SV);
+    }
+    else 
+    {
+        pstSingleValue->szDisplayData[12] = ('0' + pstSingleValue->uchFirstDigit_SV);
+        pstSingleValue->szDisplayData[13] = ('0' + pstSingleValue->uchSecondDigit_SV);
+        pstSingleValue->szDisplayData[14] = ('0' + pstSingleValue->uchThirdDigit_SV);
+    }
     pstSingleValue->szDisplayData[15] = 223;    // Degrees char -> Depends on LCD type
 }
 
@@ -545,18 +565,31 @@ Function for create and write a string which has two values
     pstDoubleValue->uchVoltageSecondDigit_DV = ((flValue_2 * 100) - (pstDoubleValue->uchVoltageFirstDigit_DV * 100)) / 10;;
     pstDoubleValue->uchVoltageThirdDigit_DV =  ((flValue_2 * 100) - (pstDoubleValue->uchVoltageFirstDigit_DV * 100) -
                                                ( pstDoubleValue->uchVoltageSecondDigit_DV * 10) / 1);
-
+    
     // Insert Angle chars into string (ASCII 48 == '0')
-    pstDoubleValue->szDisplayData[4] = ('0' + pstDoubleValue->uchAngleFirstDigit_DV);
-    pstDoubleValue->szDisplayData[5] = ('0' + pstDoubleValue->uchAngleSecondDigit_DV);
-    pstDoubleValue->szDisplayData[6] = ('0' + pstDoubleValue->uchAngleThirdDigit_DV);
+    if (pstDoubleValue->uchAngleFirstDigit_DV == 0)
+    {
+        pstDoubleValue->szDisplayData[4] = (' ' + pstDoubleValue->uchAngleFirstDigit_DV);
+        pstDoubleValue->szDisplayData[5] = ('0' + pstDoubleValue->uchAngleSecondDigit_DV);
+        pstDoubleValue->szDisplayData[6] = ('0' + pstDoubleValue->uchAngleThirdDigit_DV);
+    }
+    else
+    {
+        pstDoubleValue->szDisplayData[4] = ('0' + pstDoubleValue->uchAngleFirstDigit_DV);
+        pstDoubleValue->szDisplayData[5] = ('0' + pstDoubleValue->uchAngleSecondDigit_DV);
+        pstDoubleValue->szDisplayData[6] = ('0' + pstDoubleValue->uchAngleThirdDigit_DV);
+    }
+    pstDoubleValue->szDisplayData[7] = 223;    // Degrees char -> Depends on LCD type
+
+
+
 
     // Insert Voltage chars into string (ASCII 48 == '0')
     pstDoubleValue->szDisplayData[11] = ('0' + pstDoubleValue->uchVoltageFirstDigit_DV);
     pstDoubleValue->szDisplayData[12] = '.';
     pstDoubleValue->szDisplayData[13] = ('0' + pstDoubleValue->uchVoltageSecondDigit_DV);
     pstDoubleValue->szDisplayData[14] = ('0' + pstDoubleValue->uchVoltageThirdDigit_DV);
-    pstDoubleValue->szDisplayData[15] = 223;    // Degrees char -> Depends on LCD type
+    pstDoubleValue->szDisplayData[15] = 'V';
 };
 
 void fWriteString(tstPrvMain *pstPrivate, char szStringLine[], unsigned char uchLcdRow)

@@ -97,11 +97,11 @@ typedef struct tstUI
     bool                bStartAuto;                 // Start automatic mode
     bool                bStartManual;               // Start manual mode
     bool                bModeAborted;               // Status boolean abort
+    bool                bSetCursorFlag;             // Flag indication for LCD-cursor set
     tenKey              enKeyState;                 // Key states
     tenUIState          enUIState;                  // User Interface states
     float              *pflLightInVoltage;          // Voltage depend on Photodiode resistance
-    char                szDisplayData[32];          // Data buffer
-    char                szOldDisplayData[32];       // Old data buffer
+    char                szDisplayData[33];          // Data buffer
     unsigned int       *puiActAngle;                // Actual angle compass
     unsigned char       uchPrevState;               // Previous User Interface state
     unsigned char       uchDisplayIx;               // Index for data buffer read
@@ -117,6 +117,7 @@ typedef struct tstUI
     unsigned short      usPrevState;                // Previous UI state
     unsigned short      usKeyState;                 // Key state
     unsigned long       ulCycle;                    // Cycle counter
+    unsigned long       ulPrevCycle;                // Previous cycle counter
     unsigned long       ulTimeTextOnHold;           // Time delay for display hold (Text)
     unsigned long       ulTime;                 //DELETE AFTER TESTING!!
     unsigned long       ulOldTime;              //DELETE AFTER TESTING!!
