@@ -31,7 +31,7 @@ void fDisplayProcedure(tstUI *pstDisplay);
 /****************************************************************
 MEMORY ALLOCATION
 *****************************************************************/
-tstPrvMain stPrivate;	//Allocate private memory
+tstPrvMain stPrivate;   //Allocate private memory
 tstUI *pstUI = &stPrivate.stUI;
 
 // the setup function runs once when you press reset or power the board
