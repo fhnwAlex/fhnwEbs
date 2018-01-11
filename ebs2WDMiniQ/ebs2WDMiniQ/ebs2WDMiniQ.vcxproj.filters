@@ -20,6 +20,7 @@
   <ItemGroup>
     <None Include="ebs2WDMiniQ.ino" />
     <None Include="ClassDiagram1.cd" />
+    <None Include="ClassDiagram11.cd" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.ebs2WDMiniQ.vsarduino.h">
