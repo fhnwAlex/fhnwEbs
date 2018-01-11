@@ -86,6 +86,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
+    <None Include="ClassDiagram11.cd" />
     <None Include="ebs2WDMiniQ.ino">
       <FileType>CppCode</FileType>
     </None>

@@ -1,10 +1,10 @@
 /**********************************************************************************************************************
 FHNW - EMBEDDED SYSTEMS 
 **********************************************************************************************************************
-/*  Program:	ebs2WDMiniQ.ino				*/
-/*	Revision:	1.0							*/
-/*	Author:		A. Gessler / B. Hürzeler	*/
-/*	Date:		2018-01-12					*/
+/*  Program:    ebs2WDMiniQ.ino             */
+/*  Revision:   1.0                         */
+/*  Author:     A. Gessler / B. Hürzeler    */
+/*  Date:       2018-01-12                  */
 /**********************************************************************************************************************/
 /* MAIN PROGRAM
 ***********************************************************************************************************************/
@@ -27,7 +27,6 @@ unsigned short fgetKeyValue(tstUI *pstUI);
 void fUIProcedure(tstPrvMain *pstPrivate);
 void fsetUIMenu(tstPrvMain *pstPrivate);
 void fDisplayProcedure(tstUI *pstDisplay);
-//void fUpdateDisplay(tstPrvMain *pstPrivate);
 
 /****************************************************************
 MEMORY ALLOCATION
@@ -38,7 +37,9 @@ tstUI *pstUI = &stPrivate.stUI;
 // the setup function runs once when you press reset or power the board
 void setup() 
 {
-    memset(&stPrivate, 0, sizeof(stPrivate));		// Set whole privat memory 0
+    // Set whole privat memory 0
+    memset(&stPrivate, 0, sizeof(stPrivate));
+    // Call init function
     finitUp(&stPrivate);
 }
 
