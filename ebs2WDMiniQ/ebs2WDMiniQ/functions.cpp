@@ -531,9 +531,18 @@ Function for create and write a string which has one value
     // Insert Angle chars into string (ASCII 48 == '0')
     if (pstSingleValue->uchFirstDigit_SV == 0)
     {
-        pstSingleValue->szDisplayData[12] = (' ' + pstSingleValue->uchFirstDigit_SV);
-        pstSingleValue->szDisplayData[13] = ('0' + pstSingleValue->uchSecondDigit_SV);
-        pstSingleValue->szDisplayData[14] = ('0' + pstSingleValue->uchThirdDigit_SV);
+        if (pstSingleValue->uchSecondDigit_SV == 0)
+        {
+            pstSingleValue->szDisplayData[12] = ' ';
+            pstSingleValue->szDisplayData[13] = ' ';
+            pstSingleValue->szDisplayData[14] = ('0' + pstSingleValue->uchThirdDigit_SV);
+        }
+        else
+        {
+            pstSingleValue->szDisplayData[12] = ' ';
+            pstSingleValue->szDisplayData[13] = ('0' + pstSingleValue->uchSecondDigit_SV);
+            pstSingleValue->szDisplayData[14] = ('0' + pstSingleValue->uchThirdDigit_SV);
+        }
     }
     else 
     {
@@ -541,7 +550,7 @@ Function for create and write a string which has one value
         pstSingleValue->szDisplayData[13] = ('0' + pstSingleValue->uchSecondDigit_SV);
         pstSingleValue->szDisplayData[14] = ('0' + pstSingleValue->uchThirdDigit_SV);
     }
-    pstSingleValue->szDisplayData[15] = 223;    // Degrees char -> Depends on LCD type
+    pstSingleValue->szDisplayData[15] = 223;    // Degrees char (°) -> Depends on LCD type
 }
 
 void fWriteDoubleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue_1, float flValue_2, unsigned char uchLcdRow)
@@ -570,9 +579,18 @@ Function for create and write a string which has two values
     // Insert Angle chars into string (ASCII 48 == '0')
     if (pstDoubleValue->uchAngleFirstDigit_DV == 0)
     {
-        pstDoubleValue->szDisplayData[4] = (' ' + pstDoubleValue->uchAngleFirstDigit_DV);
-        pstDoubleValue->szDisplayData[5] = ('0' + pstDoubleValue->uchAngleSecondDigit_DV);
-        pstDoubleValue->szDisplayData[6] = ('0' + pstDoubleValue->uchAngleThirdDigit_DV);
+        if (pstDoubleValue->uchAngleSecondDigit_DV == 0)
+        {
+            pstDoubleValue->szDisplayData[4] = ' ';
+            pstDoubleValue->szDisplayData[5] = ' ';
+            pstDoubleValue->szDisplayData[6] = ('0' + pstDoubleValue->uchAngleThirdDigit_DV);
+        }
+        else
+        {
+            pstDoubleValue->szDisplayData[4] = ' ';
+            pstDoubleValue->szDisplayData[5] = ('0' + pstDoubleValue->uchAngleSecondDigit_DV);
+            pstDoubleValue->szDisplayData[6] = ('0' + pstDoubleValue->uchAngleThirdDigit_DV);
+        }
     }
     else
     {
