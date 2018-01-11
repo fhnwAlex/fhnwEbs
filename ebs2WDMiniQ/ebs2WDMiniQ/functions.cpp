@@ -474,41 +474,42 @@ Indicate different User Interface menus
 
 void fDisplayProcedure(tstUI *pstDisplay)
 /****************************************************************
-Display text driver / sending every cycle one char if needed 
+Display text driver / sending every cycle one char if needed
 
 *****************************************************************/
 {
-    if ((pstDisplay->uchDisplayIx == 16) && !pstDisplay->bSetCursorFlag)
-    {
-        // Set cursor to 2nd line
-        lcd.setCursor(0, 1);
-        pstDisplay->bSetCursorFlag = true;
-        pstDisplay->ulPrevCycle = pstDisplay->ulCycle;
-        pstDisplay->uchDisplayIx = 15;
-    }
+	//Set cursor to 0,0
+	if (pstDisplay->ulCycle == sizeof(pstDisplay->szDisplayData))
+	{
+		lcd.setCursor(0, 0);
+		pstDisplay->bSetCursorFlag = true;
+	}
 
-    if ((pstDisplay->ulCycle - pstDisplay->ulPrevCycle) != 0)
-    {
-        pstDisplay->bSetCursorFlag = false;
-    }
+	if (pstDisplay->ulCycle == 16)
+	{
+		// Set cursor to 2nd line
+		lcd.setCursor(0, 1);
+		pstDisplay->bSetCursorFlag = true;
+		//pstDisplay->uchDisplayIx = 15;
+	}
 
-    pstDisplay->ulPrevCycle = pstDisplay->ulCycle;
+	if (pstDisplay->ulCycle > sizeof(pstDisplay->szDisplayData))
+	{
+		// Reset index
+		pstDisplay->uchDisplayIx = 0;
+		pstDisplay->ulCycle = 0;
+	}
 
-    if (!pstDisplay->bSetCursorFlag)
-    {
-        // Send each char to LCD-Display
-        lcd.print(pstDisplay->szDisplayData[pstDisplay->uchDisplayIx]);
-    }
+	if (!pstDisplay->bSetCursorFlag)
+	{
+		// Send each char to LCD-Display
+		lcd.print(pstDisplay->szDisplayData[pstDisplay->uchDisplayIx]);
+		pstDisplay->uchDisplayIx++;
+	}
 
-    pstDisplay->uchDisplayIx++;
-
-    if (pstDisplay->uchDisplayIx > (sizeof(pstDisplay->szDisplayData)-1))
-    {
-        // Reset index
-        pstDisplay->uchDisplayIx = 0;
-        lcd.setCursor(0, 0);
-    }
-    pstDisplay->ulCycle++;
+	//pstDisplay->uchDisplayIx++;
+	pstDisplay->bSetCursorFlag = false;
+	pstDisplay->ulCycle++;
 };
 
 void fWriteSingleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue, unsigned char uchLcdRow)
