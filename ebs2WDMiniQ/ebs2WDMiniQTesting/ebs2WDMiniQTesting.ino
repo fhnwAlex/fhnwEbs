@@ -34,6 +34,7 @@ MEMORY ALLOCATION
 *****************************************************************/
 tstPrvMain stPrivate;	//Allocate private memory
 tstUI *pstUI = &stPrivate.stUI;
+tstPrvMain *pstPrivate = &stPrivate;
 
 // the setup function runs once when you press reset or power the board
 void setup()
@@ -235,14 +236,18 @@ void loop()
 
 	//UNCOMMENT AFTER TIMING TESTS
 	/*CYCLIC FUNCTIONS*/
-	fUIProcedure(&stPrivate);
-	fgetLight(&stPrivate.stLight);
-	fgetAngle(&stPrivate.stCompass);
-	fMoveProcedure(&stPrivate.stMotor);
-	fsetUIMenu(&stPrivate);
-	fDisplayProcedure(pstUI);
-	fsetColor(&stPrivate);
-	
+	//fUIProcedure(&stPrivate);
+	//fgetLight(&stPrivate.stLight);
+	//fcompassCalibrate(&stPrivate);
+	//fMoveProcedure(&stPrivate.stMotor);
+	//fsetUIMenu(&stPrivate);
+	//fDisplayProcedure(pstUI);
+	//Serial.println(fgetKeyValue(&stPrivate.stUI));
+	//pstPrivate->stMotor.bCompassCalibrated = true;
+	//pstPrivate->stMotor.bRun = true;
+	//pstPrivate->stCompass.uiAngle = 270;
+	//fMoveProcedure(&stPrivate.stMotor);
+	//delay(1000);
 	//Serial.print("UI State: ");
 	//Serial.print("\t");
 	//Serial.println(pstUI->enUIState);
