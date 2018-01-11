@@ -27,10 +27,10 @@ FHNW - EMBEDDED SYSTEMS
 #define LCDADDR         0x20        // Adress for LCD display
 #define LCDROWS         2           // Number of rows on LCD
 #define LCDCOLS         16          // Number of coloums on LCD
-#define SpeedPinLeft    5           // Pin for run the left motor 
-#define SpeedPinRight   6           // Pin for run the right motor 
-#define DirectionRight  7           // Pin for control right motor direction
-#define DirectionLeft   12          // Pin for control left motor direction
+#define SPEEDPINLEFT    5           // Pin for run the left motor 
+#define SPEEDPINRIGHT   6           // Pin for run the right motor 
+#define DIRECTIONRIGHT  7           // Pin for control right motor direction
+#define DIRECTIONLEFT   12          // Pin for control left motor direction
 #define MIN_V           30.0        // Minimum speed of motors
 #define MAX_V           60.0        // Maximum speed of motors
 #define ANGLE_MIN       10.0        // Minimum angle
@@ -85,10 +85,10 @@ Initialize after Power up
 	if (!mag.testConnection()) { lcd.print("Connection to compass failed!"); }
 
 	// Initialize Motorpins
-	pinMode(SpeedPinLeft, OUTPUT);
-	pinMode(SpeedPinRight, OUTPUT);
-	pinMode(DirectionRight, OUTPUT);
-	pinMode(DirectionLeft, OUTPUT);
+	pinMode(SPEEDPINLEFT, OUTPUT);
+	pinMode(SPEEDPINRIGHT, OUTPUT);
+	pinMode(DIRECTIONRIGHT, OUTPUT);
+	pinMode(DIRECTIONLEFT, OUTPUT);
 
 	// Initialize RGB-LED
 	led.begin();
@@ -114,24 +114,24 @@ Move procedure of a motor with arguments of direction and speed
 	{
 		if (pstMotor->bCalibRun)
 		{
-			digitalWrite(DirectionRight, FORW);
-			analogWrite(SpeedPinRight, MIN_V);
+			digitalWrite(DIRECTIONRIGHT, FORW);
+			analogWrite(SPEEDPINRIGHT, MIN_V);
 			delayMicroseconds(10);
-			digitalWrite(DirectionLeft, BACK);
-			analogWrite(SpeedPinLeft, MIN_V);
+			digitalWrite(DIRECTIONLEFT, BACK);
+			analogWrite(SPEEDPINLEFT, MIN_V);
 		}
 		else if (pstMotor->bCalibRunL)
 		{
-			digitalWrite(DirectionRight, BACK);
-			analogWrite(SpeedPinRight, MIN_V);
+			digitalWrite(DIRECTIONRIGHT, BACK);
+			analogWrite(SPEEDPINRIGHT, MIN_V);
 			delayMicroseconds(10);
-			digitalWrite(DirectionLeft, FORW);
-			analogWrite(SpeedPinLeft, MIN_V);
+			digitalWrite(DIRECTIONLEFT, FORW);
+			analogWrite(SPEEDPINLEFT, MIN_V);
 		}
 		else
 		{
-			analogWrite(SpeedPinRight, LOW);
-			analogWrite(SpeedPinLeft, LOW);
+			analogWrite(SPEEDPINRIGHT, LOW);
+			analogWrite(SPEEDPINLEFT, LOW);
 		}
 	}
 	else if (pstMotor->bRun)
@@ -143,32 +143,32 @@ Move procedure of a motor with arguments of direction and speed
 		pstMotor->uiSpeed = (unsigned int)(((MAX_V - MIN_V) / (-HALFCIRCLE) * (float)iDiffAngle) + MAX_V);
 		if (iDiffAngle >= (HALFCIRCLE - ANGLE_MIN))
 		{
-			analogWrite(SpeedPinRight, LOW);
-			analogWrite(SpeedPinLeft, LOW);
+			analogWrite(SPEEDPINRIGHT, LOW);
+			analogWrite(SPEEDPINLEFT, LOW);
 		}
 		else if ((*pstMotor->puiActAngle < ANGLE_MAX) && (*pstMotor->puiActAngle > HALFCIRCLE))
 		{
 			// Left turn
-			digitalWrite(DirectionRight, BACK);
-			analogWrite(SpeedPinRight, pstMotor->uiSpeed);
+			digitalWrite(DIRECTIONRIGHT, BACK);
+			analogWrite(SPEEDPINRIGHT, pstMotor->uiSpeed);
 			delayMicroseconds(10);
-			digitalWrite(DirectionLeft, FORW);
-			analogWrite(SpeedPinLeft, pstMotor->uiSpeed);
+			digitalWrite(DIRECTIONLEFT, FORW);
+			analogWrite(SPEEDPINLEFT, pstMotor->uiSpeed);
 		}
 		else
 		{
 			// Right turn
-			digitalWrite(DirectionRight, FORW);
-			analogWrite(SpeedPinRight, pstMotor->uiSpeed);
+			digitalWrite(DIRECTIONRIGHT, FORW);
+			analogWrite(SPEEDPINRIGHT, pstMotor->uiSpeed);
 			delayMicroseconds(10);
-			digitalWrite(DirectionLeft, BACK);
-			analogWrite(SpeedPinLeft, pstMotor->uiSpeed);
+			digitalWrite(DIRECTIONLEFT, BACK);
+			analogWrite(SPEEDPINLEFT, pstMotor->uiSpeed);
 		}
 	}
 	else
 	{
-		analogWrite(SpeedPinRight, LOW);
-		analogWrite(SpeedPinLeft, LOW);
+		analogWrite(SPEEDPINRIGHT, LOW);
+		analogWrite(SPEEDPINLEFT, LOW);
 	}
 };
 
