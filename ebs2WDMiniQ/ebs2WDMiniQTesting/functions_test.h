@@ -23,10 +23,10 @@ Key enumerator
 ----------------------------------------------------------------*/
 typedef enum tenKey
 {
-	enKey_undef = 0,
-	enKey_1,
-	enKey_2,
-	enKey_3,
+	enKey_undef = 0,                            // State - No key pressed
+	enKey_1,                                    // State - Key 1 pressed
+	enKey_2,                                    // State - Key 2 pressed
+	enKey_3,                                    // State - Key 3 pressed
 }tenKey;
 
 /*----------------------------------------------------------------
@@ -34,11 +34,13 @@ User Interface enumerator
 ----------------------------------------------------------------*/
 typedef enum tenUIState
 {
-	enUIState_undef = 0,
-	enUIState_Calibration,
-	enUIState_ManualMode,
-	enUIState_AutomaticMode,
-	enUIState_Abort,
+	enUIState_undef = 0,                        // State - Undefined
+	enUIState_Calibration,                      // State - Calibration
+	enUIState_ManualMode,                       // State - Manual mode
+	enUIState_AutomaticMode,                    // State - Automatic mode
+	enUIState_Abort,                            // State - Aborting
+	enUIState_StartUp,                          // State - After StartUp
+	enUIState_Wait,                             // State - Wait
 }tenUIState;
 
 /*----------------------------------------------------------------
@@ -46,31 +48,29 @@ Motor control structure
 ----------------------------------------------------------------*/
 typedef struct tstMotor
 {
-	bool			bRun;
-	bool			bCalibRun;
-	bool			bCalibRunL;
-	bool			bCompassCalibrated;
-	unsigned int 	uiSpeed;
-	unsigned int	uiAngelNorth;
-	unsigned int	*puiActAngle;
+	bool                bRun;                   // Start motors dynamic speed
+	bool                bCalibRun;              // Start motors static right turn
+	bool                bCalibRunL;             // Start motors static left turn
+	bool                bCompassCalibrated;     // Compass calibration successfull
+	unsigned int        uiSpeed;                // Actual speed of motors
+	unsigned int       *puiActAngle;            // Actual angle of compass
 }tstMotor;
 
 /*----------------------------------------------------------------
-Buzzer structure
+Lightsensor structure
 ----------------------------------------------------------------*/
-typedef struct tstBuzzer
+typedef struct tstLightSensor
 {
-	unsigned long		ulToneDurration;
-	unsigned long		ulToneFrequency;
-}tstBuzzer;
+	float               flLightInVoltage;       // Voltage depend on Photodiode resistance
+}tstLightSensor;
 
 /*----------------------------------------------------------------
 RGB-LED structure
 ----------------------------------------------------------------*/
 typedef struct tstRgbLed
 {
-	unsigned int		*puiColor;
-	unsigned long		ulCycle;
+	unsigned int       *puiColor;               // Actual color of LED
+	unsigned long       ulCycle;                // Cycle counter 	
 }tstRgbLed;
 
 /*----------------------------------------------------------------
@@ -78,18 +78,14 @@ Compass structure
 ----------------------------------------------------------------*/
 typedef struct tstCompass
 {
-	bool			bRun;
-	//bool			bCalibRun;
-	bool			bCalibDone;
-	float			flDeclinationAngle;
-	signed int		iMagnet_x;
-	signed int		iMagnet_y;
-	signed int		iMagnet_z;
-	signed int		iMagOffset_x;
-	signed int		iMagOffset_y;
-	unsigned int	uiAngle;
-	unsigned int	uiSamples;
-
+	bool                bCalibDone;             // Calibration of compass done
+	float               flDeclinationAngle;     // Factor for offset calculation
+	signed int          iMagnet_x;              // Compass magnitude X-Axis
+	signed int          iMagnet_y;              // Compass magnitude Y-Axis
+	signed int          iMagnet_z;              // Compass magnitude Z-Axis
+	signed int          iMagOffset_x;           // Offset magnitude X-Axis
+	signed int          iMagOffset_y;           // Offset magnitude Y-Axis
+	unsigned int        uiAngle;                // Actual angle of compass
 }tstCompass;
 
 /*----------------------------------------------------------------
@@ -97,31 +93,32 @@ User interface structure
 ----------------------------------------------------------------*/
 typedef struct tstUI
 {
-	bool			bInitUpDone;
-	bool			bMenuSet; //for test only!!
-	bool			bStartAuto;
-	bool			bStartManual;
-	bool			bRun;
-	bool			bCalibRun;
-	tenKey			enKeyState;
-	tenUIState		enUIState;
-	unsigned int	*puiActAngle;
-	unsigned short	usPrevState;
-	unsigned long	ulCycle;
-	unsigned long	ulTime;
-	unsigned long	ulOldTime;
-	unsigned long	ulTimeLCDClear;
-	unsigned long	ulTimeLCDClearOld;
-	unsigned long	ulTimeLCDClearDiff;
-	unsigned long	ulTimeLCDCursor;
-	unsigned long	ulTimeLCDCursorOld;
-	unsigned long	ulTimeLCDCursorDiff;
-	unsigned long	ulTimeLCDPrint;
-	unsigned long	ulTimeLCDPrintOld;
-	unsigned long	ulTimeLCDPrintDiff;
-	unsigned long	ulTimeLCDPrint2;
-	unsigned long	ulTimeLCDPrintOld2;
-	unsigned long	ulTimeLCDPrintDiff2;
+	bool                bMenuSet;                   // For UI-Menu controll
+	bool                bStartAuto;                 // Start automatic mode
+	bool                bStartManual;               // Start manual mode
+	bool                bModeAborted;               // Status boolean abort
+	bool                bSetCursorFlag;             // Flag indication for LCD-cursor set
+	tenKey              enKeyState;                 // Key states
+	tenUIState          enUIState;                  // User Interface states
+	float              *pflLightInVoltage;          // Voltage depend on Photodiode resistance
+	char                szDisplayData[33];          // Data buffer
+	unsigned int       *puiActAngle;                // Actual angle compass
+	unsigned char       uchPrevState;               // Previous User Interface state
+	unsigned char       uchDisplayIx;               // Index for data buffer read
+	unsigned char       uchFirstDigit_SV;           // First char digit single value
+	unsigned char       uchSecondDigit_SV;          // Second char digit single value
+	unsigned char       uchThirdDigit_SV;           // Third char digit single value
+	unsigned char       uchAngleFirstDigit_DV;      // First char digit (Angle) double value
+	unsigned char       uchAngleSecondDigit_DV;     // Second char digit (Angle) double value
+	unsigned char       uchAngleThirdDigit_DV;      // Third char digit (Angle) double value
+	unsigned char       uchVoltageFirstDigit_DV;    // First char digit (Voltage) double value
+	unsigned char       uchVoltageSecondDigit_DV;   // Second char digit (Voltage) double value
+	unsigned char       uchVoltageThirdDigit_DV;    // Third char digit (Voltage) double value
+	unsigned short      usPrevState;                // Previous UI state
+	unsigned short      usKeyState;                 // Key state
+	unsigned long       ulCycle;                    // Cycle counter
+	unsigned long       ulPrevCycle;                // Previous cycle counter
+	unsigned long       ulTimeTextOnHold;           // Time delay for display hold (Text)
 }tstUI;
 
 
@@ -130,11 +127,11 @@ Private structure
 ----------------------------------------------------------------*/
 typedef struct tstPrvMain
 {
-	tstMotor		stMotor;
-	tstBuzzer		stBuzzer;
-	tstRgbLed		stRgbLed;
-	tstUI			stUI;
-	tstCompass		stCompass;
+	tstMotor            stMotor;                // Motor structure
+	tstLightSensor      stLight;                // Lightsensor structure
+	tstRgbLed           stRgbLed;               // LED structure
+	tstUI               stUI;                   // User Interface structure
+	tstCompass          stCompass;              // Compass structure
 }tstPrvMain;
 
 #endif // !FUNCTIONS_TEST_H

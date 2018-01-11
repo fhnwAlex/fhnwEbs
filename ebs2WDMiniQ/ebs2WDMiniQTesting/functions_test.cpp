@@ -9,6 +9,7 @@ FHNW - EMBEDDED SYSTEMS
 /* Includes
 **********************************************************************************************************************/
 #include <math.h>
+#include "string.h"
 #include "functions_test.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -21,25 +22,25 @@ FHNW - EMBEDDED SYSTEMS
 /**********************************************************************************************************************/
 /* Defines
 **********************************************************************************************************************/
-#define FORW			0			// Motor control forward
-#define BACK			1			// Motor control backward
-#define LCDADDR			0x20		// Adress for LCD display
-#define LCDROWS			2			// Number of rows on LCD
-#define LCDCOLS			16			// Number of coloums on LCD
-#define SpeedPinLeft	5			// Pin for run the left motor 
-#define SpeedPinRight	6			// Pin for run the right motor 
-#define DirectionRight	7			// Pin for control right motor direction
-#define DirectionLeft	12			// Pin for control left motor direction
-#define MIN_V			30.0		// Minimum speed of motors
-#define MAX_V			60.0		// Maximum speed of motors
-#define ANGLE_MIN		10.0		// Minimum angle
-#define ANGLE_MAX		350			// Maximum angle
-#define HALFCIRCLE		180.0		// Half circle in degrees
-#define LEDPIN			10			// Pin of RGB-LED
-#define SAMPLES			1			// For filter magnitude
-#define CALIB_TIME		20000		// Calibration time [ms]
-#define TONEPIN			16			// Pin of buzzer
-#define TONEFREQ		100			// Tone frequency buzzer
+#define FORW            0           // Motor control forward
+#define BACK            1           // Motor control backward
+#define LCDADDR         0x20        // Adress for LCD display
+#define LCDROWS         2           // Number of rows on LCD
+#define LCDCOLS         16          // Number of coloums on LCD
+#define SpeedPinLeft    5           // Pin for run the left motor 
+#define SpeedPinRight   6           // Pin for run the right motor 
+#define DirectionRight  7           // Pin for control right motor direction
+#define DirectionLeft   12          // Pin for control left motor direction
+#define MIN_V           30.0        // Minimum speed of motors
+#define MAX_V           60.0        // Maximum speed of motors
+#define ANGLE_MIN       10.0        // Minimum angle
+#define ANGLE_MAX       350.0          // Maximum angle
+#define HALFCIRCLE      180.0       // Half circle in degrees
+#define LEDPIN          10          // Pin of RGB-LED
+#define SAMPLES         1           // For filter magnitude
+#define CALIB_TIME      20000       // Calibration time [ms]
+#define TONEPIN         16          // Pin of buzzer
+#define TONEFREQ        100         // Tone frequency buzzer
 
 /**********************************************************************************************************************/
 /* Instances
@@ -50,7 +51,11 @@ Adafruit_NeoPixel led = Adafruit_NeoPixel(1, LEDPIN, NEO_GRB + NEO_KHZ800);
 /**********************************************************************************************************************/
 /* Functions
 **********************************************************************************************************************/
-void fsetUIMenu(tstPrvMain *pstUIMenu);
+//void fsetUIMenu(tstPrvMain *pstPrivate);
+void fWriteSingleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue, unsigned char uchLcdRow);
+void fWriteDoubleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue_1, float flValue_2, unsigned char uchLcdRow);
+void fWriteString(tstPrvMain *pstPrivate, char szStringLine[], unsigned char uchLcdRow);
+
 /**********************************************************************************************************************/
 
 
@@ -64,19 +69,20 @@ Initialize after Power up
 	pstPrivate->stMotor.puiActAngle = &pstPrivate->stCompass.uiAngle;
 	pstPrivate->stUI.puiActAngle = &pstPrivate->stCompass.uiAngle;
 	pstPrivate->stRgbLed.puiColor = &pstPrivate->stCompass.uiAngle;
+	pstPrivate->stUI.pflLightInVoltage = &pstPrivate->stLight.flLightInVoltage;
 
 	// Initialize LCD-Display
-	uint8_t	uiLcdSquare[] = { 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F };
-	uint8_t uiLcdDegrees[] = { 0x0C, 0x12, 0x12, 0x0C, 0x00, 0x00, 0x00, 0x00 };
+	uint8_t uiLcdSquare[] = { 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F };
+	//uint8_t uiLcdDegrees[] = { 0x0C, 0x12, 0x12, 0x0C, 0x00, 0x00, 0x00, 0x00 };
 	lcd.begin();
 	lcd.backlight();
 	lcd.home();
 	lcd.createChar(0, uiLcdSquare);
-	lcd.createChar(1, uiLcdDegrees);
+	//lcd.createChar(1, uiLcdDegrees);
 
 	// Initialize compass
 	mag.initialize();
-	if (!mag.testConnection())	lcd.println("Connection to compass failed!");
+	if (!mag.testConnection()) { lcd.print("Connection to compass failed!"); }
 
 	// Initialize Motorpins
 	pinMode(SpeedPinLeft, OUTPUT);
@@ -87,13 +93,14 @@ Initialize after Power up
 	// Initialize RGB-LED
 	led.begin();
 	led.show();
+	led.setBrightness(60);
+	lcd.setCursor(0, 0);
 
-	// Initialize Buzzer
-	pinMode(TONEPIN, OUTPUT);
+	// Fill up Buffer with zeros
+	memset(&pstPrivate->stUI.szDisplayData[0], '0', sizeof(pstPrivate->stUI.szDisplayData));
 
-	pstPrivate->stUI.enUIState = enUIState_undef;
-	fsetUIMenu(pstPrivate);
-	pstPrivate->stUI.bInitUpDone = true;
+	// Set UI-State to Start - Up
+	pstPrivate->stUI.enUIState = enUIState_StartUp;
 };
 
 void fMoveProcedure(tstMotor *pstMotor)
@@ -102,15 +109,14 @@ Move procedure of a motor with arguments of direction and speed
 
 *****************************************************************/
 {
-	// Static speed mode
+	// Static speed mode for calibration
 	if (!pstMotor->bCompassCalibrated)
 	{
 		if (pstMotor->bCalibRun)
 		{
 			digitalWrite(DirectionRight, FORW);
 			analogWrite(SpeedPinRight, MIN_V);
-			//delay(1);
-			delayMicroseconds(200);
+			delayMicroseconds(10);
 			digitalWrite(DirectionLeft, BACK);
 			analogWrite(SpeedPinLeft, MIN_V);
 		}
@@ -118,8 +124,7 @@ Move procedure of a motor with arguments of direction and speed
 		{
 			digitalWrite(DirectionRight, BACK);
 			analogWrite(SpeedPinRight, MIN_V);
-			//delay(1);
-			delayMicroseconds(200);
+			delayMicroseconds(10);
 			digitalWrite(DirectionLeft, FORW);
 			analogWrite(SpeedPinLeft, MIN_V);
 		}
@@ -134,8 +139,8 @@ Move procedure of a motor with arguments of direction and speed
 		// Dynamic speed mode
 		signed int	iDiffAngle = *pstMotor->puiActAngle;
 		iDiffAngle = abs(iDiffAngle - 180);
-		unsigned int uiSpeed = (unsigned int)(((MAX_V - MIN_V) / (-HALFCIRCLE) * (float)iDiffAngle) + MAX_V);
 
+		pstMotor->uiSpeed = (unsigned int)(((MAX_V - MIN_V) / (-HALFCIRCLE) * (float)iDiffAngle) + MAX_V);
 		if (iDiffAngle >= (HALFCIRCLE - ANGLE_MIN))
 		{
 			analogWrite(SpeedPinRight, LOW);
@@ -145,21 +150,19 @@ Move procedure of a motor with arguments of direction and speed
 		{
 			// Left turn
 			digitalWrite(DirectionRight, BACK);
-			analogWrite(SpeedPinRight, uiSpeed);
-			//delay(1);
-			delayMicroseconds(200);
+			analogWrite(SpeedPinRight, pstMotor->uiSpeed);
+			delayMicroseconds(10);
 			digitalWrite(DirectionLeft, FORW);
-			analogWrite(SpeedPinLeft, uiSpeed);
+			analogWrite(SpeedPinLeft, pstMotor->uiSpeed);
 		}
 		else
 		{
 			// Right turn
 			digitalWrite(DirectionRight, FORW);
-			analogWrite(SpeedPinRight, uiSpeed);
-			//delay(1);
-			delayMicroseconds(200);
+			analogWrite(SpeedPinRight, pstMotor->uiSpeed);
+			delayMicroseconds(10);
 			digitalWrite(DirectionLeft, BACK);
-			analogWrite(SpeedPinLeft, uiSpeed);
+			analogWrite(SpeedPinLeft, pstMotor->uiSpeed);
 		}
 	}
 	else
@@ -181,20 +184,19 @@ Indicates color on RGB Led
 
 	signed int	iColor = *pstColor->puiColor;
 	iColor = abs(iColor - 180);
-	led.setBrightness(60);
 
 	if (pstUI->bStartAuto || pstUI->bStartManual)
 	{
-		if (iColor <= 45)								led.setPixelColor(0, 200, 0, 0);
-		else if ((iColor > 45) && (iColor < 170))		led.setPixelColor(0, 255, 204, 0);
-		else if (iColor >= 170)							led.setPixelColor(0, 0, 200, 0);
+		if (iColor <= 90) { led.setPixelColor(0, 200, 0, 0); }
+		else if ((iColor > 90) && (iColor < 170)) { led.setPixelColor(0, 255, 204, 0); }
+		else if (iColor >= 170) { led.setPixelColor(0, 0, 200, 0); }
 		led.show();
 	}
 	else if (pstMotor->bCalibRun || pstMotor->bCalibRunL)
 	{
 		if ((pstColor->ulCycle % 200) < 100)
 		{
-			led.setPixelColor(0, 255, 0, 255);
+			led.setPixelColor(0, 255, 255, 255);
 			led.show();
 		}
 		else if ((pstColor->ulCycle % 100) < 100)
@@ -210,20 +212,17 @@ Indicates color on RGB Led
 
 void fcompassCalibrate(tstPrvMain *pstPrivate)
 /****************************************************************
-Compass calibration
+Compass calibration / Offset calculating
 Run for every new location
 *****************************************************************/
 {
 	tstCompass *pstCompass = &pstPrivate->stCompass;
 	tstMotor *pstMotor = &pstPrivate->stMotor;
 
-	bool			bStarted = false;
-	signed int		iMinX = 1000;
-	signed int		iMaxX = 0;
-	signed int		iMinY = 1000;
-	signed int		iMaxY = 0;
-	unsigned long	ulStartTime = millis();
-
+	bool            bStarted = false;
+	signed int      iMaxX, iMaxY = 0;
+	signed int      iMinX, iMinY = 1000;
+	unsigned long   ulStartTime = millis();
 
 	pstMotor->bCalibRun = true;
 	fMoveProcedure(pstMotor);
@@ -238,12 +237,10 @@ Run for every new location
 			fMoveProcedure(pstMotor);
 		}
 		mag.getHeading(&pstCompass->iMagnet_x, &pstCompass->iMagnet_y, &pstCompass->iMagnet_z);
-		//Test 2
-		//mag.getHeading(&pstCompass->iMagnet_y, &pstCompass->iMagnet_x, &pstCompass->iMagnet_z);
-		if (pstCompass->iMagnet_x < iMinX) iMinX = pstCompass->iMagnet_x;
-		if (pstCompass->iMagnet_x > iMaxX) iMaxX = pstCompass->iMagnet_x;
-		if (pstCompass->iMagnet_y < iMinY) iMinY = pstCompass->iMagnet_y;
-		if (pstCompass->iMagnet_y > iMaxY) iMaxY = pstCompass->iMagnet_y;
+		if (pstCompass->iMagnet_x < iMinX) { iMinX = pstCompass->iMagnet_x; }
+		if (pstCompass->iMagnet_x > iMaxX) { iMaxX = pstCompass->iMagnet_x; }
+		if (pstCompass->iMagnet_y < iMinY) { iMinY = pstCompass->iMagnet_y; }
+		if (pstCompass->iMagnet_y > iMaxY) { iMaxY = pstCompass->iMagnet_y; }
 		if (i < LCDCOLS && (millis() - ulStartTime) >= (CALIB_TIME / LCDCOLS * i))
 		{
 			lcd.setCursor(i, 1);
@@ -251,41 +248,18 @@ Run for every new location
 			i++;
 		}
 		fsetColor(pstPrivate);
-		//Serial.print("x: ");
-		//Serial.print(pstCompass->iMagnet_x);
-		//Serial.print("\t");
-		//Serial.print("y: ");
-		//Serial.println(pstCompass->iMagnet_y);
-		//delay(1000);
 	}
 
 	// Calculate offsets
-	//Serial.print("Min x: ");
-	//Serial.print(iMinX);
-	//Serial.print("\t");
-	//Serial.print("Max x: ");
-	//Serial.println(iMaxX);
-
-	//Serial.print("Min y: ");
-	//Serial.print(iMinY);
-	//Serial.print("\t");
-	//Serial.print("Max y: ");
-	//Serial.println(iMaxY);
-
 	pstCompass->iMagOffset_x = (iMaxX + iMinX) / 2;
 	pstCompass->iMagOffset_y = (iMaxY + iMinY) / 2;
-
-	//Serial.print("Offset x: ");
-	//Serial.print(pstCompass->iMagOffset_x);
-	//Serial.print("\t");
-	//Serial.print("Offset y: ");
-	//Serial.println(pstCompass->iMagOffset_y);
 
 	pstMotor->bCalibRun = false;
 	pstMotor->bCalibRunL = false;
 	pstCompass->bCalibDone = true;
 	pstMotor->bCompassCalibrated = pstCompass->bCalibDone;
 	fMoveProcedure(pstMotor);
+	lcd.setCursor(0, 0);
 };
 
 void fgetAngle(tstCompass *pstCompass)
@@ -302,44 +276,32 @@ Get actual angle from compass
 	// Formula: (deg + (min / 60.0)) / (180 / M_PI);
 	pstCompass->flDeclinationAngle = (2.0 + (16.0 / 60.0)) / (180.0 / M_PI);
 
-	for (int i = 1; i <= SAMPLES; i++) {
-		// Read raw heading measurements from device
-		mag.getHeading(&pstCompass->iMagnet_x, &pstCompass->iMagnet_y, &pstCompass->iMagnet_z);
-		pstCompass->iMagnet_x = pstCompass->iMagnet_x - pstCompass->iMagOffset_x;
-		pstCompass->iMagnet_y = pstCompass->iMagnet_y - pstCompass->iMagOffset_y;
+	// Read raw heading measurements from device
+	mag.getHeading(&pstCompass->iMagnet_x, &pstCompass->iMagnet_y, &pstCompass->iMagnet_z);
+	pstCompass->iMagnet_x = pstCompass->iMagnet_x - pstCompass->iMagOffset_x;
+	pstCompass->iMagnet_y = pstCompass->iMagnet_y - pstCompass->iMagOffset_y;
 
-		// To calculate heading in degrees. 0 degree indicates North
-		//flTempAngle += (atan2((float)pstCompass->iMagnet_y, (float)pstCompass->iMagnet_x) + pstCompass->flDeclinationAngle );
-		flTempAngle += (atan2((float)pstCompass->iMagnet_y, (float)pstCompass->iMagnet_x) + pstCompass->flDeclinationAngle + (90.0 * M_PI / 180.0));
-	}
-	// Filtering angles
-	flTempAngle = flTempAngle / SAMPLES; //worked
-	//flTempAngle = (flTempAngle / SAMPLES) + (90 * M_PI / 180); works well
+	// To calculate heading in degrees. 0 degree indicates North
+	flTempAngle += (atan2((float)pstCompass->iMagnet_y, (float)pstCompass->iMagnet_x) +
+		(pstCompass->flDeclinationAngle) +
+		(90.0 * M_PI / 180.0));
 
-	if (flTempAngle < 0)  flTempAngle += 2 * M_PI;
+	if (flTempAngle < 0) { flTempAngle += 2 * M_PI; }
 
-	flTempAngle = flTempAngle * 180 / M_PI; // Calculation from radiant to degree
-	//flTempAngle = flTempAngle * 180 / M_PI; // Calculation from radiant to degree
+	// Calculation from radiant to degree
+	flTempAngle = flTempAngle * 180 / M_PI;
 
+	// Write TempAngle into struct variable
 	pstCompass->uiAngle = (unsigned int)flTempAngle;
 };
 
-void fsetTone(tstPrvMain *pstBuzzer)
+void fgetLight(tstLightSensor *pstLight)
 /****************************************************************
-Generate and set a tone on the buzzer
+Get the light value and convert it into voltage for UI
 
 *****************************************************************/
 {
-	signed int iAngleDiff = *pstBuzzer->stMotor.puiActAngle;
-	iAngleDiff = abs(iAngleDiff - 180);
-
-	if (iAngleDiff < 30)								tone(TONEPIN, TONEFREQ);
-	else if (iAngleDiff >= 30 && iAngleDiff < 60)		tone(TONEPIN, 2 * TONEFREQ);
-	else if (iAngleDiff >= 60 && iAngleDiff < 90)		tone(TONEPIN, 4 * TONEFREQ);
-	else if (iAngleDiff >= 90 && iAngleDiff < 120)		tone(TONEPIN, 8 * TONEFREQ);
-	else if (iAngleDiff >= 120 && iAngleDiff < 150)		tone(TONEPIN, 10 * TONEFREQ);
-	else if (iAngleDiff >= 150)							tone(TONEPIN, 20 * TONEFREQ);
-	else noTone(TONEPIN);
+	pstLight->flLightInVoltage = ((float)analogRead(5) / 1024.0) * 5.0;
 };
 
 unsigned short fgetKeyValue(tstUI *pstUIKey)
@@ -356,12 +318,12 @@ Set key state
 		pstUIKey->enKeyState = enKey_undef;
 		if (++keys[0] >= 1)
 		{
-			if (keys[1] > 700) usRet = 4;
-			else if (keys[1] > 10) usRet = 1;
-			else if (keys[2] > 10) usRet = 2;
-			else if (keys[3] > 10) usRet = 3;
+			if (keys[1] > 700) { usRet = 4; }
+			else if (keys[1] > 10) { usRet = 1; }
+			else if (keys[2] > 10) { usRet = 2; }
+			else if (keys[3] > 10) { usRet = 3; }
 			else usRet = 0;
-			if (usRet) keys[0] = keys[1] = keys[2] = keys[3] = 0;
+			if (usRet) { keys[0] = keys[1] = keys[2] = keys[3] = 0; }
 		}
 		else usRet = pstUIKey->enKeyState;
 	}
@@ -399,24 +361,23 @@ Complete User Interface procedure
 	tstCompass *pstCompass = &pstPrivate->stCompass;
 	tstMotor *pstMotor = &pstPrivate->stMotor;
 	tstUI *pstUIProcedure = &pstPrivate->stUI;
-	unsigned short		usKeyState;
 
-	usKeyState = fgetKeyValue(pstUIProcedure);
+	pstUIProcedure->usKeyState = fgetKeyValue(pstUIProcedure);
 
-	switch (usKeyState)
+	switch (pstUIProcedure->usKeyState)
 	{
 	case enKey_1:
 
 		if (!pstCompass->bCalibDone)
 		{
 			pstUIProcedure->enUIState = enUIState_Calibration;
-			fsetUIMenu(pstPrivate);
+			pstUIProcedure->uchPrevState = pstUIProcedure->enUIState;
 		}
-		else if (!pstUIProcedure->bStartAuto)
+		else if (!pstUIProcedure->bStartAuto || !pstUIProcedure->bStartManual)
 		{
 			pstUIProcedure->bStartManual = true;
 			pstUIProcedure->enUIState = enUIState_ManualMode;
-			fsetUIMenu(pstPrivate);
+			pstUIProcedure->uchPrevState = pstUIProcedure->enUIState;
 		}
 		break;
 
@@ -426,25 +387,27 @@ Complete User Interface procedure
 			pstUIProcedure->bStartAuto = true;
 			pstMotor->bRun = true;
 			pstUIProcedure->enUIState = enUIState_AutomaticMode;
-			fsetUIMenu(pstPrivate);
+			pstUIProcedure->uchPrevState = pstUIProcedure->enUIState;
 		}
 		break;
 
 	case enKey_3:
-		if (pstCompass->bCalibDone)
+		if (pstCompass->bCalibDone && (pstUIProcedure->uchPrevState != enUIState_Abort))
 		{
+			pstUIProcedure->ulTimeTextOnHold = millis();
 			pstUIProcedure->bStartAuto = false;
 			pstUIProcedure->bStartManual = false;
+			pstUIProcedure->bModeAborted = true;
 			pstMotor->bRun = false;
+			fMoveProcedure(pstMotor);
 			pstUIProcedure->enUIState = enUIState_Abort;
-			fsetUIMenu(pstPrivate);
+			pstUIProcedure->uchPrevState = pstUIProcedure->enUIState;
 		}
 		break;
 
 	case enKey_undef:
-		pstUIProcedure->enUIState = enUIState_undef;
-		if (!pstUIProcedure->bMenuSet)	fsetUIMenu(pstPrivate);
 		break;
+
 	default:
 		break;
 	}
@@ -456,118 +419,188 @@ Indicate different User Interface menus
 
 *****************************************************************/
 {
-	tstCompass *pstCompass = &pstPrivate->stCompass;
-	tstMotor *pstMotor = &pstPrivate->stMotor;
+	tstCompass	*pstCompass = &pstPrivate->stCompass;
+	tstUI       *pstUI = &pstPrivate->stUI;
 
-	if (pstPrivate->stUI.enUIState == enUIState_Calibration)
+	switch (pstUI->enUIState)
 	{
+	case enUIState_StartUp:
+		fWriteString(pstPrivate, "PRESS Key 1 to  ", 1);
+		fWriteString(pstPrivate, "calib. compass! ", 2);
+		break;
+
+	case enUIState_Wait:
+		fWriteString(pstPrivate, "Key1 - ManMode  ", 1);
+		fWriteString(pstPrivate, "Key2 - AutoMode ", 2);
+		break;
+
+	case enUIState_Calibration:
 		lcd.clear();
-		lcd.setCursor(0, 0);
-		if (!pstCompass->bCalibDone)		lcd.println("Compass calibr..");
+		lcd.print("Compass calibr. ");
 		fcompassCalibrate(pstPrivate);
 		lcd.setCursor(0, 0);
-		lcd.print("                  ");
-		lcd.setCursor(4, 0);
-		lcd.print("Complete!");
+		lcd.print("   Complete!    ");
 		delay(2000);
-		pstPrivate->stUI.bMenuSet = false;
-	}
-	else if (pstPrivate->stUI.enUIState == enUIState_undef && !pstCompass->bCalibDone)
-	{
-		lcd.clear();
-		lcd.println("PRESS Key 1 to  ");
-		lcd.setCursor(0, 1);
-		lcd.println("calib. compass! ");
-		pstPrivate->stUI.bMenuSet = true;
-	}
-	else if (pstPrivate->stUI.enUIState == enUIState_undef && pstCompass->bCalibDone)
-	{
-		lcd.clear();
-		lcd.println("Key 1 - ManMode ");
-		lcd.setCursor(0, 1);
-		lcd.println("Key 2 - AutoMode");
-		pstPrivate->stUI.usPrevState = enUIState_undef;
-		pstPrivate->stUI.bMenuSet = true;
-	}
-	else if (pstPrivate->stUI.enUIState == enUIState_ManualMode)
-	{
-		pstPrivate->stUI.usPrevState = enUIState_ManualMode;
-		lcd.clear();
-		lcd.setCursor(0, 0);
-		lcd.print("M:Act. Ang:   ");
-		lcd.setCursor(15, 0);
-		lcd.write(1);
-		lcd.setCursor(0, 1);
-		lcd.print("Key 3 - STOP");
-	}
-	else if (pstPrivate->stUI.enUIState == enUIState_AutomaticMode)
-	{
-		pstPrivate->stUI.usPrevState = enUIState_AutomaticMode;
-		lcd.clear();
-		lcd.setCursor(0, 0);
-		lcd.print("A:Act. Ang:   ");
-		lcd.setCursor(15, 0);
-		lcd.write(1);
-		lcd.setCursor(0, 1);
-		lcd.print("Key 3 - STOP");
-	}
-	else if ((pstPrivate->stUI.enUIState == enUIState_Abort) && pstPrivate->stUI.usPrevState > 0)
-	{
-		lcd.clear();
-		lcd.setCursor(0, 0);
-		fMoveProcedure(pstMotor);
-		lcd.print("Mode aborted!");
-		delay(2000);
-		pstPrivate->stUI.bMenuSet = false;
+		pstUI->enUIState = enUIState_Wait;
+		break;
+
+	case enUIState_ManualMode:
+		fWriteDoubleValue(pstPrivate, "Ang:XXX  L:X.XX ", *pstPrivate->stMotor.puiActAngle, *pstUI->pflLightInVoltage, 1);
+		fWriteString(pstPrivate, "KEY3 - STOP     ", 2);
+		break;
+
+	case enUIState_AutomaticMode:
+		fWriteSingleValue(pstPrivate, "Act. Angle: XXX ", *pstPrivate->stMotor.puiActAngle, 1);
+		fWriteString(pstPrivate, "KEY3 - STOP     ", 2);
+		break;
+
+	case enUIState_Abort:
+		if ((millis() - pstUI->ulTimeTextOnHold) < 2000)
+		{
+			fWriteString(pstPrivate, "MODE ABORTED!   ", 1);
+			fWriteString(pstPrivate, "                ", 2);
+		}
+		else
+		{
+			pstUI->bModeAborted = false;
+			pstUI->enUIState = enUIState_Wait;
+		}
+		break;
+
+	default:
+		break;
 	}
 };
 
-void fUpdateDisplay(tstPrvMain *pstPrivate)
+void fDisplayProcedure(tstUI *pstDisplay)
 /****************************************************************
-Update LCD Display
+Display text driver / sending every cycle one char if needed
 
 *****************************************************************/
 {
-	//// Only for timing measurements
-	//if (pstPrivate->stUI.ulCycle == 0)	pstPrivate->stUI.ulOldTime = micros();
+	//Set cursor to 0,0
+	if (pstDisplay->ulCycle == sizeof(pstDisplay->szDisplayData))
+	{
+		lcd.setCursor(0, 0);
+		pstDisplay->bSetCursorFlag = true;
+	}
 
-	//if (pstPrivate->stUI.ulCycle == 90)
-	//{
-	//	lcd.setCursor(12, 0);
-	//	lcd.print("   ");
-	//	lcd.setCursor(12, 0);
-	//	lcd.print(*pstPrivate->stMotor.puiActAngle);
+	if (pstDisplay->ulCycle == 16)
+	{
+		// Set cursor to 2nd line
+		lcd.setCursor(0, 1);
+		pstDisplay->bSetCursorFlag = true;
+		//pstDisplay->uchDisplayIx = 15;
+	}
 
-	//	// Only for timing measurements
-	//	pstPrivate->stUI.ulTime = micros();
-	//	Serial.print("Update Time Display: ");
-	//	Serial.println(pstPrivate->stUI.ulTime - pstPrivate->stUI.ulOldTime);
-	//	pstPrivate->stUI.ulOldTime = pstPrivate->stUI.ulTime;
+	if (pstDisplay->ulCycle > sizeof(pstDisplay->szDisplayData))
+	{
+		// Reset index
+		pstDisplay->uchDisplayIx = 0;
+		pstDisplay->ulCycle = 0;
+	}
 
-	//	pstPrivate->stUI.ulCycle = 0;
-	//}
-	//pstPrivate->stUI.ulCycle++;
+	if (!pstDisplay->bSetCursorFlag)
+	{
+		// Send each char to LCD-Display
+		lcd.print(pstDisplay->szDisplayData[pstDisplay->uchDisplayIx]);
+		pstDisplay->uchDisplayIx++;
+	}
+
+	//pstDisplay->uchDisplayIx++;
+	pstDisplay->bSetCursorFlag = false;
+	pstDisplay->ulCycle++;
+};
+
+void fWriteSingleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue, unsigned char uchLcdRow)
+/****************************************************************
+Function for create and write a string which has one value
+
+*****************************************************************/
+{
+	tstUI *pstSingleValue = &pstPrivate->stUI;
+
+	memcpy(&pstSingleValue->szDisplayData[(uchLcdRow - 1) * 16], &szStringLine[0], strlen(szStringLine));
+	pstSingleValue->szDisplayData[uchLcdRow * 16] = '\0';
+
+	// Convert integer (3 digit) to chars
+	pstSingleValue->uchFirstDigit_SV = uiValue / 100;
+	pstSingleValue->uchSecondDigit_SV = (uiValue - (pstSingleValue->uchFirstDigit_SV * 100)) / 10;
+	pstSingleValue->uchThirdDigit_SV = (uiValue - (pstSingleValue->uchFirstDigit_SV * 100) - (pstSingleValue->uchSecondDigit_SV * 10) / 1);
+
+	// Insert Angle chars into string (ASCII 48 == '0')
+	if (pstSingleValue->uchFirstDigit_SV == 0)
+	{
+		pstSingleValue->szDisplayData[12] = (' ' + pstSingleValue->uchFirstDigit_SV);
+		pstSingleValue->szDisplayData[13] = ('0' + pstSingleValue->uchSecondDigit_SV);
+		pstSingleValue->szDisplayData[14] = ('0' + pstSingleValue->uchThirdDigit_SV);
+	}
+	else
+	{
+		pstSingleValue->szDisplayData[12] = ('0' + pstSingleValue->uchFirstDigit_SV);
+		pstSingleValue->szDisplayData[13] = ('0' + pstSingleValue->uchSecondDigit_SV);
+		pstSingleValue->szDisplayData[14] = ('0' + pstSingleValue->uchThirdDigit_SV);
+	}
+	pstSingleValue->szDisplayData[15] = 223;    // Degrees char -> Depends on LCD type
+}
+
+void fWriteDoubleValue(tstPrvMain *pstPrivate, char szStringLine[], unsigned int uiValue_1, float flValue_2, unsigned char uchLcdRow)
+/****************************************************************
+Function for create and write a string which has two values
+
+*****************************************************************/
+{
+	tstUI *pstDoubleValue = &pstPrivate->stUI;
+
+	memcpy(&pstDoubleValue->szDisplayData[(uchLcdRow - 1) * 16], &szStringLine[0], strlen(szStringLine));
+	pstDoubleValue->szDisplayData[uchLcdRow * 16] = '\0';
+
+	// Convert Angle integer (3 digit) to chars
+	pstDoubleValue->uchAngleFirstDigit_DV = uiValue_1 / 100;
+	pstDoubleValue->uchAngleSecondDigit_DV = (uiValue_1 - (pstDoubleValue->uchAngleFirstDigit_DV * 100)) / 10;
+	pstDoubleValue->uchAngleThirdDigit_DV = (uiValue_1 - (pstDoubleValue->uchAngleFirstDigit_DV * 100) -
+		(pstDoubleValue->uchAngleSecondDigit_DV * 10) / 1);
+
+	// Convert Voltage integer (3 digit) to chars
+	pstDoubleValue->uchVoltageFirstDigit_DV = flValue_2;
+	pstDoubleValue->uchVoltageSecondDigit_DV = ((flValue_2 * 100) - (pstDoubleValue->uchVoltageFirstDigit_DV * 100)) / 10;;
+	pstDoubleValue->uchVoltageThirdDigit_DV = ((flValue_2 * 100) - (pstDoubleValue->uchVoltageFirstDigit_DV * 100) -
+		(pstDoubleValue->uchVoltageSecondDigit_DV * 10) / 1);
+
+	// Insert Angle chars into string (ASCII 48 == '0')
+	if (pstDoubleValue->uchAngleFirstDigit_DV == 0)
+	{
+		pstDoubleValue->szDisplayData[4] = (' ' + pstDoubleValue->uchAngleFirstDigit_DV);
+		pstDoubleValue->szDisplayData[5] = ('0' + pstDoubleValue->uchAngleSecondDigit_DV);
+		pstDoubleValue->szDisplayData[6] = ('0' + pstDoubleValue->uchAngleThirdDigit_DV);
+	}
+	else
+	{
+		pstDoubleValue->szDisplayData[4] = ('0' + pstDoubleValue->uchAngleFirstDigit_DV);
+		pstDoubleValue->szDisplayData[5] = ('0' + pstDoubleValue->uchAngleSecondDigit_DV);
+		pstDoubleValue->szDisplayData[6] = ('0' + pstDoubleValue->uchAngleThirdDigit_DV);
+	}
+	pstDoubleValue->szDisplayData[7] = 223;    // Degrees char -> Depends on LCD type
 
 
-	//Tests Nr.2 timing of LCD functions
-	pstPrivate->stUI.ulTimeLCDClearOld = micros();
-	lcd.clear();
-	pstPrivate->stUI.ulTimeLCDClear = micros();
-	
-	pstPrivate->stUI.ulTimeLCDCursorOld = micros();
-	lcd.setCursor(0, 0);
-	pstPrivate->stUI.ulTimeLCDCursor = micros();
 
-	pstPrivate->stUI.ulTimeLCDPrintOld = micros();
-	lcd.print("  ");
-	pstPrivate->stUI.ulTimeLCDPrint = micros();
 
-	pstPrivate->stUI.ulTimeLCDPrintOld2 = micros();
-	lcd.print("9");
-	pstPrivate->stUI.ulTimeLCDPrint2 = micros();
+											   // Insert Voltage chars into string (ASCII 48 == '0')
+	pstDoubleValue->szDisplayData[11] = ('0' + pstDoubleValue->uchVoltageFirstDigit_DV);
+	pstDoubleValue->szDisplayData[12] = '.';
+	pstDoubleValue->szDisplayData[13] = ('0' + pstDoubleValue->uchVoltageSecondDigit_DV);
+	pstDoubleValue->szDisplayData[14] = ('0' + pstDoubleValue->uchVoltageThirdDigit_DV);
+	pstDoubleValue->szDisplayData[15] = 'V';
+};
 
-	pstPrivate->stUI.ulTimeLCDClearDiff = pstPrivate->stUI.ulTimeLCDClear - pstPrivate->stUI.ulTimeLCDClearOld;
-	pstPrivate->stUI.ulTimeLCDCursorDiff = pstPrivate->stUI.ulTimeLCDCursor - pstPrivate->stUI.ulTimeLCDCursorOld;
-	pstPrivate->stUI.ulTimeLCDPrintDiff = pstPrivate->stUI.ulTimeLCDPrint - pstPrivate->stUI.ulTimeLCDPrintOld;
-	pstPrivate->stUI.ulTimeLCDPrintDiff2 = pstPrivate->stUI.ulTimeLCDPrint2 - pstPrivate->stUI.ulTimeLCDPrintOld2;
+void fWriteString(tstPrvMain *pstPrivate, char szStringLine[], unsigned char uchLcdRow)
+/****************************************************************
+Function for create and write a string which has no values
+
+*****************************************************************/
+{
+	tstUI *pstString = &pstPrivate->stUI;
+
+	memcpy(&pstString->szDisplayData[(uchLcdRow - 1) * 16], &szStringLine[0], strlen(szStringLine));
+	pstString->szDisplayData[uchLcdRow * 16] = '\0';
 };

@@ -1,12 +1,12 @@
 /**********************************************************************************************************************
 FHNW - EMBEDDED SYSTEMS
 **********************************************************************************************************************
-/*  Program :: ebs2WDMiniQ.ino	*/
-/*	Revision:: 1.0	*/
-/*	Author:: A. Gessler / B. Hürzeler	*/
-/*	Date:: 2017-10-05	*/
+/*  Program:	ebs2WDMiniQ.ino				*/
+/*	Revision:	1.0							*/
+/*	Author:		A. Gessler / B. Hürzeler	*/
+/*	Date:		2018-01-12					*/
 /**********************************************************************************************************************/
-/* Main program
+/* MAIN PROGRAM
 ***********************************************************************************************************************/
 
 /****************************************************************
@@ -18,21 +18,21 @@ INCLUDES
 FUNCTIONS
 *****************************************************************/
 void finitUp(tstPrvMain *pstPrivate);
-void fcompassCalibrate(tstPrvMain *pstCalibrate);
+void fcompassCalibrate(tstPrvMain *pstPrivate);
 void fgetAngle(tstCompass *pstCompass);
 void fMoveProcedure(tstMotor *pstMotor);
-void fsetTone(tstPrvMain *pstBuzzer);
-void fsetColor(tstPrvMain *pstLed);
+void fgetLight(tstLightSensor *pstLight);
+void fsetColor(tstPrvMain *pstPrivate);
 unsigned short fgetKeyValue(tstUI *pstUI);
-void fUIProcedure(tstPrvMain *pstUI);
-void fUpdateDisplay(tstPrvMain *pstDisplay);
-
+void fUIProcedure(tstPrvMain *pstPrivate);
+void fsetUIMenu(tstPrvMain *pstPrivate);
+void fDisplayProcedure(tstUI *pstDisplay);
+//void fUpdateDisplay(tstPrvMain *pstPrivate);
 
 /****************************************************************
 MEMORY ALLOCATION
 *****************************************************************/
 tstPrvMain stPrivate;	//Allocate private memory
-
 tstUI *pstUI = &stPrivate.stUI;
 
 // the setup function runs once when you press reset or power the board
@@ -41,85 +41,209 @@ void setup()
 	memset(&stPrivate, 0, sizeof(stPrivate));		// Set whole privat memory 0
 	finitUp(&stPrivate);
 
-	//FOR TEST Nr. 2
-	Serial.print("T LCD Clear");
-	Serial.print("\t");
-	Serial.print("T LCD Cursor");
-	Serial.print("\t");
-	Serial.print("T LCD Print");
-	Serial.print("\t");
-	Serial.println("T LCD Print2");
+	////FOR TIMING TESTS
+	//Serial.print("CC");
+	//Serial.print("\t");
+	//Serial.print("Min.UI");
+	//Serial.print("\t");
+	//Serial.print("Max.UI");
+	//Serial.print("\t");
+	//Serial.print("Min.Li");
+	//Serial.print("\t");
+	//Serial.print("Max.Li");
+	//Serial.print("\t");
+	//Serial.print("Min.Ang");
+	//Serial.print("\t");
+	//Serial.print("Max.Ang");
+	//Serial.print("\t");
+	//Serial.print("Min.Mot");
+	//Serial.print("\t");
+	//Serial.print("Max.Mot");
+	//Serial.print("\t");
+	//Serial.print("Min.Bu");
+	//Serial.print("\t");
+	//Serial.print("Max.Bu");
+	//Serial.print("\t");
+	//Serial.print("Min.LCD");
+	//Serial.print("\t");
+	//Serial.print("Max.LCD");
+	//Serial.print("\t");
+	//Serial.print("Min.LED");
+	//Serial.print("\t");
+	//Serial.println("Max.LED");
+
 }
 
+////FOR TIMING TESTS
+//
+//unsigned long ulCtfUIProcedure = 0;
+//unsigned long ulCtOldfUIProcedure = 0;
+//unsigned long ulCtfUIProcedureMin = 10000000;
+//unsigned long ulCtfUIProcedureMax = 0;
+//
+//unsigned long ulCtfgetLight = 0;
+//unsigned long ulCtOldfgetLight = 0;
+//unsigned long ulCtfgetLightMin = 10000000;
+//unsigned long ulCtfgetLightMax = 0;
+//
+//unsigned long ulCtfgetAngle = 0;
+//unsigned long ulCtOldfgetAngle = 0;
+//unsigned long ulCtfgetAngleMin = 10000000;
+//unsigned long ulCtfgetAngleMax = 0;
+//
+//unsigned long ulCtfMoveProcedure = 0;
+//unsigned long ulCtOldfMoveProcedure = 0;
+//unsigned long ulCtfMoveProcedureMin = 10000000;
+//unsigned long ulCtfMoveProcedureMax = 0;
+//
+//unsigned long ulCtfsetUIMenu = 0;
+//unsigned long ulCtOldfsetUIMenu = 0;
+//unsigned long ulCtfsetUIMenuMin = 10000000;
+//unsigned long ulCtfsetUIMenuMax = 0;
+//
+//unsigned long ulCtfDisplayPro = 0;
+//unsigned long ulCtOldfDisplayPro = 0;
+//unsigned long ulCtfDisplayProMin = 10000000;
+//unsigned long ulCtfDisplayProMax = 0;
+//
+//unsigned long ulCtfsetColor = 0;
+//unsigned long ulCtOldfsetColor = 0;
+//unsigned long ulCtfsetColorMin = 10000000;
+//unsigned long ulCtfsetColorMax = 0;
+//
+//unsigned long ulCycleCount = 1;
 
-unsigned long ulCycleCount = 1;
+
 
 // the loop function runs over and over again until power down or reset
 void loop()
 {
-	///*CYCLIC FUNCTIONS*/
+	//////FOR TIMING TESTS
+	/////*CYCLIC FUNCTIONS*/
+
+	//ulCtOldfUIProcedure = micros();
 	//fUIProcedure(&stPrivate);
-	////fgetAngle(&stPrivate.stCompass);
-	////fMoveProcedure(&stPrivate.stMotor);
+	//ulCtfUIProcedure = micros();
+
+	//ulCtOldfgetLight = micros();
+	//fgetLight(&stPrivate.stLight);
+	//ulCtfgetLight = micros();
+
+	//ulCtOldfgetAngle = micros();
+	//fgetAngle(&stPrivate.stCompass);
+	//ulCtfgetAngle = micros();
+
+	//ulCtOldfMoveProcedure = micros();
+	//fMoveProcedure(&stPrivate.stMotor);
+	//ulCtfMoveProcedure = micros();
+
+	//ulCtOldfsetUIMenu = micros();
+	//fsetUIMenu(&stPrivate);
+	//ulCtfsetUIMenu = micros();
+
+	//ulCtOldfDisplayPro = micros();
+	//fDisplayProcedure(pstUI);
+	//ulCtfDisplayPro = micros();
+
+	//ulCtOldfsetColor = micros();
 	//fsetColor(&stPrivate);
+	//ulCtfsetColor = micros();
 
-	//if (pstUI->bStartAuto || pstUI->bStartManual)
-	//{
-	//	//Time from getAngle to MoveProcedure
-	//	ulTimeOld = micros();
 
-	//	fgetAngle(&stPrivate.stCompass);
-	//	
-	//	//Time after getting Angle
-	//	//ulCycleTime = micros() - ulTimeOld;
-	//	
-	//	fMoveProcedure(&stPrivate.stMotor);
+	//ulCtfUIProcedure = ulCtfUIProcedure - ulCtOldfUIProcedure;
+	//ulCtfgetLight = ulCtfgetLight - ulCtOldfgetLight;
+	//ulCtfgetAngle = ulCtfgetAngle - ulCtOldfgetAngle;
+	//ulCtfMoveProcedure = ulCtfMoveProcedure - ulCtOldfMoveProcedure;
+	//ulCtfsetUIMenu = ulCtfsetUIMenu - ulCtOldfsetUIMenu;
+	//ulCtfDisplayPro = ulCtfDisplayPro - ulCtOldfDisplayPro;
+	//ulCtfsetColor = ulCtfsetColor - ulCtOldfsetColor;
 
-	//	//Time after MoveProcedure
-	//	ulCycleTime = micros() - ulTimeOld;
-	//	
-	//	fUpdateDisplay(&stPrivate);
-	//}
+	//if (ulCtfUIProcedure < ulCtfUIProcedureMin) ulCtfUIProcedureMin = ulCtfUIProcedure;
+	//if (ulCtfUIProcedure > ulCtfUIProcedureMax) ulCtfUIProcedureMax = ulCtfUIProcedure;
 
-	////Time after everything
-	////ulCycleTime = micros() - ulTimeOld;
+	//if (ulCtfgetLight < ulCtfgetLightMin) ulCtfgetLightMin = ulCtfgetLight;
+	//if (ulCtfgetLight > ulCtfgetLightMax) ulCtfgetLightMax = ulCtfgetLight;
 
-	//ulCycleTimeSum += ulCycleTime;
-	//if (ulCycleTime < ulCycleTimeMin) ulCycleTimeMin = ulCycleTime;
-	//if (ulCycleTime > ulCycleTimeMax) ulCycleTimeMax = ulCycleTime;
+	//if (ulCtfgetAngle < ulCtfgetAngleMin) ulCtfgetAngleMin = ulCtfgetAngle;
+	//if (ulCtfgetAngle > ulCtfgetAngleMax) ulCtfgetAngleMax = ulCtfgetAngle;
+
+	//if (ulCtfMoveProcedure < ulCtfMoveProcedureMin) ulCtfMoveProcedureMin = ulCtfMoveProcedure;
+	//if (ulCtfMoveProcedure > ulCtfMoveProcedureMax) ulCtfMoveProcedureMax = ulCtfMoveProcedure;
+
+	//if (ulCtfsetUIMenu < ulCtfsetUIMenuMin) ulCtfsetUIMenuMin = ulCtfsetUIMenu;
+	//if (ulCtfsetUIMenu > ulCtfsetUIMenuMax) ulCtfsetUIMenuMax = ulCtfsetUIMenu;
+
+	//if (ulCtfDisplayPro < ulCtfDisplayProMin) ulCtfDisplayProMin = ulCtfDisplayPro;
+	//if (ulCtfDisplayPro > ulCtfDisplayProMax) ulCtfDisplayProMax = ulCtfDisplayPro;
+
+	//if (ulCtfsetColor < ulCtfsetColorMin) ulCtfsetColorMin = ulCtfsetColor;
+	//if (ulCtfsetColor > ulCtfsetColorMax) ulCtfsetColorMax = ulCtfsetColor;
+
 	//if (ulCycleCount == 1000)
 	//{
-	//	ulCycleTimeSum = (ulCycleTimeSum / ulCycleCount);
-	//	Serial.print("Cycle Nr.: ");
 	//	Serial.print(ulCycleCount);
 	//	Serial.print("\t");
-	//	Serial.print("Mean CT: ");
-	//	Serial.print(ulCycleTimeSum);
+	//	Serial.print(ulCtfUIProcedureMin);
 	//	Serial.print("\t");
-	//	Serial.print("Min. CT: ");
-	//	Serial.print(ulCycleTimeMin);
+	//	Serial.print(ulCtfUIProcedureMax);
 	//	Serial.print("\t");
-	//	Serial.print("Max. CT: ");
-	//	Serial.println(ulCycleTimeMax);
-
-	//	ulCycleTimeSum = 0;
-	//	ulCycleTimeMin = 10000000;
-	//	ulCycleTimeMax = 0;
-	//	ulCycleTime = 0;
-	//}
-	//ulCycleCount++;
+	//	Serial.print(ulCtfgetLightMin);
+	//	Serial.print("\t");
+	//	Serial.print(ulCtfgetLightMax);
+	//	Serial.print("\t");
+	//	Serial.print(ulCtfgetAngleMin);
+	//	Serial.print("\t");
+	//	Serial.print(ulCtfgetAngleMax);
+	//	Serial.print("\t");
+	//	Serial.print(ulCtfMoveProcedureMin);
+	//	Serial.print("\t");
+	//	Serial.print(ulCtfMoveProcedureMax);
+	//	Serial.print("\t");
+	//	Serial.print(ulCtfsetUIMenuMin);
+	//	Serial.print("\t");
+	//	Serial.print(ulCtfsetUIMenuMax);
+	//	Serial.print("\t");
+	//	Serial.print(ulCtfDisplayProMin);
+	//	Serial.print("\t");
+	//	Serial.print(ulCtfDisplayProMax);
+	//	Serial.print("\t");
+	//	Serial.print(ulCtfsetColorMin);
+	//	Serial.print("\t");
+	//	Serial.println(ulCtfsetColorMax);
 	//
-	//if(ulCycleCount > 1000) ulCycleCount = 1;
 
-	//TEST NR. 2
-	fUpdateDisplay(&stPrivate);
-	Serial.print(stPrivate.stUI.ulTimeLCDClearDiff);
-	Serial.print("\t");
-	Serial.print(stPrivate.stUI.ulTimeLCDCursorDiff);
-	Serial.print("\t");
-	Serial.print(stPrivate.stUI.ulTimeLCDPrintDiff);
-	Serial.print("\t");
-	Serial.println(stPrivate.stUI.ulTimeLCDPrintDiff2);
-	delay(1000);
+	//	ulCtfUIProcedureMin = 10000000;
+	//	ulCtfUIProcedureMax = 0;
+	//	ulCtfgetLightMin = 10000000;
+	//	ulCtfgetLightMax = 0;
+	//	ulCtfgetAngleMin = 10000000;
+	//	ulCtfgetAngleMax = 0;
+	//	ulCtfMoveProcedureMin = 10000000;
+	//	ulCtfMoveProcedureMax = 0;
+	//	ulCtfsetUIMenuMin = 10000000;
+	//	ulCtfsetUIMenuMax = 0;
+	//	ulCtfDisplayProMin = 10000000;
+	//	ulCtfDisplayProMax = 0;
+	//	ulCtfsetColorMin = 10000000;
+	//	ulCtfsetColorMax = 0;
 
+	//}
+
+	//ulCycleCount++;
+
+	//if (ulCycleCount > 1000) ulCycleCount = 1;
+
+	//UNCOMMENT AFTER TIMING TESTS
+	/*CYCLIC FUNCTIONS*/
+	fUIProcedure(&stPrivate);
+	fgetLight(&stPrivate.stLight);
+	fgetAngle(&stPrivate.stCompass);
+	fMoveProcedure(&stPrivate.stMotor);
+	fsetUIMenu(&stPrivate);
+	fDisplayProcedure(pstUI);
+	fsetColor(&stPrivate);
+	
+	//Serial.print("UI State: ");
+	//Serial.print("\t");
+	//Serial.println(pstUI->enUIState);
 }
