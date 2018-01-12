@@ -8,10 +8,8 @@ FHNW - EMBEDDED SYSTEMS
 /**********************************************************************************************************************/
 /* IMPLEMENTATION OF CONTROLLER / STRUCTURE
 **********************************************************************************************************************/
-
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
-
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "arduino.h"
 #else
@@ -118,7 +116,6 @@ typedef struct tstUI
     unsigned long       ulCycle;                    // Cycle counter
     unsigned long       ulTimeTextOnHold;           // Time delay for display hold (Text)
 }tstUI;
-
 
 /*----------------------------------------------------------------
 Private structure

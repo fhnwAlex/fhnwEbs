@@ -87,7 +87,6 @@ Initialize after Power up
     led.begin();
     led.show();
     led.setBrightness(60);
-    lcd.setCursor(0, 0);
 
     // Fill up Buffer with zeros
     memset(&pstPrivate->stUI.szDisplayData[0], '0', sizeof(pstPrivate->stUI.szDisplayData));
